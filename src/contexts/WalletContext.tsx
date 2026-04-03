@@ -70,7 +70,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       setIdentity(user.getIdentity() ?? null);
 
       try {
-        const balances = await user.getBalances({ page: 1, limit: 20 });
+        const balances = await user.getBalances({ page: 1, limit: 100 });
         const balanceList = Array.isArray(balances) ? balances : [];
         setTokenBalances(balanceList);
 

@@ -2,12 +2,10 @@ import {
   createContext,
   useContext,
   useReducer,
-  useEffect,
   type ReactNode,
   type Dispatch,
 } from "react";
 import { calculateReward, TIER_CONFIGS, type Tier } from "../utils/rewards";
-import { saveGameState, loadGameState } from "../utils/persistence";
 import type { StakingPosition } from "../canister/staking.did";
 
 const TOKEN_DECIMALS = 3;
@@ -180,15 +178,7 @@ const GameStateContext = createContext<GameState>(INITIAL_STATE);
 const GameDispatchContext = createContext<Dispatch<GameAction>>(() => {});
 
 export function GameProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(gameReducer, INITIAL_STATE, () => {
-    const saved = loadGameState();
-    if (!saved) return INITIAL_STATE;
-    return { ...saved, pendingReturns: saved.pendingReturns || [] };
-  });
-
-  useEffect(() => {
-    saveGameState(state);
-  }, [state]);
+  const [state, dispatch] = useReducer(gameReducer, INITIAL_STATE);
 
   return (
     <GameStateContext.Provider value={state}>
