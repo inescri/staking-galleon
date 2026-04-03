@@ -21,14 +21,14 @@ export const TIER_CONFIGS: Record<Tier, TierConfig> = {
     emoji: "\u{1F6A2}",
     minDuration: 60,
     maxDuration: 180,
-    color: "#0f3460",
+    color: "#FFB347",
   },
   deep_ocean: {
     name: "Deep Ocean",
     emoji: "\u{1F30A}",
     minDuration: 180,
     maxDuration: 300,
-    color: "#1a1a2e",
+    color: "#E67E22",
   },
   kraken_waters: {
     name: "Kraken Waters",
