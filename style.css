@@ -292,13 +292,6 @@ body {
   color: var(--panel-bg);
 }
 
-.faucet-btn {
-  width: 100%;
-  font-size: 0.55rem;
-  padding: 10px;
-  margin-bottom: 4px;
-}
-
 /* Wallet */
 
 .wallet-row {
@@ -382,39 +375,6 @@ body {
   padding: 4px 0;
 }
 
-/* ======== MODAL ======== */
-
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 50;
-}
-
-.modal-content {
-  width: 90%;
-  max-width: 380px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.modal-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  margin-top: 4px;
-}
-
-.modal-cancel-btn {
-  width: 100%;
-  text-align: center;
-  padding: 8px;
-}
-
 /* Voyage Log */
 
 .voyage-log {
@@ -449,14 +409,6 @@ body {
 .log-stake {
   color: var(--text-dim);
   min-width: 60px;
-}
-
-.log-result.profit {
-  color: var(--success);
-}
-
-.log-result.loss {
-  color: var(--danger);
 }
 
 /* ======== HARBOR ======== */
@@ -701,20 +653,6 @@ body {
   line-height: 1.2;
 }
 
-.tier-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 1.1rem;
-  color: var(--text-dim);
-  padding: 4px 0;
-}
-
-.danger-text {
-  color: var(--danger);
-  font-size: 0.95rem;
-}
-
 .form-group {
   display: flex;
   flex-direction: column;
@@ -911,10 +849,6 @@ body {
   border-color: var(--success);
 }
 
-.toast-loss {
-  border-color: var(--danger);
-}
-
 .toast-dispatched {
   border-color: var(--gold);
 }
@@ -956,10 +890,6 @@ body {
 
 .toast-profit .toast-result {
   color: var(--success);
-}
-
-.toast-loss .toast-result {
-  color: var(--danger);
 }
 
 /* ======== SCROLLBAR ======== */
