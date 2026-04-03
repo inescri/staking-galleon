@@ -260,6 +260,122 @@ body {
   margin-bottom: 4px;
 }
 
+/* Wallet */
+
+.wallet-row {
+  margin-bottom: 12px;
+}
+
+.wallet-connected-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  background: rgba(39, 174, 96, 0.1);
+  border: 2px solid var(--success);
+}
+
+.wallet-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.wallet-status-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--success);
+  display: inline-block;
+  box-shadow: 0 0 6px rgba(39, 174, 96, 0.6);
+}
+
+.wallet-principal {
+  font-family: "VT323", monospace;
+  font-size: 1.1rem;
+  color: var(--text-primary);
+}
+
+.wallet-disconnect-btn {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+.wallet-disconnect-btn:hover {
+  background: rgba(192, 57, 43, 0.2);
+  border-color: var(--danger);
+}
+
+.wallet-connect-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.wallet-connect-btn {
+  width: 100%;
+  font-size: 0.55rem;
+  padding: 10px;
+  background: var(--sea-mid);
+  color: var(--text-primary);
+  box-shadow:
+    0 4px 0 var(--sea-dark),
+    -3px -3px 0 0 var(--sea-deep),
+     3px -3px 0 0 var(--sea-deep),
+    -3px  3px 0 0 var(--sea-deep),
+     3px  3px 0 0 var(--sea-deep);
+}
+
+.wallet-connect-btn:hover {
+  background: var(--sea-light);
+  color: var(--sea-deep);
+}
+
+.wallet-connect-btn:disabled {
+  background: var(--text-dim);
+  color: var(--sea-dark);
+  cursor: not-allowed;
+}
+
+.wallet-error {
+  font-family: "VT323", monospace;
+  font-size: 1rem;
+  color: var(--danger);
+  padding: 4px 0;
+}
+
+/* ======== MODAL ======== */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+
+.modal-content {
+  width: 90%;
+  max-width: 380px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.modal-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.modal-cancel-btn {
+  width: 100%;
+  text-align: center;
+  padding: 8px;
+}
+
 /* Voyage Log */
 
 .voyage-log {

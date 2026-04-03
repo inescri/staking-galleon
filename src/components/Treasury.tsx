@@ -1,9 +1,20 @@
-import { useGameState, useGameDispatch } from "../contexts/GameContext";
+import { useState } from "react";
+import { useGameState } from "../contexts/GameContext";
+import { useWallet } from "../contexts/WalletContext";
 import { formatDoubloons, TIER_CONFIGS } from "../utils/rewards";
+import { DepositModal } from "./DepositModal";
 
 export function Treasury() {
   const { balance, completedExpeditions } = useGameState();
-  const dispatch = useGameDispatch();
+  const [showDeposit, setShowDeposit] = useState(false);
+  const {
+    connectedUser,
+    principal,
+    isConnecting,
+    connectionError,
+    connectWallet,
+    disconnectWallet,
+  } = useWallet();
 
   return (
     <div className="treasury">
@@ -14,12 +25,47 @@ export function Treasury() {
           {formatDoubloons(balance)} Doubloons
         </span>
       </div>
-      <button
-        className="pixel-btn faucet-btn"
-        onClick={() => dispatch({ type: "CLAIM_FREE_DOUBLOONS" })}
-      >
-        + Claim 500 Doubloons
-      </button>
+
+      <div className="wallet-row">
+        {connectedUser ? (
+          <div className="wallet-connected-row">
+            <div className="wallet-info">
+              <span className="wallet-status-dot" />
+              <span className="wallet-principal">{principal}</span>
+            </div>
+            <button
+              className="pixel-btn-sm wallet-disconnect-btn"
+              onClick={disconnectWallet}
+            >
+              Disconnect
+            </button>
+          </div>
+        ) : (
+          <div className="wallet-connect-row">
+            <button
+              className="pixel-btn wallet-connect-btn"
+              onClick={connectWallet}
+              disabled={isConnecting}
+            >
+              {isConnecting ? "Connecting..." : "Connect Wallet"}
+            </button>
+            {connectionError && (
+              <span className="wallet-error">{connectionError}</span>
+            )}
+          </div>
+        )}
+      </div>
+
+      {connectedUser && (
+        <button
+          className="pixel-btn faucet-btn"
+          onClick={() => setShowDeposit(true)}
+        >
+          Deposit Doubloons
+        </button>
+      )}
+
+      {showDeposit && <DepositModal onClose={() => setShowDeposit(false)} />}
 
       {completedExpeditions.length > 0 && (
         <div className="voyage-log">

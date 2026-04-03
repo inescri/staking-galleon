@@ -40,7 +40,8 @@ export type GameAction =
     }
   | { type: "COMPLETE_EXPEDITION"; payload: { id: string } }
   | { type: "DISMISS_RETURN"; payload: { id: string } }
-  | { type: "CLAIM_FREE_DOUBLOONS" }
+  | { type: "DEPOSIT_DOUBLOONS"; payload: number }
+  | { type: "SET_BALANCE"; payload: number }
   | { type: "LOAD_STATE"; payload: GameState };
 
 const MAX_EXPEDITIONS = 5;
@@ -111,10 +112,17 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       };
     }
 
-    case "CLAIM_FREE_DOUBLOONS": {
+    case "DEPOSIT_DOUBLOONS": {
       return {
         ...state,
-        balance: state.balance + 500,
+        balance: state.balance + action.payload,
+      };
+    }
+
+    case "SET_BALANCE": {
+      return {
+        ...state,
+        balance: action.payload,
       };
     }
 
