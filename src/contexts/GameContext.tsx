@@ -1,6 +1,7 @@
 import {
   createContext,
   useContext,
+  useEffect,
   useReducer,
   type ReactNode,
   type Dispatch,
@@ -204,11 +205,35 @@ function gameReducer(state: GameState, action: GameAction): GameState {
   }
 }
 
+const VOYAGE_LOG_KEY = "voyage-log";
+
+function loadCompletedExpeditions(): CompletedExpedition[] {
+  try {
+    const raw = localStorage.getItem(VOYAGE_LOG_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveCompletedExpeditions(entries: CompletedExpedition[]): void {
+  try {
+    localStorage.setItem(VOYAGE_LOG_KEY, JSON.stringify(entries));
+  } catch {}
+}
+
 const GameStateContext = createContext<GameState>(INITIAL_STATE);
 const GameDispatchContext = createContext<Dispatch<GameAction>>(() => {});
 
 export function GameProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(gameReducer, INITIAL_STATE);
+  const [state, dispatch] = useReducer(gameReducer, undefined, () => ({
+    ...INITIAL_STATE,
+    completedExpeditions: loadCompletedExpeditions(),
+  }));
+
+  useEffect(() => {
+    saveCompletedExpeditions(state.completedExpeditions);
+  }, [state.completedExpeditions]);
 
   return (
     <GameStateContext.Provider value={state}>

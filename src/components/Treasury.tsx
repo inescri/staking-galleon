@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useGameState } from "../contexts/GameContext";
-import { useWallet } from "../contexts/WalletContext";
+import { useWallet, truncatePrincipal } from "../contexts/WalletContext";
 import { TOKEN_URL } from "../canister/actor";
 import { formatDoubloons, TIER_CONFIGS } from "../utils/rewards";
 
@@ -49,12 +49,22 @@ export function Treasury() {
           <div className="log-entries">
             {completedExpeditions.slice(0, 8).map((exp) => {
               const config = TIER_CONFIGS[exp.tier];
+              const principal = exp.id.split(":").slice(1).join(":");
               return (
-                <div key={exp.id} className="log-entry">
+                <div key={exp.id+exp.completedAt.toString()} className="log-entry">
                   <span className="log-tier">{config.emoji}</span>
                   <span className="log-stake">
                     {formatDoubloons(exp.stakeAmount)} dbl
                   </span>
+                  <span className="log-date">
+                    {new Date(exp.completedAt).toLocaleDateString(undefined, {
+                      month: "short",
+                      day: "numeric",
+                      hour: "numeric",
+                      minute: "2-digit",
+                    })}
+                  </span>
+                  <span className="log-principal">{truncatePrincipal(principal)}</span>
                 </div>
               );
             })}

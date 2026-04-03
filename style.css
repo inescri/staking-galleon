@@ -410,6 +410,12 @@ body {
   min-width: 60px;
 }
 
+.log-principal {
+  margin-left: auto;
+  color: var(--text-dim);
+  font-size: 0.85rem;
+}
+
 /* ======== HARBOR ======== */
 
 .harbor {
