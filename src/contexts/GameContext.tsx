@@ -5,7 +5,7 @@ import {
   type ReactNode,
   type Dispatch,
 } from "react";
-import { calculateReward, TIER_CONFIGS, type Tier } from "../utils/rewards";
+import { TIER_CONFIGS, type Tier } from "../utils/rewards";
 import type { StakingPosition } from "../canister/staking.did";
 
 const TOKEN_DECIMALS = 3;
@@ -32,7 +32,6 @@ export function stakingPositionToExpedition(pos: StakingPosition): Expedition {
     durationMs,
     startedAt,
     tier,
-    reward: calculateReward(stakeAmount, durationMs, tier),
   };
 }
 
@@ -42,13 +41,11 @@ export interface Expedition {
   durationMs: number;
   startedAt: number;
   tier: Tier;
-  reward: number; // pre-calculated at launch
 }
 
 export interface CompletedExpedition {
   id: string;
   stakeAmount: number;
-  reward: number;
   tier: Tier;
   completedAt: number;
 }
@@ -88,19 +85,16 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       if (stakeAmount > state.balance) return state;
       if (state.activeExpeditions.length >= MAX_EXPEDITIONS) return state;
 
-      const reward = calculateReward(stakeAmount, durationMs, tier);
       const expedition: Expedition = {
         id: crypto.randomUUID(),
         stakeAmount,
         durationMs,
         startedAt: Date.now(),
         tier,
-        reward,
       };
 
       return {
         ...state,
-        balance: Math.round((state.balance - stakeAmount) * 100) / 100,
         activeExpeditions: [...state.activeExpeditions, expedition],
       };
     }
@@ -114,15 +108,12 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const completed: CompletedExpedition = {
         id: expedition.id,
         stakeAmount: expedition.stakeAmount,
-        reward: expedition.reward,
         tier: expedition.tier,
         completedAt: Date.now(),
       };
 
       return {
         ...state,
-        balance:
-          Math.round((state.balance + expedition.reward) * 100) / 100,
         activeExpeditions: state.activeExpeditions.filter((e) => e.id !== id),
         completedExpeditions: [completed, ...state.completedExpeditions].slice(
           0,

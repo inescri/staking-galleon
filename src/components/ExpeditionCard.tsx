@@ -23,6 +23,7 @@ export function ExpeditionCard({ expedition }: { expedition: Expedition }) {
     setWithdrawError(null);
     try {
       await unlockAndWithdraw("2jjj");
+      await new Promise((resolve) => setTimeout(resolve, 2000)); // wait for state to update on-chain
       dispatch({
         type: "RETURN_EXPEDITION",
         payload: { id: expedition.id },
