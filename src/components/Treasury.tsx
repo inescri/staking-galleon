@@ -1,12 +1,9 @@
-import { useState } from "react";
 import { useGameState } from "../contexts/GameContext";
 import { useWallet } from "../contexts/WalletContext";
 import { formatDoubloons, TIER_CONFIGS } from "../utils/rewards";
-import { DepositModal } from "./DepositModal";
 
 export function Treasury() {
-  const { balance, completedExpeditions } = useGameState();
-  const [showDeposit, setShowDeposit] = useState(false);
+  const { completedExpeditions } = useGameState();
   const {
     connectedUser,
     principal,
@@ -14,7 +11,10 @@ export function Treasury() {
     connectionError,
     connectWallet,
     disconnectWallet,
+    getTokenBalance,
   } = useWallet();
+
+  const balance = getTokenBalance("2jjj");
 
   return (
     <div className="treasury">
@@ -55,17 +55,6 @@ export function Treasury() {
           </div>
         )}
       </div>
-
-      {connectedUser && (
-        <button
-          className="pixel-btn faucet-btn"
-          onClick={() => setShowDeposit(true)}
-        >
-          Deposit Doubloons
-        </button>
-      )}
-
-      {showDeposit && <DepositModal onClose={() => setShowDeposit(false)} />}
 
       {completedExpeditions.length > 0 && (
         <div className="voyage-log">

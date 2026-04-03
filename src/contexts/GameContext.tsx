@@ -40,7 +40,6 @@ export type GameAction =
     }
   | { type: "COMPLETE_EXPEDITION"; payload: { id: string } }
   | { type: "DISMISS_RETURN"; payload: { id: string } }
-  | { type: "DEPOSIT_DOUBLOONS"; payload: number }
   | { type: "SET_BALANCE"; payload: number }
   | { type: "LOAD_STATE"; payload: GameState };
 
@@ -109,13 +108,6 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         pendingReturns: state.pendingReturns.filter(
           (r) => r.id !== action.payload.id
         ),
-      };
-    }
-
-    case "DEPOSIT_DOUBLOONS": {
-      return {
-        ...state,
-        balance: state.balance + action.payload,
       };
     }
 

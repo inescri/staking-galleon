@@ -65,10 +65,19 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
       try {
         const balances = await user.getBalances({ page: 1, limit: 20 });
-        setTokenBalances(Array.isArray(balances) ? balances : []);
+        const balanceList = Array.isArray(balances) ? balances : [];
+        setTokenBalances(balanceList);
+
+        const token2jjj = balanceList.find((b) => String(b.id) === "2jjj");
+        if (token2jjj) {
+          dispatch({ type: "SET_BALANCE", payload: computeTokenBalance(token2jjj) });
+        } else {
+          dispatch({ type: "SET_BALANCE", payload: 0 });
+        }
       } catch (err) {
         console.error("Failed to fetch token balances:", err);
         setTokenBalances([]);
+        dispatch({ type: "SET_BALANCE", payload: 0 });
       }
     } catch (err) {
       const message =
