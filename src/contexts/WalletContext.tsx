@@ -34,7 +34,7 @@ const WalletContext = createContext<WalletContextValue | null>(null);
 
 const odinConnect = new OdinConnect({ name: "Galleon Stakes", env: "_preview" });
 
-function truncatePrincipal(principal: string): string {
+export function truncatePrincipal(principal: string): string {
   if (!principal || principal.length <= 12) return principal;
   return principal.slice(0, 5) + "..." + principal.slice(-3);
 }
@@ -140,9 +140,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const value: WalletContextValue = {
     connectedUser,
     identity,
-    principal: connectedUser
-      ? truncatePrincipal(connectedUser.principal || "Unknown")
-      : "",
+    principal: connectedUser?.principal || "",
     tokenBalances,
     isConnecting,
     connectionError,

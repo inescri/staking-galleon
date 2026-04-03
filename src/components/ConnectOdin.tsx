@@ -1,4 +1,4 @@
-import { useWallet } from "../contexts/WalletContext";
+import { useWallet, truncatePrincipal } from "../contexts/WalletContext";
 
 export function ConnectOdin() {
   const {
@@ -16,7 +16,7 @@ export function ConnectOdin() {
         <div className="wallet-connected-row">
           <div className="wallet-info">
             <span className="wallet-status-dot" />
-            <span className="wallet-principal">{principal}</span>
+            <span className="wallet-principal">{truncatePrincipal(principal)}</span>
           </div>
           <button
             className="pixel-btn-sm wallet-disconnect-btn"
