@@ -11,7 +11,7 @@ const TIERS: Tier[] = ["coastal", "open_sea", "deep_ocean", "kraken_waters"];
 export function SendShipForm() {
   const { balance, activeExpeditions } = useGameState();
   const dispatch = useGameDispatch();
-  const { connectedUser } = useWallet();
+  const { connectedUser, principal } = useWallet();
   const { depositAndLock } = useStakingCanister();
 
   const [selectedTier, setSelectedTier] = useState<Tier>("coastal");
@@ -63,6 +63,7 @@ export function SendShipForm() {
       dispatch({
         type: "LAUNCH_EXPEDITION",
         payload: {
+          id: `${TOKEN_ID}:${principal}`,
           stakeAmount,
           durationMs,
           tier: selectedTier,

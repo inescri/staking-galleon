@@ -1,9 +1,22 @@
+import { useState } from "react";
 import { useGameState } from "../contexts/GameContext";
+import { useWallet } from "../contexts/WalletContext";
 import { TOKEN_URL } from "../canister/actor";
 import { formatDoubloons, TIER_CONFIGS } from "../utils/rewards";
 
 export function Treasury() {
   const { balance, completedExpeditions } = useGameState();
+  const { refreshBalances } = useWallet();
+  const [refreshing, setRefreshing] = useState(false);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await refreshBalances();
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   return (
     <div className="treasury">
@@ -13,13 +26,20 @@ export function Treasury() {
           <span className="coin-icon">&#x1FA99;</span>{" "}
           {formatDoubloons(balance)} Doubloons
         </span>
+        <button
+          className="refresh-balance-btn"
+          onClick={handleRefresh}
+          disabled={refreshing}
+        >
+          {refreshing ? "..." : "Refresh"}
+        </button>
         <a
           href={TOKEN_URL}
           target="_blank"
           rel="noopener noreferrer"
           className="buy-doubloons-link"
         >
-          Buy Doubloons
+          Buy 
         </a>
       </div>
 

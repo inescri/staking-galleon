@@ -27,7 +27,7 @@ export function stakingPositionToExpedition(pos: StakingPosition): Expedition {
   const stakeAmount = Number(pos.stakedAmount) / TOKEN_DIVISOR;
   const tier = inferTier(durationMs);
   return {
-    id: `onchain-${pos.tokenId}`,
+    id: `${pos.tokenId}:${pos.user}`,
     stakeAmount,
     durationMs,
     startedAt,
@@ -67,7 +67,7 @@ export interface GameState {
 export type GameAction =
   | {
       type: "LAUNCH_EXPEDITION";
-      payload: { stakeAmount: number; durationMs: number; tier: Tier };
+      payload: { id: string; stakeAmount: number; durationMs: number; tier: Tier };
     }
   | { type: "RETURN_EXPEDITION"; payload: { id: string } }
   | { type: "DISMISS_RETURN"; payload: { id: string } }
@@ -89,12 +89,13 @@ const INITIAL_STATE: GameState = {
 function gameReducer(state: GameState, action: GameAction): GameState {
   switch (action.type) {
     case "LAUNCH_EXPEDITION": {
-      const { stakeAmount, durationMs, tier } = action.payload;
+      const { id, stakeAmount, durationMs, tier } = action.payload;
       if (stakeAmount > state.balance) return state;
       if (state.activeExpeditions.length >= MAX_EXPEDITIONS) return state;
+      if (state.activeExpeditions.some((e) => e.id === id)) return state;
 
       const expedition: Expedition = {
-        id: crypto.randomUUID(),
+        id,
         stakeAmount,
         durationMs,
         startedAt: Date.now(),
@@ -170,10 +171,9 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         .filter((pos) => Number(pos.stakedAmount) > 0)
         .map(stakingPositionToExpedition);
 
-      // Keep local-only expeditions that aren't duplicated by on-chain data
       const onChainIds = new Set(onChainExpeditions.map((e) => e.id));
       const localOnly = state.activeExpeditions.filter(
-        (e) => !e.id.startsWith("onchain-") && !onChainIds.has(e.id)
+        (e) => !onChainIds.has(e.id)
       );
 
       return {

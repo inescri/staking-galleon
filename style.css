@@ -253,6 +253,29 @@ body {
   font-size: 1rem;
 }
 
+.refresh-balance-btn {
+  display: none;
+  font-family: "Press Start 2P", monospace;
+  font-size: 0.55rem;
+  color: var(--gold);
+  background: var(--panel-bg-light);
+  border: 2px solid var(--gold-dark);
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+  line-height: 1;
+}
+
+.refresh-balance-btn:hover {
+  background: var(--gold);
+  color: var(--panel-bg);
+}
+
+.refresh-balance-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .buy-doubloons-link {
   font-family: "Press Start 2P", monospace;
   font-size: 0.55rem;
