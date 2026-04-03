@@ -8,7 +8,6 @@ import {
 import {
   OdinConnect,
   type OdinConnectedUser,
-  type OdinBalance,
 } from "odin-connect";
 import type { Identity } from "@dfinity/agent";
 import { useGameDispatch } from "./GameContext";
@@ -18,16 +17,11 @@ interface WalletContextValue {
   connectedUser: OdinConnectedUser | null;
   identity: Identity | null;
   principal: string;
-  tokenBalances: readonly OdinBalance[];
   isConnecting: boolean;
   connectionError: string | null;
   connectWallet: () => Promise<void>;
   disconnectWallet: () => void;
   refreshBalances: () => Promise<void>;
-  getTokenBalance: {
-    (tokenId: string | number, mode: "full"): bigint;
-    (tokenId: string | number, mode?: "display"): number;
-  };
 }
 
 const WalletContext = createContext<WalletContextValue | null>(null);
@@ -39,7 +33,7 @@ export function truncatePrincipal(principal: string): string {
   return principal.slice(0, 5) + "..." + principal.slice(-3);
 }
 
-function computeTokenBalance(token: OdinBalance): number {
+function computeTokenBalance(token: { balance: bigint; decimals?: number; divisibility?: number }): number {
   if (!token) return 0;
   const decimals = token.decimals ?? 0;
   const divisibility = token.divisibility ?? 8;
@@ -51,20 +45,13 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const [connectedUser, setConnectedUser] =
     useState<OdinConnectedUser | null>(null);
   const [identity, setIdentity] = useState<Identity | null>(null);
-  const [tokenBalances, setTokenBalances] = useState<readonly OdinBalance[]>(
-    []
-  );
   const [isConnecting, setIsConnecting] = useState(false);
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const dispatch = useGameDispatch();
 
   const fetchBalancesAndPositions = useCallback(async (user: OdinConnectedUser) => {
     try {
-      const balances = await user.getBalances({ page: 1, limit: 100 });
-      const balanceList = Array.isArray(balances) ? balances : [];
-      setTokenBalances(balanceList);
-
-      const tokenBalance = balanceList.find((b) => String(b.id) === TOKEN_ID);
+      const tokenBalance = await user.getBalance(TOKEN_ID);
       if (tokenBalance) {
         dispatch({ type: "SET_BALANCE", payload: computeTokenBalance(tokenBalance) });
       } else {
@@ -72,7 +59,6 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       }
     } catch (err) {
       console.error("Failed to fetch token balances:", err);
-      setTokenBalances([]);
       dispatch({ type: "SET_BALANCE", payload: 0 });
     }
 
@@ -122,32 +108,18 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const disconnectWallet = useCallback(() => {
     setConnectedUser(null);
     setIdentity(null);
-    setTokenBalances([]);
     dispatch({ type: "SET_BALANCE", payload: 0 });
   }, [dispatch]);
-
-  const getTokenBalance = useCallback(
-    ((tokenId: string | number, mode: "display" | "full" = "display") => {
-      const token = tokenBalances.find(
-        (b) => String(b.id) === String(tokenId)
-      );
-      if (!token) return mode === "full" ? BigInt(0) : 0;
-      return mode === "full" ? token.balance : computeTokenBalance(token);
-    }) as WalletContextValue["getTokenBalance"],
-    [tokenBalances]
-  );
 
   const value: WalletContextValue = {
     connectedUser,
     identity,
     principal: connectedUser?.principal || "",
-    tokenBalances,
     isConnecting,
     connectionError,
     connectWallet,
     disconnectWallet,
     refreshBalances,
-    getTokenBalance,
   };
 
   return (
