@@ -4,12 +4,14 @@ import { useCountdown } from "../hooks/useCountdown";
 import { useStakingCanister } from "../hooks/useStakingCanister";
 import { TOKEN_ID } from "../canister/actor";
 import { TIER_CONFIGS, formatDoubloons } from "../utils/rewards";
+import { ExtendModal } from "./ExtendModal";
 
 export function ExpeditionCard({ expedition }: { expedition: Expedition }) {
   const dispatch = useGameDispatch();
   const { unlockAndWithdraw } = useStakingCanister();
   const [isWithdrawing, setIsWithdrawing] = useState(false);
   const [withdrawError, setWithdrawError] = useState<string | null>(null);
+  const [showExtendModal, setShowExtendModal] = useState(false);
   const config = TIER_CONFIGS[expedition.tier];
 
   const { minutes, seconds, progress, isComplete } = useCountdown(
@@ -60,27 +62,44 @@ export function ExpeditionCard({ expedition }: { expedition: Expedition }) {
         {isComplete ? (
           <>
             <span className="expedition-time">Voyage complete!</span>
-            <button
-              className="pixel-btn-sm"
-              disabled={isWithdrawing}
-              onClick={handleWithdraw}
-            >
-              {isWithdrawing ? "Returning..." : "Return Ship"}
-            </button>
+            <div className="expedition-actions">
+              <button
+                className="pixel-btn-sm"
+                onClick={() => setShowExtendModal(true)}
+              >
+                Extend
+              </button>
+              <button
+                className="pixel-btn-sm"
+                disabled={isWithdrawing}
+                onClick={handleWithdraw}
+              >
+                {isWithdrawing ? "Returning..." : "Return Ship"}
+              </button>
+            </div>
           </>
         ) : (
           <>
             <span className="expedition-time">
               {minutes}:{seconds.toString().padStart(2, "0")} remaining
             </span>
-            <span className="expedition-progress">
-              {Math.round(progress * 100)}%
-            </span>
+            <button
+              className="pixel-btn-sm"
+              onClick={() => setShowExtendModal(true)}
+            >
+              Extend
+            </button>
           </>
         )}
       </div>
       {withdrawError && (
         <span className="wallet-error">{withdrawError}</span>
+      )}
+      {showExtendModal && (
+        <ExtendModal
+          expedition={expedition}
+          onClose={() => setShowExtendModal(false)}
+        />
       )}
     </div>
   );

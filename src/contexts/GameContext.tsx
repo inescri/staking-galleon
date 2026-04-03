@@ -72,6 +72,7 @@ export type GameAction =
   | { type: "RETURN_EXPEDITION"; payload: { id: string } }
   | { type: "DISMISS_RETURN"; payload: { id: string } }
   | { type: "DISMISS_DISPATCH"; payload: { id: string } }
+  | { type: "EXTEND_EXPEDITION"; payload: { id: string; additionalDurationMs: number } }
   | { type: "SET_BALANCE"; payload: number }
   | { type: "LOAD_STATE"; payload: GameState }
   | { type: "SYNC_POSITIONS"; payload: StakingPosition[] };
@@ -151,6 +152,22 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         ...state,
         pendingDispatches: state.pendingDispatches.filter(
           (d) => d.id !== action.payload.id
+        ),
+      };
+    }
+
+    case "EXTEND_EXPEDITION": {
+      const { id, additionalDurationMs } = action.payload;
+      return {
+        ...state,
+        activeExpeditions: state.activeExpeditions.map((e) =>
+          e.id === id
+            ? {
+                ...e,
+                durationMs: e.durationMs + additionalDurationMs,
+                tier: inferTier(e.durationMs + additionalDurationMs),
+              }
+            : e
         ),
       };
     }

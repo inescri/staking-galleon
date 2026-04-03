@@ -814,6 +814,70 @@ body {
   color: var(--sea-light);
 }
 
+/* ======== MODAL ======== */
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 200;
+  animation: fade-in 0.15s ease-out;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.modal-content {
+  width: 90%;
+  max-width: 400px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.modal-expedition-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 1.1rem;
+  color: var(--text-dim);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.modal-confirm-btn {
+  background: var(--gold) !important;
+  color: var(--sea-deep) !important;
+  border-color: var(--gold-dark) !important;
+}
+
+.modal-confirm-btn:hover {
+  filter: brightness(1.1);
+}
+
+.modal-confirm-btn:disabled {
+  background: var(--text-dim) !important;
+  color: var(--sea-dark) !important;
+  cursor: not-allowed;
+}
+
+/* Expedition card actions row */
+
+.expedition-actions {
+  display: flex;
+  gap: 6px;
+}
+
 /* ======== REWARD TOAST ======== */
 
 .toast-container {
