@@ -1,20 +1,12 @@
-import { useGameState, useGameDispatch } from "../contexts/GameContext";
+import { useGameState } from "../contexts/GameContext";
 import { useCountdown } from "../hooks/useCountdown";
 import { ShipSprite } from "./ShipSprite";
 import type { Expedition } from "../contexts/GameContext";
-import { useCallback } from "react";
 
 function HarborShip({ expedition }: { expedition: Expedition }) {
-  const dispatch = useGameDispatch();
-
-  const onComplete = useCallback(() => {
-    dispatch({ type: "COMPLETE_EXPEDITION", payload: { id: expedition.id } });
-  }, [dispatch, expedition.id]);
-
   const { progress } = useCountdown(
     expedition.startedAt,
-    expedition.durationMs,
-    onComplete
+    expedition.durationMs
   );
 
   return (

@@ -6,8 +6,37 @@ import {
   type ReactNode,
   type Dispatch,
 } from "react";
-import { calculateReward, type Tier } from "../utils/rewards";
+import { calculateReward, TIER_CONFIGS, type Tier } from "../utils/rewards";
 import { saveGameState, loadGameState } from "../utils/persistence";
+import type { StakingPosition } from "../canister/staking.did";
+
+const TOKEN_DECIMALS = 3;
+const TOKEN_DIVISIBILITY = 8;
+const TOKEN_DIVISOR = Math.pow(10, TOKEN_DIVISIBILITY + TOKEN_DECIMALS);
+
+function inferTier(durationMs: number): Tier {
+  const durationSec = durationMs / 1000;
+  const tiers: Tier[] = ["kraken_waters", "deep_ocean", "open_sea", "coastal"];
+  for (const tier of tiers) {
+    if (durationSec >= TIER_CONFIGS[tier].minDuration) return tier;
+  }
+  return "coastal";
+}
+
+export function stakingPositionToExpedition(pos: StakingPosition): Expedition {
+  const durationMs = Number(pos.initialDuration);
+  const startedAt = Number(pos.lockStart);
+  const stakeAmount = Number(pos.stakedAmount) / TOKEN_DIVISOR;
+  const tier = inferTier(durationMs);
+  return {
+    id: `onchain-${pos.tokenId}`,
+    stakeAmount,
+    durationMs,
+    startedAt,
+    tier,
+    reward: calculateReward(stakeAmount, durationMs, tier),
+  };
+}
 
 export interface Expedition {
   id: string;
@@ -39,9 +68,11 @@ export type GameAction =
       payload: { stakeAmount: number; durationMs: number; tier: Tier };
     }
   | { type: "COMPLETE_EXPEDITION"; payload: { id: string } }
+  | { type: "RETURN_EXPEDITION"; payload: { id: string } }
   | { type: "DISMISS_RETURN"; payload: { id: string } }
   | { type: "SET_BALANCE"; payload: number }
-  | { type: "LOAD_STATE"; payload: GameState };
+  | { type: "LOAD_STATE"; payload: GameState }
+  | { type: "SYNC_POSITIONS"; payload: StakingPosition[] };
 
 const MAX_EXPEDITIONS = 5;
 
@@ -76,7 +107,8 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       };
     }
 
-    case "COMPLETE_EXPEDITION": {
+    case "COMPLETE_EXPEDITION":
+    case "RETURN_EXPEDITION": {
       const { id } = action.payload;
       const expedition = state.activeExpeditions.find((e) => e.id === id);
       if (!expedition) return state;
@@ -122,6 +154,23 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       return action.payload;
     }
 
+    case "SYNC_POSITIONS": {
+      const onChainExpeditions = action.payload
+        .filter((pos) => Number(pos.stakedAmount) > 0)
+        .map(stakingPositionToExpedition);
+
+      // Keep local-only expeditions that aren't duplicated by on-chain data
+      const onChainIds = new Set(onChainExpeditions.map((e) => e.id));
+      const localOnly = state.activeExpeditions.filter(
+        (e) => !e.id.startsWith("onchain-") && !onChainIds.has(e.id)
+      );
+
+      return {
+        ...state,
+        activeExpeditions: [...onChainExpeditions, ...localOnly],
+      };
+    }
+
     default:
       return state;
   }
@@ -134,38 +183,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(gameReducer, INITIAL_STATE, () => {
     const saved = loadGameState();
     if (!saved) return INITIAL_STATE;
-
-    // Auto-complete expeditions that finished while away
-    const now = Date.now();
-    const stillActive: Expedition[] = [];
-    let balance = saved.balance;
-    const newCompleted: CompletedExpedition[] = [];
-
-    for (const exp of saved.activeExpeditions) {
-      if (exp.startedAt + exp.durationMs <= now) {
-        balance = Math.round((balance + exp.reward) * 100) / 100;
-        newCompleted.push({
-          id: exp.id,
-          stakeAmount: exp.stakeAmount,
-          reward: exp.reward,
-          tier: exp.tier,
-          completedAt: exp.startedAt + exp.durationMs,
-        });
-      } else {
-        stillActive.push(exp);
-      }
-    }
-
-    return {
-      ...saved,
-      balance,
-      activeExpeditions: stillActive,
-      completedExpeditions: [
-        ...newCompleted,
-        ...saved.completedExpeditions,
-      ].slice(0, 20),
-      pendingReturns: [...(saved.pendingReturns || []), ...newCompleted],
-    };
+    return { ...saved, pendingReturns: saved.pendingReturns || [] };
   });
 
   useEffect(() => {

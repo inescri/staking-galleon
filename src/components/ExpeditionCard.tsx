@@ -1,24 +1,39 @@
-import { useCallback } from "react";
+import { useState } from "react";
 import { useGameDispatch, type Expedition } from "../contexts/GameContext";
 import { useCountdown } from "../hooks/useCountdown";
+import { useStakingCanister } from "../hooks/useStakingCanister";
 import { TIER_CONFIGS, formatDoubloons } from "../utils/rewards";
 
 export function ExpeditionCard({ expedition }: { expedition: Expedition }) {
   const dispatch = useGameDispatch();
+  const { unlockAndWithdraw } = useStakingCanister();
+  const [isWithdrawing, setIsWithdrawing] = useState(false);
+  const [withdrawError, setWithdrawError] = useState<string | null>(null);
   const config = TIER_CONFIGS[expedition.tier];
 
-  const onComplete = useCallback(() => {
-    dispatch({
-      type: "COMPLETE_EXPEDITION",
-      payload: { id: expedition.id },
-    });
-  }, [dispatch, expedition.id]);
-
-  const { minutes, seconds, progress } = useCountdown(
+  const { minutes, seconds, progress, isComplete } = useCountdown(
     expedition.startedAt,
-    expedition.durationMs,
-    onComplete
+    expedition.durationMs
   );
+
+  const handleWithdraw = async () => {
+    setIsWithdrawing(true);
+    setWithdrawError(null);
+    try {
+      await unlockAndWithdraw("2jjj");
+      dispatch({
+        type: "RETURN_EXPEDITION",
+        payload: { id: expedition.id },
+      });
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : "Withdrawal failed";
+      console.error("Withdraw failed:", err);
+      setWithdrawError(message);
+    } finally {
+      setIsWithdrawing(false);
+    }
+  };
 
   return (
     <div className="expedition-card pixel-panel">
@@ -40,13 +55,31 @@ export function ExpeditionCard({ expedition }: { expedition: Expedition }) {
         />
       </div>
       <div className="expedition-footer">
-        <span className="expedition-time">
-          {minutes}:{seconds.toString().padStart(2, "0")} remaining
-        </span>
-        <span className="expedition-progress">
-          {Math.round(progress * 100)}%
-        </span>
+        {isComplete ? (
+          <>
+            <span className="expedition-time">Voyage complete!</span>
+            <button
+              className="pixel-btn-sm"
+              disabled={isWithdrawing}
+              onClick={handleWithdraw}
+            >
+              {isWithdrawing ? "Returning..." : "Return Ship"}
+            </button>
+          </>
+        ) : (
+          <>
+            <span className="expedition-time">
+              {minutes}:{seconds.toString().padStart(2, "0")} remaining
+            </span>
+            <span className="expedition-progress">
+              {Math.round(progress * 100)}%
+            </span>
+          </>
+        )}
       </div>
+      {withdrawError && (
+        <span className="wallet-error">{withdrawError}</span>
+      )}
     </div>
   );
 }
