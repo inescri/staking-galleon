@@ -64,9 +64,9 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       const balanceList = Array.isArray(balances) ? balances : [];
       setTokenBalances(balanceList);
 
-      const token2jjj = balanceList.find((b) => String(b.id) === TOKEN_ID);
-      if (token2jjj) {
-        dispatch({ type: "SET_BALANCE", payload: computeTokenBalance(token2jjj) });
+      const tokenBalance = balanceList.find((b) => String(b.id) === TOKEN_ID);
+      if (tokenBalance) {
+        dispatch({ type: "SET_BALANCE", payload: computeTokenBalance(tokenBalance) });
       } else {
         dispatch({ type: "SET_BALANCE", payload: 0 });
       }
