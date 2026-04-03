@@ -1,5 +1,6 @@
 import { useGameState } from "../contexts/GameContext";
 import { useWallet } from "../contexts/WalletContext";
+import { TOKEN_URL } from "../canister/actor";
 import { formatDoubloons, TIER_CONFIGS } from "../utils/rewards";
 
 export function Treasury() {
@@ -22,7 +23,7 @@ export function Treasury() {
           {formatDoubloons(balance)} Doubloons
         </span>
         <a
-          href="https://dev.odin.fun/token/2j5i"
+          href={TOKEN_URL}
           target="_blank"
           rel="noopener noreferrer"
           className="buy-doubloons-link"
