@@ -50,11 +50,18 @@ export interface CompletedExpedition {
   completedAt: number;
 }
 
+export interface DispatchedExpedition {
+  id: string;
+  stakeAmount: number;
+  tier: Tier;
+}
+
 export interface GameState {
   balance: number;
   activeExpeditions: Expedition[];
   completedExpeditions: CompletedExpedition[];
   pendingReturns: CompletedExpedition[];
+  pendingDispatches: DispatchedExpedition[];
 }
 
 export type GameAction =
@@ -64,6 +71,7 @@ export type GameAction =
     }
   | { type: "RETURN_EXPEDITION"; payload: { id: string } }
   | { type: "DISMISS_RETURN"; payload: { id: string } }
+  | { type: "DISMISS_DISPATCH"; payload: { id: string } }
   | { type: "SET_BALANCE"; payload: number }
   | { type: "LOAD_STATE"; payload: GameState }
   | { type: "SYNC_POSITIONS"; payload: StakingPosition[] };
@@ -75,6 +83,7 @@ const INITIAL_STATE: GameState = {
   activeExpeditions: [],
   completedExpeditions: [],
   pendingReturns: [],
+  pendingDispatches: [],
 };
 
 function gameReducer(state: GameState, action: GameAction): GameState {
@@ -96,6 +105,10 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         ...state,
         balance: state.balance - stakeAmount,
         activeExpeditions: [...state.activeExpeditions, expedition],
+        pendingDispatches: [
+          ...state.pendingDispatches,
+          { id: expedition.id, stakeAmount, tier },
+        ],
       };
     }
 
@@ -128,6 +141,15 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         ...state,
         pendingReturns: state.pendingReturns.filter(
           (r) => r.id !== action.payload.id
+        ),
+      };
+    }
+
+    case "DISMISS_DISPATCH": {
+      return {
+        ...state,
+        pendingDispatches: state.pendingDispatches.filter(
+          (d) => d.id !== action.payload.id
         ),
       };
     }

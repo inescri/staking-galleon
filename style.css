@@ -892,6 +892,14 @@ body {
   border-color: var(--danger);
 }
 
+.toast-dispatched {
+  border-color: var(--gold);
+}
+
+.toast-dispatched .toast-result {
+  color: var(--gold);
+}
+
 @keyframes toast-in {
   from {
     transform: translateX(100px);
