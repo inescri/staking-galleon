@@ -10,10 +10,13 @@ import {
   type OdinConnectedUser,
   type OdinBalance,
 } from "odin-connect";
+import type { Identity } from "@dfinity/agent";
 import { useGameDispatch } from "./GameContext";
+import { STAKING_CANISTER_ID } from "../canister/actor";
 
 interface WalletContextValue {
   connectedUser: OdinConnectedUser | null;
+  identity: Identity | null;
   principal: string;
   tokenBalances: readonly OdinBalance[];
   isConnecting: boolean;
@@ -28,7 +31,7 @@ interface WalletContextValue {
 
 const WalletContext = createContext<WalletContextValue | null>(null);
 
-const odinConnect = new OdinConnect({ name: "Galleon Stakes", env: "dev" });
+const odinConnect = new OdinConnect({ name: "Galleon Stakes", env: "_preview" });
 
 function truncatePrincipal(principal: string): string {
   if (!principal || principal.length <= 12) return principal;
@@ -46,6 +49,7 @@ function computeTokenBalance(token: OdinBalance): number {
 export function WalletProvider({ children }: { children: ReactNode }) {
   const [connectedUser, setConnectedUser] =
     useState<OdinConnectedUser | null>(null);
+  const [identity, setIdentity] = useState<Identity | null>(null);
   const [tokenBalances, setTokenBalances] = useState<readonly OdinBalance[]>(
     []
   );
@@ -59,9 +63,11 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     try {
       const user = await odinConnect.connect({
         requires_api: false,
-        requires_delegation: false,
+        requires_delegation: true,
+        targets: [STAKING_CANISTER_ID],
       });
       setConnectedUser(user);
+      setIdentity(user.getIdentity() ?? null);
 
       try {
         const balances = await user.getBalances({ page: 1, limit: 20 });
@@ -91,6 +97,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
   const disconnectWallet = useCallback(() => {
     setConnectedUser(null);
+    setIdentity(null);
     setTokenBalances([]);
     dispatch({ type: "SET_BALANCE", payload: 0 });
   }, [dispatch]);
@@ -108,6 +115,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
   const value: WalletContextValue = {
     connectedUser,
+    identity,
     principal: connectedUser
       ? truncatePrincipal(connectedUser.principal || "Unknown")
       : "",
