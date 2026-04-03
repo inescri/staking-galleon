@@ -62,7 +62,6 @@ export type GameAction =
       type: "LAUNCH_EXPEDITION";
       payload: { stakeAmount: number; durationMs: number; tier: Tier };
     }
-  | { type: "COMPLETE_EXPEDITION"; payload: { id: string } }
   | { type: "RETURN_EXPEDITION"; payload: { id: string } }
   | { type: "DISMISS_RETURN"; payload: { id: string } }
   | { type: "SET_BALANCE"; payload: number }
@@ -100,7 +99,6 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       };
     }
 
-    case "COMPLETE_EXPEDITION":
     case "RETURN_EXPEDITION": {
       const { id } = action.payload;
       const expedition = state.activeExpeditions.find((e) => e.id === id);
@@ -120,6 +118,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
           0,
           20
         ),
+        balance: state.balance + expedition.stakeAmount,
         pendingReturns: [...state.pendingReturns, completed],
       };
     }

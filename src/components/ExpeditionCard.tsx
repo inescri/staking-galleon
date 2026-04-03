@@ -8,7 +8,6 @@ import { TIER_CONFIGS, formatDoubloons } from "../utils/rewards";
 
 export function ExpeditionCard({ expedition }: { expedition: Expedition }) {
   const dispatch = useGameDispatch();
-  const { refreshBalances } = useWallet();
   const { unlockAndWithdraw } = useStakingCanister();
   const [isWithdrawing, setIsWithdrawing] = useState(false);
   const [withdrawError, setWithdrawError] = useState<string | null>(null);
@@ -28,8 +27,7 @@ export function ExpeditionCard({ expedition }: { expedition: Expedition }) {
         type: "RETURN_EXPEDITION",
         payload: { id: expedition.id },
       });
-      await new Promise((resolve) => setTimeout(resolve, 2000)); // wait for state to update on-chai
-      await refreshBalances();
+     
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Withdrawal failed";
