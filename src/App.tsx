@@ -1,4 +1,5 @@
 import { useGameState } from "./contexts/GameContext";
+import { ConnectOdin } from "./components/ConnectOdin";
 import { Treasury } from "./components/Treasury";
 import { Harbor } from "./components/Harbor";
 import { SendShipForm } from "./components/SendShipForm";
@@ -26,6 +27,7 @@ export function App() {
       </header>
 
       <main className="app-main">
+        <ConnectOdin />
         <Treasury />
         <Harbor />
         <SendShipForm />

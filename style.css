@@ -287,8 +287,8 @@ body {
   justify-content: space-between;
   align-items: center;
   padding: 8px 10px;
-  background: rgba(39, 174, 96, 0.1);
-  border: 2px solid var(--success);
+  background: none;
+  border: none;
 }
 
 .wallet-info {
