@@ -4,21 +4,20 @@ import { useWallet } from "../contexts/WalletContext";
 import { TIER_CONFIGS, formatDoubloons, type Tier } from "../utils/rewards";
 import { convertToOdinAmount } from "odin-connect/dist/utils";
 import { useStakingCanister } from "../hooks/useStakingCanister";
-import { STAKING_CANISTER_ID } from "../canister/actor";
+import { STAKING_CANISTER_ID, TOKEN_ID } from "../canister/actor";
 
 const TIERS: Tier[] = ["coastal", "open_sea", "deep_ocean", "kraken_waters"];
-const TOKEN_ID = "2jjj";
 
 export function SendShipForm() {
   const { balance, activeExpeditions } = useGameState();
   const dispatch = useGameDispatch();
   const { connectedUser } = useWallet();
-  const { depositAndLock, isLoading: isStaking } = useStakingCanister();
+  const { depositAndLock } = useStakingCanister();
 
   const [selectedTier, setSelectedTier] = useState<Tier>("coastal");
   const [stakeAmount, setStakeAmount] = useState(100);
   const [duration, setDuration] = useState(30);
-  const [isApproving, setIsApproving] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [approveError, setApproveError] = useState<string | null>(null);
 
   const config = TIER_CONFIGS[selectedTier];
@@ -28,8 +27,7 @@ export function SendShipForm() {
     activeExpeditions.length < 5 &&
     duration >= config.minDuration &&
     duration <= config.maxDuration &&
-    !isApproving &&
-    !isStaking;
+    !isLoading;
 
   const handleTierChange = (tier: Tier) => {
     setSelectedTier(tier);
@@ -41,7 +39,7 @@ export function SendShipForm() {
   const handleLaunch = async () => {
     if (!canLaunch || !connectedUser) return;
 
-    setIsApproving(true);
+    setIsLoading(true);
     setApproveError(null);
     try {
       const onChainAmount = convertToOdinAmount(stakeAmount, {
@@ -76,7 +74,7 @@ export function SendShipForm() {
       console.error("Staking failed:", err);
       setApproveError(message);
     } finally {
-      setIsApproving(false);
+      setIsLoading(false);
     }
   };
 
@@ -178,10 +176,8 @@ export function SendShipForm() {
         disabled={!canLaunch}
         onClick={handleLaunch}
       >
-        {isStaking
-          ? "Staking..."
-          : isApproving
-          ? "Approving..."
+        {isLoading
+          ? "Dispatching..."
           : activeExpeditions.length >= 5
           ? "Fleet Full"
           : stakeAmount > balance

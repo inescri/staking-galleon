@@ -1,7 +1,9 @@
 import { useState } from "react";
 import { useGameDispatch, type Expedition } from "../contexts/GameContext";
+import { useWallet } from "../contexts/WalletContext";
 import { useCountdown } from "../hooks/useCountdown";
 import { useStakingCanister } from "../hooks/useStakingCanister";
+import { TOKEN_ID } from "../canister/actor";
 import { TIER_CONFIGS, formatDoubloons } from "../utils/rewards";
 
 export function ExpeditionCard({ expedition }: { expedition: Expedition }) {
@@ -20,11 +22,12 @@ export function ExpeditionCard({ expedition }: { expedition: Expedition }) {
     setIsWithdrawing(true);
     setWithdrawError(null);
     try {
-      await unlockAndWithdraw("2jjj");
+      await unlockAndWithdraw(TOKEN_ID);
       dispatch({
         type: "RETURN_EXPEDITION",
         payload: { id: expedition.id },
       });
+     
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Withdrawal failed";

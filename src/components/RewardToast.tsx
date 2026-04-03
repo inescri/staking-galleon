@@ -9,9 +9,6 @@ export function RewardToast({
 }) {
   const dispatch = useGameDispatch();
   const config = TIER_CONFIGS[expedition.tier];
-  const profit = expedition.reward - expedition.stakeAmount;
-  const isProfit = profit >= 0;
-  const multiplier = (expedition.reward / expedition.stakeAmount).toFixed(2);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -22,7 +19,7 @@ export function RewardToast({
 
   return (
     <div
-      className={`reward-toast ${isProfit ? "toast-profit" : "toast-loss"}`}
+      className="reward-toast toast-profit"
       onClick={() =>
         dispatch({ type: "DISMISS_RETURN", payload: { id: expedition.id } })
       }
@@ -31,8 +28,7 @@ export function RewardToast({
       <div className="toast-content">
         <span className="toast-title">Ship Returned!</span>
         <span className="toast-result">
-          {isProfit ? "+" : ""}
-          {formatDoubloons(profit)} doubloons ({multiplier}x)
+          {formatDoubloons(expedition.stakeAmount)} doubloons staked
         </span>
       </div>
     </div>

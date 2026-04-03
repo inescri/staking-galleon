@@ -2,12 +2,10 @@ import {
   createContext,
   useContext,
   useReducer,
-  useEffect,
   type ReactNode,
   type Dispatch,
 } from "react";
-import { calculateReward, TIER_CONFIGS, type Tier } from "../utils/rewards";
-import { saveGameState, loadGameState } from "../utils/persistence";
+import { TIER_CONFIGS, type Tier } from "../utils/rewards";
 import type { StakingPosition } from "../canister/staking.did";
 
 const TOKEN_DECIMALS = 3;
@@ -34,7 +32,6 @@ export function stakingPositionToExpedition(pos: StakingPosition): Expedition {
     durationMs,
     startedAt,
     tier,
-    reward: calculateReward(stakeAmount, durationMs, tier),
   };
 }
 
@@ -44,13 +41,11 @@ export interface Expedition {
   durationMs: number;
   startedAt: number;
   tier: Tier;
-  reward: number; // pre-calculated at launch
 }
 
 export interface CompletedExpedition {
   id: string;
   stakeAmount: number;
-  reward: number;
   tier: Tier;
   completedAt: number;
 }
@@ -67,7 +62,6 @@ export type GameAction =
       type: "LAUNCH_EXPEDITION";
       payload: { stakeAmount: number; durationMs: number; tier: Tier };
     }
-  | { type: "COMPLETE_EXPEDITION"; payload: { id: string } }
   | { type: "RETURN_EXPEDITION"; payload: { id: string } }
   | { type: "DISMISS_RETURN"; payload: { id: string } }
   | { type: "SET_BALANCE"; payload: number }
@@ -77,7 +71,7 @@ export type GameAction =
 const MAX_EXPEDITIONS = 5;
 
 const INITIAL_STATE: GameState = {
-  balance: 1000,
+  balance: 0,
   activeExpeditions: [],
   completedExpeditions: [],
   pendingReturns: [],
@@ -90,24 +84,21 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       if (stakeAmount > state.balance) return state;
       if (state.activeExpeditions.length >= MAX_EXPEDITIONS) return state;
 
-      const reward = calculateReward(stakeAmount, durationMs, tier);
       const expedition: Expedition = {
         id: crypto.randomUUID(),
         stakeAmount,
         durationMs,
         startedAt: Date.now(),
         tier,
-        reward,
       };
 
       return {
         ...state,
-        balance: Math.round((state.balance - stakeAmount) * 100) / 100,
+        balance: state.balance - stakeAmount,
         activeExpeditions: [...state.activeExpeditions, expedition],
       };
     }
 
-    case "COMPLETE_EXPEDITION":
     case "RETURN_EXPEDITION": {
       const { id } = action.payload;
       const expedition = state.activeExpeditions.find((e) => e.id === id);
@@ -116,20 +107,18 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       const completed: CompletedExpedition = {
         id: expedition.id,
         stakeAmount: expedition.stakeAmount,
-        reward: expedition.reward,
         tier: expedition.tier,
         completedAt: Date.now(),
       };
 
       return {
         ...state,
-        balance:
-          Math.round((state.balance + expedition.reward) * 100) / 100,
         activeExpeditions: state.activeExpeditions.filter((e) => e.id !== id),
         completedExpeditions: [completed, ...state.completedExpeditions].slice(
           0,
           20
         ),
+        balance: state.balance + expedition.stakeAmount,
         pendingReturns: [...state.pendingReturns, completed],
       };
     }
@@ -180,15 +169,7 @@ const GameStateContext = createContext<GameState>(INITIAL_STATE);
 const GameDispatchContext = createContext<Dispatch<GameAction>>(() => {});
 
 export function GameProvider({ children }: { children: ReactNode }) {
-  const [state, dispatch] = useReducer(gameReducer, INITIAL_STATE, () => {
-    const saved = loadGameState();
-    if (!saved) return INITIAL_STATE;
-    return { ...saved, pendingReturns: saved.pendingReturns || [] };
-  });
-
-  useEffect(() => {
-    saveGameState(state);
-  }, [state]);
+  const [state, dispatch] = useReducer(gameReducer, INITIAL_STATE);
 
   return (
     <GameStateContext.Provider value={state}>

@@ -3,7 +3,7 @@ import { useWallet } from "../contexts/WalletContext";
 import { formatDoubloons, TIER_CONFIGS } from "../utils/rewards";
 
 export function Treasury() {
-  const { completedExpeditions } = useGameState();
+  const { balance, completedExpeditions } = useGameState();
   const {
     connectedUser,
     principal,
@@ -11,10 +11,7 @@ export function Treasury() {
     connectionError,
     connectWallet,
     disconnectWallet,
-    getTokenBalance,
   } = useWallet();
-
-  const balance = getTokenBalance("2jjj");
 
   return (
     <div className="treasury">
@@ -61,19 +58,12 @@ export function Treasury() {
           <h3 className="section-title">Voyage Log</h3>
           <div className="log-entries">
             {completedExpeditions.slice(0, 8).map((exp) => {
-              const multiplier = exp.reward / exp.stakeAmount;
-              const profit = exp.reward - exp.stakeAmount;
-              const isProfit = profit >= 0;
               const config = TIER_CONFIGS[exp.tier];
               return (
                 <div key={exp.id} className="log-entry">
                   <span className="log-tier">{config.emoji}</span>
                   <span className="log-stake">
-                    {formatDoubloons(exp.stakeAmount)}
-                  </span>
-                  <span className={`log-result ${isProfit ? "profit" : "loss"}`}>
-                    {isProfit ? "+" : ""}
-                    {formatDoubloons(profit)} ({multiplier.toFixed(2)}x)
+                    {formatDoubloons(exp.stakeAmount)} dbl
                   </span>
                 </div>
               );
