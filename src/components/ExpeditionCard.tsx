@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useGameDispatch, type Expedition } from "../contexts/GameContext";
+import { useWallet, truncatePrincipal } from "../contexts/WalletContext";
 import { useCountdown } from "../hooks/useCountdown";
 import { useStakingCanister } from "../hooks/useStakingCanister";
 import { TOKEN_ID } from "../canister/actor";
@@ -12,7 +13,10 @@ export function ExpeditionCard({ expedition }: { expedition: Expedition }) {
   const [isWithdrawing, setIsWithdrawing] = useState(false);
   const [withdrawError, setWithdrawError] = useState<string | null>(null);
   const [showExtendModal, setShowExtendModal] = useState(false);
+  const { principal } = useWallet();
   const config = TIER_CONFIGS[expedition.tier];
+  const owner = expedition.id.split(":").slice(1).join(":");
+  const isOwner = owner === principal;
 
   const { minutes, seconds, progress, isComplete } = useCountdown(
     expedition.startedAt,
@@ -46,8 +50,9 @@ export function ExpeditionCard({ expedition }: { expedition: Expedition }) {
           {config.emoji} {config.name}
         </span>
         <span className="expedition-stake">
-          {formatDoubloons(expedition.stakeAmount)} dbl
+          &nbsp;{formatDoubloons(expedition.stakeAmount)} dbl
         </span>
+        <span className="expedition-principal">{truncatePrincipal(owner)}</span>
       </div>
       <div className="progress-bar-container">
         <div
@@ -62,33 +67,37 @@ export function ExpeditionCard({ expedition }: { expedition: Expedition }) {
         {isComplete ? (
           <>
             <span className="expedition-time">Voyage complete!</span>
-            <div className="expedition-actions">
-              <button
-                className="pixel-btn-sm"
-                onClick={() => setShowExtendModal(true)}
-              >
-                Extend
-              </button>
-              <button
-                className="pixel-btn-sm"
-                disabled={isWithdrawing}
-                onClick={handleWithdraw}
-              >
-                {isWithdrawing ? "Returning..." : "Return Ship"}
-              </button>
-            </div>
+            {isOwner && (
+              <div className="expedition-actions">
+                <button
+                  className="pixel-btn-sm"
+                  onClick={() => setShowExtendModal(true)}
+                >
+                  Extend
+                </button>
+                <button
+                  className="pixel-btn-sm"
+                  disabled={isWithdrawing}
+                  onClick={handleWithdraw}
+                >
+                  {isWithdrawing ? "Returning..." : "Return Ship"}
+                </button>
+              </div>
+            )}
           </>
         ) : (
           <>
             <span className="expedition-time">
               {minutes}:{seconds.toString().padStart(2, "0")} remaining
             </span>
-            <button
-              className="pixel-btn-sm"
-              onClick={() => setShowExtendModal(true)}
-            >
-              Extend
-            </button>
+            {isOwner && (
+              <button
+                className="pixel-btn-sm"
+                onClick={() => setShowExtendModal(true)}
+              >
+                Extend
+              </button>
+            )}
           </>
         )}
       </div>

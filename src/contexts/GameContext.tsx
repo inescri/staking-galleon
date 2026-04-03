@@ -222,6 +222,23 @@ function saveCompletedExpeditions(entries: CompletedExpedition[]): void {
   } catch {}
 }
 
+const ACTIVE_EXPEDITIONS_KEY = "active-expeditions";
+
+function loadActiveExpeditions(): Expedition[] {
+  try {
+    const raw = localStorage.getItem(ACTIVE_EXPEDITIONS_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveActiveExpeditions(entries: Expedition[]): void {
+  try {
+    localStorage.setItem(ACTIVE_EXPEDITIONS_KEY, JSON.stringify(entries));
+  } catch {}
+}
+
 const GameStateContext = createContext<GameState>(INITIAL_STATE);
 const GameDispatchContext = createContext<Dispatch<GameAction>>(() => {});
 
@@ -229,11 +246,16 @@ export function GameProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(gameReducer, undefined, () => ({
     ...INITIAL_STATE,
     completedExpeditions: loadCompletedExpeditions(),
+    activeExpeditions: loadActiveExpeditions(),
   }));
 
   useEffect(() => {
     saveCompletedExpeditions(state.completedExpeditions);
   }, [state.completedExpeditions]);
+
+  useEffect(() => {
+    saveActiveExpeditions(state.activeExpeditions);
+  }, [state.activeExpeditions]);
 
   return (
     <GameStateContext.Provider value={state}>

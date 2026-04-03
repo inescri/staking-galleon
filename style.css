@@ -776,7 +776,6 @@ body {
 
 .expedition-header {
   display: flex;
-  justify-content: space-between;
   align-items: center;
   margin-bottom: 8px;
 }
@@ -789,6 +788,12 @@ body {
   font-family: "Press Start 2P", monospace;
   font-size: 0.55rem;
   color: var(--gold);
+}
+
+.expedition-principal {
+  margin-left: auto;
+  color: var(--text-dim);
+  font-size: 1rem;
 }
 
 .progress-bar-container {
