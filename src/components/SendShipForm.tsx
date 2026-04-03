@@ -1,16 +1,22 @@
 import { useState } from "react";
 import { useGameState, useGameDispatch } from "../contexts/GameContext";
+import { useWallet } from "../contexts/WalletContext";
 import { TIER_CONFIGS, formatDoubloons, type Tier } from "../utils/rewards";
+import { convertToOdinAmount } from "odin-connect/dist/utils";
 
 const TIERS: Tier[] = ["coastal", "open_sea", "deep_ocean", "kraken_waters"];
+const SPENDER_PRINCIPAL = "sfgyi-iyaaa-aaaam-qepyq-cai";
 
 export function SendShipForm() {
   const { balance, activeExpeditions } = useGameState();
   const dispatch = useGameDispatch();
+  const { connectedUser } = useWallet();
 
   const [selectedTier, setSelectedTier] = useState<Tier>("coastal");
   const [stakeAmount, setStakeAmount] = useState(100);
   const [duration, setDuration] = useState(30);
+  const [isApproving, setIsApproving] = useState(false);
+  const [approveError, setApproveError] = useState<string | null>(null);
 
   const config = TIER_CONFIGS[selectedTier];
   const canLaunch =
@@ -18,7 +24,8 @@ export function SendShipForm() {
     stakeAmount <= balance &&
     activeExpeditions.length < 5 &&
     duration >= config.minDuration &&
-    duration <= config.maxDuration;
+    duration <= config.maxDuration &&
+    !isApproving;
 
   const handleTierChange = (tier: Tier) => {
     setSelectedTier(tier);
@@ -27,17 +34,41 @@ export function SendShipForm() {
     if (stakeAmount > balance) setStakeAmount(Math.floor(balance));
   };
 
-  const handleLaunch = () => {
-    if (!canLaunch) return;
-    dispatch({
-      type: "LAUNCH_EXPEDITION",
-      payload: {
-        stakeAmount,
-        durationMs: duration * 1000,
-        tier: selectedTier,
-      },
-    });
-    setStakeAmount(Math.min(100, Math.floor(balance - stakeAmount)));
+  const handleLaunch = async () => {
+    if (!canLaunch || !connectedUser) return;
+
+    setIsApproving(true);
+    setApproveError(null);
+    try {
+      const approved = await connectedUser.icrcApprove({
+        token: "2jjj",
+        spender: SPENDER_PRINCIPAL,
+        amount: convertToOdinAmount(stakeAmount, {
+          decimals: 3, divisibility: 8,
+        }),
+      });
+
+      if (!approved) {
+        setApproveError("Approval was rejected.");
+        return;
+      }
+
+      dispatch({
+        type: "LAUNCH_EXPEDITION",
+        payload: {
+          stakeAmount,
+          durationMs: duration * 1000,
+          tier: selectedTier,
+        },
+      });
+      setStakeAmount(Math.min(100, Math.floor(balance - stakeAmount)));
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Approval failed. Please try again.";
+      console.error("ICRC approve failed:", err);
+      setApproveError(message);
+    } finally {
+      setIsApproving(false);
+    }
   };
 
   const setPercent = (pct: number) => {
@@ -129,12 +160,18 @@ export function SendShipForm() {
         </span>
       </div>
 
+      {approveError && (
+        <span className="wallet-error">{approveError}</span>
+      )}
+
       <button
         className="pixel-btn launch-btn"
         disabled={!canLaunch}
         onClick={handleLaunch}
       >
-        {activeExpeditions.length >= 5
+        {isApproving
+          ? "Approving..."
+          : activeExpeditions.length >= 5
           ? "Fleet Full"
           : stakeAmount > balance
           ? "Insufficient Doubloons"
