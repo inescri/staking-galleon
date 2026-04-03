@@ -331,10 +331,10 @@ body {
   width: 100%;
   font-size: 0.55rem;
   padding: 10px;
-  background: var(--sea-mid);
-  color: var(--text-primary);
+  background: var(--gold);
+  color: var(--panel-bg);
   box-shadow:
-    0 4px 0 var(--sea-dark),
+    0 4px 0 var(--gold-dark),
     -3px -3px 0 0 var(--sea-deep),
      3px -3px 0 0 var(--sea-deep),
     -3px  3px 0 0 var(--sea-deep),
@@ -342,8 +342,8 @@ body {
 }
 
 .wallet-connect-btn:hover {
-  background: var(--sea-light);
-  color: var(--sea-deep);
+  background: var(--gold-light);
+  color: var(--panel-bg);
 }
 
 .wallet-connect-btn:disabled {

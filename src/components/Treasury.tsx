@@ -52,7 +52,7 @@ export function Treasury() {
               onClick={connectWallet}
               disabled={isConnecting}
             >
-              {isConnecting ? "Connecting..." : "Connect Wallet"}
+              {isConnecting ? "Connecting..." : "Connect Odin"}
             </button>
             {connectionError && (
               <span className="wallet-error">{connectionError}</span>
