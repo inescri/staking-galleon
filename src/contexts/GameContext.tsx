@@ -95,6 +95,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 
       return {
         ...state,
+        balance: state.balance - stakeAmount,
         activeExpeditions: [...state.activeExpeditions, expedition],
       };
     }

@@ -4,10 +4,9 @@ import { useWallet } from "../contexts/WalletContext";
 import { TIER_CONFIGS, formatDoubloons, type Tier } from "../utils/rewards";
 import { convertToOdinAmount } from "odin-connect/dist/utils";
 import { useStakingCanister } from "../hooks/useStakingCanister";
-import { STAKING_CANISTER_ID } from "../canister/actor";
+import { STAKING_CANISTER_ID, TOKEN_ID } from "../canister/actor";
 
 const TIERS: Tier[] = ["coastal", "open_sea", "deep_ocean", "kraken_waters"];
-const TOKEN_ID = "2jjj";
 
 export function SendShipForm() {
   const { balance, activeExpeditions } = useGameState();

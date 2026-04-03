@@ -12,7 +12,7 @@ import {
 } from "odin-connect";
 import type { Identity } from "@dfinity/agent";
 import { useGameDispatch } from "./GameContext";
-import { createStakingActor, STAKING_CANISTER_ID } from "../canister/actor";
+import { createStakingActor, STAKING_CANISTER_ID, TOKEN_ID } from "../canister/actor";
 
 interface WalletContextValue {
   connectedUser: OdinConnectedUser | null;
@@ -64,7 +64,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       const balanceList = Array.isArray(balances) ? balances : [];
       setTokenBalances(balanceList);
 
-      const token2jjj = balanceList.find((b) => String(b.id) === "2jjj");
+      const token2jjj = balanceList.find((b) => String(b.id) === TOKEN_ID);
       if (token2jjj) {
         dispatch({ type: "SET_BALANCE", payload: computeTokenBalance(token2jjj) });
       } else {
@@ -79,7 +79,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     try {
       const delegationIdentity = user.getIdentity() ?? undefined;
       const actor = createStakingActor(delegationIdentity);
-      const position = await actor.stake_get_position("2jjj");
+      const position = await actor.stake_get_position(TOKEN_ID);
       console.log("Fetched staking position:", position);
       if (position.length > 0 && position[0]) {
         dispatch({ type: "SYNC_POSITIONS", payload: [position[0]] });
