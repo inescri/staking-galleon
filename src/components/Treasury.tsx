@@ -21,6 +21,14 @@ export function Treasury() {
           <span className="coin-icon">&#x1FA99;</span>{" "}
           {formatDoubloons(balance)} Doubloons
         </span>
+        <a
+          href="https://dev.odin.fun/token/2j5i"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="buy-doubloons-link"
+        >
+          Buy Doubloons
+        </a>
       </div>
 
       <div className="wallet-row">

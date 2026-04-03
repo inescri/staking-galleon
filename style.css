@@ -253,6 +253,22 @@ body {
   font-size: 1rem;
 }
 
+.buy-doubloons-link {
+  font-family: "Press Start 2P", monospace;
+  font-size: 0.55rem;
+  color: var(--gold);
+  text-decoration: none;
+  border: 2px solid var(--gold-dark);
+  padding: 4px 8px;
+  background: var(--panel-bg-light);
+  transition: background 0.2s, color 0.2s;
+}
+
+.buy-doubloons-link:hover {
+  background: var(--gold);
+  color: var(--panel-bg);
+}
+
 .faucet-btn {
   width: 100%;
   font-size: 0.55rem;
