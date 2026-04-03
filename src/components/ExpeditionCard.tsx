@@ -1,11 +1,13 @@
 import { useState } from "react";
 import { useGameDispatch, type Expedition } from "../contexts/GameContext";
+import { useWallet } from "../contexts/WalletContext";
 import { useCountdown } from "../hooks/useCountdown";
 import { useStakingCanister } from "../hooks/useStakingCanister";
 import { TIER_CONFIGS, formatDoubloons } from "../utils/rewards";
 
 export function ExpeditionCard({ expedition }: { expedition: Expedition }) {
   const dispatch = useGameDispatch();
+  const { refreshBalances } = useWallet();
   const { unlockAndWithdraw } = useStakingCanister();
   const [isWithdrawing, setIsWithdrawing] = useState(false);
   const [withdrawError, setWithdrawError] = useState<string | null>(null);
@@ -25,6 +27,7 @@ export function ExpeditionCard({ expedition }: { expedition: Expedition }) {
         type: "RETURN_EXPEDITION",
         payload: { id: expedition.id },
       });
+      await refreshBalances();
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Withdrawal failed";

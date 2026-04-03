@@ -23,6 +23,7 @@ interface WalletContextValue {
   connectionError: string | null;
   connectWallet: () => Promise<void>;
   disconnectWallet: () => void;
+  refreshBalances: () => Promise<void>;
   getTokenBalance: {
     (tokenId: string | number, mode: "full"): bigint;
     (tokenId: string | number, mode?: "display"): number;
@@ -57,6 +58,39 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const dispatch = useGameDispatch();
 
+  const fetchBalancesAndPositions = useCallback(async (user: OdinConnectedUser) => {
+    try {
+      const balances = await user.getBalances({ page: 1, limit: 100 });
+      const balanceList = Array.isArray(balances) ? balances : [];
+      setTokenBalances(balanceList);
+
+      const token2jjj = balanceList.find((b) => String(b.id) === "2jjj");
+      if (token2jjj) {
+        dispatch({ type: "SET_BALANCE", payload: computeTokenBalance(token2jjj) });
+      } else {
+        dispatch({ type: "SET_BALANCE", payload: 0 });
+      }
+    } catch (err) {
+      console.error("Failed to fetch token balances:", err);
+      setTokenBalances([]);
+      dispatch({ type: "SET_BALANCE", payload: 0 });
+    }
+
+    try {
+      const delegationIdentity = user.getIdentity() ?? undefined;
+      const actor = createStakingActor(delegationIdentity);
+      const position = await actor.stake_get_position("2jjj");
+      console.log("Fetched staking position:", position);
+      if (position.length > 0 && position[0]) {
+        dispatch({ type: "SYNC_POSITIONS", payload: [position[0]] });
+      } else {
+        dispatch({ type: "SYNC_POSITIONS", payload: [] });
+      }
+    } catch (err) {
+      console.error("Failed to fetch staking position:", err);
+    }
+  }, [dispatch]);
+
   const connectWallet = useCallback(async () => {
     setIsConnecting(true);
     setConnectionError(null);
@@ -68,38 +102,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       });
       setConnectedUser(user);
       setIdentity(user.getIdentity() ?? null);
-
-      try {
-        const balances = await user.getBalances({ page: 1, limit: 100 });
-        const balanceList = Array.isArray(balances) ? balances : [];
-        setTokenBalances(balanceList);
-
-        const token2jjj = balanceList.find((b) => String(b.id) === "2jjj");
-        if (token2jjj) {
-          dispatch({ type: "SET_BALANCE", payload: computeTokenBalance(token2jjj) });
-        } else {
-          dispatch({ type: "SET_BALANCE", payload: 0 });
-        }
-      } catch (err) {
-        console.error("Failed to fetch token balances:", err);
-        setTokenBalances([]);
-        dispatch({ type: "SET_BALANCE", payload: 0 });
-      }
-
-      // Fetch on-chain staking position
-      try {
-        const delegationIdentity = user.getIdentity() ?? undefined;
-        const actor = createStakingActor(delegationIdentity);
-        const position = await actor.stake_get_position("2jjj");
-        console.log("Fetched staking position:", position);
-        if (position.length > 0 && position[0]) {
-          dispatch({ type: "SYNC_POSITIONS", payload: [position[0]] });
-        } else {
-          dispatch({ type: "SYNC_POSITIONS", payload: [] });
-        }
-      } catch (err) {
-        console.error("Failed to fetch staking position:", err);
-      }
+      await fetchBalancesAndPositions(user);
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "Wallet connection failed";
@@ -108,7 +111,13 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsConnecting(false);
     }
-  }, []);
+  }, [fetchBalancesAndPositions]);
+
+  const refreshBalances = useCallback(async () => {
+    if (connectedUser) {
+      await fetchBalancesAndPositions(connectedUser);
+    }
+  }, [connectedUser, fetchBalancesAndPositions]);
 
   const disconnectWallet = useCallback(() => {
     setConnectedUser(null);
@@ -139,6 +148,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     connectionError,
     connectWallet,
     disconnectWallet,
+    refreshBalances,
     getTokenBalance,
   };
 

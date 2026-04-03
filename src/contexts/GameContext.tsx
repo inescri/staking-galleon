@@ -75,7 +75,7 @@ export type GameAction =
 const MAX_EXPEDITIONS = 5;
 
 const INITIAL_STATE: GameState = {
-  balance: 1000,
+  balance: 0,
   activeExpeditions: [],
   completedExpeditions: [],
   pendingReturns: [],

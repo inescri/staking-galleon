@@ -3,7 +3,7 @@ import { useWallet } from "../contexts/WalletContext";
 import { formatDoubloons, TIER_CONFIGS } from "../utils/rewards";
 
 export function Treasury() {
-  const { completedExpeditions } = useGameState();
+  const { balance, completedExpeditions } = useGameState();
   const {
     connectedUser,
     principal,
@@ -11,10 +11,7 @@ export function Treasury() {
     connectionError,
     connectWallet,
     disconnectWallet,
-    getTokenBalance,
   } = useWallet();
-
-  const balance = getTokenBalance("2jjj");
 
   return (
     <div className="treasury">
