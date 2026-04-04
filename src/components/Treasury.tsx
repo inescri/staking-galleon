@@ -25,14 +25,29 @@ export function Treasury() {
         <span className="balance-amount">
           <span className="coin-icon">&#x1FA99;</span>{" "}
           {formatDoubloons(balance)} Doubloons
+          <button
+            className="refresh-balance-btn"
+            onClick={handleRefresh}
+            disabled={refreshing}
+            >
+            <svg
+              className={`refresh-icon${refreshing ? " spinning" : ""}`}
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <polyline points="23 4 23 10 17 10" />
+              <polyline points="1 20 1 14 7 14" />
+              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10" />
+              <path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14" />
+            </svg>
+          </button>
         </span>
-        <button
-          className="refresh-balance-btn"
-          onClick={handleRefresh}
-          disabled={refreshing}
-        >
-          {refreshing ? "..." : "Refresh"}
-        </button>
         <a
           href={TOKEN_URL}
           target="_blank"
