@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useGameState, useGameDispatch } from "../contexts/GameContext";
 import { useWallet } from "../contexts/WalletContext";
 import { TIER_CONFIGS, formatDoubloons, type Tier } from "../utils/rewards";
-import { convertToOdinAmount } from "odin-connect/dist/utils";
+import { OdinUtils } from "odin-connect";
 import { useStakingCanister } from "../hooks/useStakingCanister";
 import { STAKING_CANISTER_ID, TOKEN_ID } from "../canister/actor";
 
@@ -42,7 +42,7 @@ export function SendShipForm() {
     setIsLoading(true);
     setApproveError(null);
     try {
-      const onChainAmount = convertToOdinAmount(stakeAmount, {
+      const onChainAmount = OdinUtils.convertToOdinAmount(stakeAmount, {
         decimals: 3, divisibility: 8,
       });
 
