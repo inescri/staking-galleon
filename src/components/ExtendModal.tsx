@@ -2,6 +2,7 @@ import { useState } from "react";
 import { createPortal } from "react-dom";
 import { useGameDispatch, type Expedition } from "../contexts/GameContext";
 import { useStakingCanister } from "../hooks/useStakingCanister";
+import { useWallet } from "../contexts/WalletContext";
 import { TOKEN_ID } from "../canister/actor";
 import { TIER_CONFIGS } from "../utils/rewards";
 import { useCountdown } from "../hooks/useCountdown";
@@ -14,6 +15,7 @@ interface ExtendModalProps {
 export function ExtendModal({ expedition, onClose }: ExtendModalProps) {
   const dispatch = useGameDispatch();
   const { increaseDuration } = useStakingCanister();
+  const { refreshBalances } = useWallet();
   const config = TIER_CONFIGS[expedition.tier];
 
   const [extensionSec, setExtensionSec] = useState(30);
@@ -40,6 +42,7 @@ export function ExtendModal({ expedition, onClose }: ExtendModalProps) {
           additionalDurationMs: extensionSec * 1000,
         },
       });
+      await refreshBalances();
       onClose();
     } catch (err) {
       const message =
