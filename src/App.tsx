@@ -1,4 +1,4 @@
-import { useGameState } from "./contexts/GameContext";
+import { useGameState } from "./contexts/useGame";
 import { ConnectOdin } from "./components/ConnectOdin";
 import { Treasury } from "./components/Treasury";
 import { Harbor } from "./components/Harbor";

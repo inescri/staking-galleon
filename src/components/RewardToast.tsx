@@ -1,5 +1,6 @@
 import { useEffect } from "react";
-import { useGameDispatch, type CompletedExpedition } from "../contexts/GameContext";
+import { useGameDispatch } from "../contexts/useGame";
+import type { CompletedExpedition } from "../contexts/GameContext";
 import { TIER_CONFIGS, formatDoubloons } from "../utils/rewards";
 
 export function RewardToast({

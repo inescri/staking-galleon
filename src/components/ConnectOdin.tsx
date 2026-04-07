@@ -1,4 +1,4 @@
-import { useWallet, truncatePrincipal } from "../contexts/WalletContext";
+import { useWallet, truncatePrincipal } from "../contexts/useWallet";
 
 export function ConnectOdin() {
   const {

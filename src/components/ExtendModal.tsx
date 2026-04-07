@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
-import { useGameDispatch, type Expedition } from "../contexts/GameContext";
+import { useGameDispatch } from "../contexts/useGame";
+import type { Expedition } from "../contexts/GameContext";
 import { useStakingCanister } from "../hooks/useStakingCanister";
-import { useWallet } from "../contexts/WalletContext";
+import { useWallet } from "../contexts/useWallet";
 import { TOKEN_ID } from "../canister/actor";
 import { TIER_CONFIGS } from "../utils/rewards";
 import { useCountdown } from "../hooks/useCountdown";

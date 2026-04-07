@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
-import { useWallet } from "../contexts/WalletContext";
+import { useWallet } from "../contexts/useWallet";
 import { createStakingActor } from "../canister/actor";
 import type {
   Result,

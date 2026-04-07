@@ -1,6 +1,7 @@
 import { useState } from "react";
-import { useGameDispatch, type Expedition } from "../contexts/GameContext";
-import { useWallet, truncatePrincipal } from "../contexts/WalletContext";
+import { useGameDispatch } from "../contexts/useGame";
+import type { Expedition } from "../contexts/GameContext";
+import { useWallet, truncatePrincipal } from "../contexts/useWallet";
 import { useCountdown } from "../hooks/useCountdown";
 import { useStakingCanister } from "../hooks/useStakingCanister";
 import { TOKEN_ID } from "../canister/actor";

@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useGameState } from "../contexts/GameContext";
-import { useWallet, truncatePrincipal } from "../contexts/WalletContext";
+import { useGameState } from "../contexts/useGame";
+import { useWallet, truncatePrincipal } from "../contexts/useWallet";
 import { TOKEN_URL } from "../canister/actor";
 import { formatDoubloons, TIER_CONFIGS } from "../utils/rewards";
 

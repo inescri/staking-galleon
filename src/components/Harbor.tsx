@@ -1,4 +1,4 @@
-import { useGameState } from "../contexts/GameContext";
+import { useGameState } from "../contexts/useGame";
 import { useCountdown } from "../hooks/useCountdown";
 import { ShipSprite } from "./ShipSprite";
 import type { Expedition } from "../contexts/GameContext";

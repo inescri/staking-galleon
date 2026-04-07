@@ -1,4 +1,4 @@
-import { useGameState } from "../contexts/GameContext";
+import { useGameState } from "../contexts/useGame";
 import { ExpeditionCard } from "./ExpeditionCard";
 
 export function FleetStatus() {

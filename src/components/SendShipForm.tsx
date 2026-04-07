@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useGameState, useGameDispatch } from "../contexts/GameContext";
-import { useWallet } from "../contexts/WalletContext";
+import { useGameState, useGameDispatch } from "../contexts/useGame";
+import { useWallet } from "../contexts/useWallet";
 import { TIER_CONFIGS, formatDoubloons, type Tier } from "../utils/rewards";
 import { OdinUtils } from "odin-connect";
 import { useStakingCanister } from "../hooks/useStakingCanister";

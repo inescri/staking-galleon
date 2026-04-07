@@ -1,7 +1,5 @@
 import {
-  createContext,
   useCallback,
-  useContext,
   useEffect,
   useState,
   type ReactNode,
@@ -11,29 +9,11 @@ import {
   type OdinConnectedUser,
 } from "odin-connect";
 import type { Identity } from "@dfinity/agent";
-import { useGameDispatch } from "./GameContext";
+import { useGameDispatch } from "./useGame";
+import { WalletContext, type WalletContextValue } from "./useWallet";
 import { createStakingActor, STAKING_CANISTER_ID, TOKEN_ID } from "../canister/actor";
 
-interface WalletContextValue {
-  connectedUser: OdinConnectedUser | null;
-  identity: Identity | null;
-  principal: string;
-  isConnecting: boolean;
-  isRestoring: boolean;
-  connectionError: string | null;
-  connectWallet: () => Promise<void>;
-  disconnectWallet: () => void;
-  refreshBalances: () => Promise<void>;
-}
-
-const WalletContext = createContext<WalletContextValue | null>(null);
-
 const odinConnect = new OdinConnect({ name: "Galleon Stakes", env: "_preview" });
-
-export function truncatePrincipal(principal: string): string {
-  if (!principal || principal.length <= 12) return principal;
-  return principal.slice(0, 5) + "..." + principal.slice(-3);
-}
 
 function computeTokenBalance(token: { balance: bigint; decimals?: number; divisibility?: number }): number {
   if (!token) return 0;
@@ -141,11 +121,4 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   return (
     <WalletContext.Provider value={value}>{children}</WalletContext.Provider>
   );
-}
-
-export function useWallet(): WalletContextValue {
-  const ctx = useContext(WalletContext);
-  if (ctx === null)
-    throw new Error("useWallet must be used within WalletProvider");
-  return ctx;
 }
