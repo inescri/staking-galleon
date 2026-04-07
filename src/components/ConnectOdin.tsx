@@ -5,10 +5,23 @@ export function ConnectOdin() {
     connectedUser,
     principal,
     isConnecting,
+    isRestoring,
     connectionError,
     connectWallet,
     disconnectWallet,
   } = useWallet();
+
+  if (isRestoring) {
+    return (
+      <div className="wallet-row">
+        <div className="wallet-connect-row">
+          <button className="pixel-btn wallet-connect-btn" disabled>
+            Loading...
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="wallet-row">
