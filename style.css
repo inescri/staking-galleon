@@ -330,6 +330,7 @@ body {
 
 .wallet-row {
   margin-bottom: 12px;
+  min-height: 48px;
 }
 
 .wallet-connected-row {
@@ -338,7 +339,8 @@ body {
   align-items: center;
   padding: 8px 10px;
   background: none;
-  border: none;
+  border: 3px solid var(--pixel-border);
+  border-radius: 4px;
 }
 
 .wallet-info {

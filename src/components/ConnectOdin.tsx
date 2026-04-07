@@ -31,6 +31,7 @@ export function ConnectOdin() {
             <span className="wallet-status-dot" />
             <span className="wallet-principal">{truncatePrincipal(principal)}</span>
           </div>
+          
           <button
             className="pixel-btn-sm wallet-disconnect-btn"
             onClick={disconnectWallet}
