@@ -74,6 +74,10 @@ export type GameAction =
       type: "EXTEND_EXPEDITION";
       payload: { id: string; additionalDurationMs: number };
     }
+  | {
+      type: "INCREASE_AMOUNT";
+      payload: { id: string; additionalAmount: number };
+    }
   | { type: "SET_BALANCE"; payload: number }
   | { type: "LOAD_STATE"; payload: GameState }
   | { type: "SYNC_POSITIONS"; payload: StakingPosition[] };

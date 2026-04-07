@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { createPortal } from "react-dom";
-import { useGameDispatch } from "../contexts/useGame";
+import { useGameState, useGameDispatch } from "../contexts/useGame";
 import type { Expedition } from "../contexts/GameContext";
 import { useStakingCanister } from "../hooks/useStakingCanister";
 import { useWallet } from "../contexts/useWallet";
-import { TOKEN_ID } from "../canister/actor";
-import { TIER_CONFIGS } from "../utils/rewards";
+import { OdinUtils } from "odin-connect";
+import { TOKEN_ID, STAKING_CANISTER_ID } from "../canister/actor";
+import { TIER_CONFIGS, formatDoubloons } from "../utils/rewards";
 import { useCountdown } from "../hooks/useCountdown";
 
 interface ExtendModalProps {
@@ -14,12 +15,15 @@ interface ExtendModalProps {
 }
 
 export function ExtendModal({ expedition, onClose }: ExtendModalProps) {
+  const { balance } = useGameState();
   const dispatch = useGameDispatch();
-  const { increaseDuration } = useStakingCanister();
-  const { refreshBalances } = useWallet();
+  const { increaseDuration, increasePosition, deposit } =
+    useStakingCanister();
+  const { connectedUser, refreshBalances } = useWallet();
   const config = TIER_CONFIGS[expedition.tier];
 
   const [extensionSec, setExtensionSec] = useState(30);
+  const [additionalAmount, setAdditionalAmount] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,7 +35,11 @@ export function ExtendModal({ expedition, onClose }: ExtendModalProps) {
   const extMin = Math.floor(extensionSec / 60);
   const extSec = extensionSec % 60;
 
+  const canConfirm =
+    !isSubmitting && additionalAmount >= 0 && additionalAmount <= balance;
+
   const handleConfirm = async () => {
+    if (!canConfirm) return;
     setIsSubmitting(true);
     setError(null);
     try {
@@ -43,6 +51,37 @@ export function ExtendModal({ expedition, onClose }: ExtendModalProps) {
           additionalDurationMs: extensionSec * 1000,
         },
       });
+      
+      if (additionalAmount > 0) {
+        if (!connectedUser) throw new Error("Wallet not connected");
+
+        const onChainAmount = OdinUtils.convertToOdinAmount(additionalAmount, {
+          decimals: 3,
+          divisibility: 8,
+        });
+
+        const approved = await connectedUser.icrcApprove({
+          token: TOKEN_ID,
+          spender: STAKING_CANISTER_ID,
+          amount: onChainAmount,
+        });
+
+        if (!approved) {
+          setError("Approval was rejected.");
+          return;
+        }
+
+        await deposit(TOKEN_ID, BigInt(onChainAmount));
+        await increasePosition(TOKEN_ID, BigInt(onChainAmount));
+        dispatch({
+          type: "INCREASE_AMOUNT",
+          payload: {
+            id: expedition.id,
+            additionalAmount,
+          },
+        });
+      }
+
       await refreshBalances();
       onClose();
     } catch (err) {
@@ -96,6 +135,30 @@ export function ExtendModal({ expedition, onClose }: ExtendModalProps) {
           </div>
         </div>
 
+        <div className="form-group">
+          <label className="form-label">
+            Add to stake:{" "}
+            <span className="duration-display">
+              {formatDoubloons(additionalAmount)} dbl
+            </span>
+          </label>
+          <div className="stake-input-row">
+            <input
+              type="number"
+              className="pixel-input"
+              value={additionalAmount || ""}
+              placeholder="0"
+              min={0}
+              max={balance}
+              onChange={(e) => setAdditionalAmount(Number(e.target.value))}
+            />
+            <span className="input-suffix">dbl</span>
+          </div>
+          <div className="slider-labels">
+            <span>Balance: {formatDoubloons(balance)} dbl</span>
+          </div>
+        </div>
+
         {error && <span className="wallet-error">{error}</span>}
 
         <div className="modal-actions">
@@ -104,7 +167,7 @@ export function ExtendModal({ expedition, onClose }: ExtendModalProps) {
           </button>
           <button
             className="pixel-btn-sm modal-confirm-btn"
-            disabled={isSubmitting}
+            disabled={!canConfirm}
             onClick={handleConfirm}
           >
             {isSubmitting ? "Extending..." : "Confirm"}

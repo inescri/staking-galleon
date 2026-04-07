@@ -113,6 +113,20 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       };
     }
 
+    case "INCREASE_AMOUNT": {
+      const { id, additionalAmount } = action.payload;
+      if (additionalAmount > state.balance) return state;
+      return {
+        ...state,
+        balance: state.balance - additionalAmount,
+        activeExpeditions: state.activeExpeditions.map((e) =>
+          e.id === id
+            ? { ...e, stakeAmount: e.stakeAmount + additionalAmount }
+            : e,
+        ),
+      };
+    }
+
     case "SET_BALANCE": {
       return {
         ...state,
