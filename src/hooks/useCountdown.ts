@@ -11,7 +11,7 @@ interface CountdownResult {
 export function useCountdown(
   startedAt: number,
   durationMs: number,
-  onComplete?: () => void
+  onComplete?: () => void,
 ): CountdownResult {
   const calcRemaining = useCallback(() => {
     return Math.max(0, startedAt + durationMs - Date.now());

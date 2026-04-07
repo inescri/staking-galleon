@@ -60,12 +60,20 @@ export interface GameState {
 export type GameAction =
   | {
       type: "LAUNCH_EXPEDITION";
-      payload: { id: string; stakeAmount: number; durationMs: number; tier: Tier };
+      payload: {
+        id: string;
+        stakeAmount: number;
+        durationMs: number;
+        tier: Tier;
+      };
     }
   | { type: "RETURN_EXPEDITION"; payload: { id: string } }
   | { type: "DISMISS_RETURN"; payload: { id: string } }
   | { type: "DISMISS_DISPATCH"; payload: { id: string } }
-  | { type: "EXTEND_EXPEDITION"; payload: { id: string; additionalDurationMs: number } }
+  | {
+      type: "EXTEND_EXPEDITION";
+      payload: { id: string; additionalDurationMs: number };
+    }
   | { type: "SET_BALANCE"; payload: number }
   | { type: "LOAD_STATE"; payload: GameState }
   | { type: "SYNC_POSITIONS"; payload: StakingPosition[] };

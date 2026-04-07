@@ -29,7 +29,7 @@ export function Treasury() {
             className="refresh-balance-btn"
             onClick={handleRefresh}
             disabled={refreshing}
-            >
+          >
             <svg
               className={`refresh-icon${refreshing ? " spinning" : ""}`}
               width="16"
@@ -54,7 +54,7 @@ export function Treasury() {
           rel="noopener noreferrer"
           className="buy-doubloons-link"
         >
-          Buy 
+          Buy
         </a>
       </div>
 
@@ -66,7 +66,10 @@ export function Treasury() {
               const config = TIER_CONFIGS[exp.tier];
               const principal = exp.id.split(":").slice(1).join(":");
               return (
-                <div key={exp.id+exp.completedAt.toString()} className="log-entry">
+                <div
+                  key={exp.id + exp.completedAt.toString()}
+                  className="log-entry"
+                >
                   <span className="log-tier">{config.emoji}</span>
                   <span className="log-stake">
                     {formatDoubloons(exp.stakeAmount)} dbl
@@ -79,7 +82,9 @@ export function Treasury() {
                       minute: "2-digit",
                     })}
                   </span>
-                  <span className="log-principal">{truncatePrincipal(principal)}</span>
+                  <span className="log-principal">
+                    {truncatePrincipal(principal)}
+                  </span>
                 </div>
               );
             })}

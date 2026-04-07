@@ -23,7 +23,9 @@ export function App() {
 
       <header className="app-header">
         <h1 className="game-title">Galleon Stakes</h1>
-        <p className="game-subtitle">Send ships. Stake doubloons. Reap the bounty.</p>
+        <p className="game-subtitle">
+          Send ships. Stake doubloons. Reap the bounty.
+        </p>
       </header>
 
       <main className="app-main">

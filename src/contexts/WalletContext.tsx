@@ -1,21 +1,24 @@
-import {
-  useCallback,
-  useEffect,
-  useState,
-  type ReactNode,
-} from "react";
-import {
-  OdinConnect,
-  type OdinConnectedUser,
-} from "odin-connect";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { OdinConnect, type OdinConnectedUser } from "odin-connect";
 import type { Identity } from "@dfinity/agent";
 import { useGameDispatch } from "./useGame";
 import { WalletContext, type WalletContextValue } from "./useWallet";
-import { createStakingActor, STAKING_CANISTER_ID, TOKEN_ID } from "../canister/actor";
+import {
+  createStakingActor,
+  STAKING_CANISTER_ID,
+  TOKEN_ID,
+} from "../canister/actor";
 
-const odinConnect = new OdinConnect({ name: "Galleon Stakes", env: "_preview" });
+const odinConnect = new OdinConnect({
+  name: "Galleon Stakes",
+  env: "_preview",
+});
 
-function computeTokenBalance(token: { balance: bigint; decimals?: number; divisibility?: number }): number {
+function computeTokenBalance(token: {
+  balance: bigint;
+  decimals?: number;
+  divisibility?: number;
+}): number {
   if (!token) return 0;
   const decimals = token.decimals ?? 0;
   const divisibility = token.divisibility ?? 8;
@@ -24,41 +27,48 @@ function computeTokenBalance(token: { balance: bigint; decimals?: number; divisi
 }
 
 export function WalletProvider({ children }: { children: ReactNode }) {
-  const [connectedUser, setConnectedUser] =
-    useState<OdinConnectedUser | null>(null);
+  const [connectedUser, setConnectedUser] = useState<OdinConnectedUser | null>(
+    null,
+  );
   const [identity, setIdentity] = useState<Identity | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
   const [isRestoring, setIsRestoring] = useState(true);
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const dispatch = useGameDispatch();
 
-  const fetchBalancesAndPositions = useCallback(async (user: OdinConnectedUser) => {
-    try {
-      const tokenBalance = await user.getBalance(TOKEN_ID);
-      if (tokenBalance) {
-        dispatch({ type: "SET_BALANCE", payload: computeTokenBalance(tokenBalance) });
-      } else {
+  const fetchBalancesAndPositions = useCallback(
+    async (user: OdinConnectedUser) => {
+      try {
+        const tokenBalance = await user.getBalance(TOKEN_ID);
+        if (tokenBalance) {
+          dispatch({
+            type: "SET_BALANCE",
+            payload: computeTokenBalance(tokenBalance),
+          });
+        } else {
+          dispatch({ type: "SET_BALANCE", payload: 0 });
+        }
+      } catch (err) {
+        console.error("Failed to fetch token balances:", err);
         dispatch({ type: "SET_BALANCE", payload: 0 });
       }
-    } catch (err) {
-      console.error("Failed to fetch token balances:", err);
-      dispatch({ type: "SET_BALANCE", payload: 0 });
-    }
 
-    try {
-      const delegationIdentity = user.getIdentity() ?? undefined;
-      const actor = createStakingActor(delegationIdentity);
-      const position = await actor.stake_get_position(TOKEN_ID);
-      console.log("Fetched staking position:", position);
-      if (position.length > 0 && position[0]) {
-        dispatch({ type: "SYNC_POSITIONS", payload: [position[0]] });
-      } else {
-        dispatch({ type: "SYNC_POSITIONS", payload: [] });
+      try {
+        const delegationIdentity = user.getIdentity() ?? undefined;
+        const actor = createStakingActor(delegationIdentity);
+        const position = await actor.stake_get_position(TOKEN_ID);
+        console.log("Fetched staking position:", position);
+        if (position.length > 0 && position[0]) {
+          dispatch({ type: "SYNC_POSITIONS", payload: [position[0]] });
+        } else {
+          dispatch({ type: "SYNC_POSITIONS", payload: [] });
+        }
+      } catch (err) {
+        console.error("Failed to fetch staking position:", err);
       }
-    } catch (err) {
-      console.error("Failed to fetch staking position:", err);
-    }
-  }, [dispatch]);
+    },
+    [dispatch],
+  );
 
   useEffect(() => {
     const user = odinConnect.restoreSession();
@@ -91,7 +101,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsConnecting(false);
     }
-  }, [fetchBalancesAndPositions])
+  }, [fetchBalancesAndPositions]);
 
   const refreshBalances = useCallback(async () => {
     if (connectedUser) {

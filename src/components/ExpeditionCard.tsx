@@ -21,7 +21,7 @@ export function ExpeditionCard({ expedition }: { expedition: Expedition }) {
 
   const { minutes, seconds, progress, isComplete } = useCountdown(
     expedition.startedAt,
-    expedition.durationMs
+    expedition.durationMs,
   );
 
   const handleWithdraw = async () => {
@@ -33,10 +33,8 @@ export function ExpeditionCard({ expedition }: { expedition: Expedition }) {
         type: "RETURN_EXPEDITION",
         payload: { id: expedition.id },
       });
-     
     } catch (err) {
-      const message =
-        err instanceof Error ? err.message : "Withdrawal failed";
+      const message = err instanceof Error ? err.message : "Withdrawal failed";
       console.error("Withdraw failed:", err);
       setWithdrawError(message);
     } finally {
@@ -102,9 +100,7 @@ export function ExpeditionCard({ expedition }: { expedition: Expedition }) {
           </>
         )}
       </div>
-      {withdrawError && (
-        <span className="wallet-error">{withdrawError}</span>
-      )}
+      {withdrawError && <span className="wallet-error">{withdrawError}</span>}
       {showExtendModal && (
         <ExtendModal
           expedition={expedition}

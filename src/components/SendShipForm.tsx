@@ -43,7 +43,8 @@ export function SendShipForm() {
     setApproveError(null);
     try {
       const onChainAmount = OdinUtils.convertToOdinAmount(stakeAmount, {
-        decimals: 3, divisibility: 8,
+        decimals: 3,
+        divisibility: 8,
       });
 
       const approved = await connectedUser.icrcApprove({
@@ -71,7 +72,10 @@ export function SendShipForm() {
       });
       setStakeAmount(Math.min(100, Math.floor(balance - stakeAmount)));
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Staking failed. Please try again.";
+      const message =
+        err instanceof Error
+          ? err.message
+          : "Staking failed. Please try again.";
       console.error("Staking failed:", err);
       setApproveError(message);
     } finally {
@@ -154,23 +158,21 @@ export function SendShipForm() {
           onChange={(e) => setDuration(Number(e.target.value))}
         />
         <div className="slider-labels">
-          <span>{Math.floor(config.minDuration / 60)}m {config.minDuration % 60}s</span>
-          <span>{Math.floor(config.maxDuration / 60)}m {config.maxDuration % 60}s</span>
+          <span>
+            {Math.floor(config.minDuration / 60)}m {config.minDuration % 60}s
+          </span>
+          <span>
+            {Math.floor(config.maxDuration / 60)}m {config.maxDuration % 60}s
+          </span>
         </div>
       </div>
 
       <div className="launch-info">
-        <span>
-          Fleet: {activeExpeditions.length}/5
-        </span>
-        <span>
-          Balance: {formatDoubloons(balance)} dbl
-        </span>
+        <span>Fleet: {activeExpeditions.length}/5</span>
+        <span>Balance: {formatDoubloons(balance)} dbl</span>
       </div>
 
-      {approveError && (
-        <span className="wallet-error">{approveError}</span>
-      )}
+      {approveError && <span className="wallet-error">{approveError}</span>}
 
       <button
         className="pixel-btn launch-btn"
@@ -180,10 +182,10 @@ export function SendShipForm() {
         {isLoading
           ? "Dispatching..."
           : activeExpeditions.length >= 5
-          ? "Fleet Full"
-          : stakeAmount > balance
-          ? "Insufficient Doubloons"
-          : "\u2693 Launch Expedition"}
+            ? "Fleet Full"
+            : stakeAmount > balance
+              ? "Insufficient Doubloons"
+              : "\u2693 Launch Expedition"}
       </button>
     </div>
   );

@@ -25,7 +25,7 @@ export function ExtendModal({ expedition, onClose }: ExtendModalProps) {
 
   const { minutes, seconds, isComplete } = useCountdown(
     expedition.startedAt,
-    expedition.durationMs
+    expedition.durationMs,
   );
 
   const extMin = Math.floor(extensionSec / 60);
@@ -112,6 +112,6 @@ export function ExtendModal({ expedition, onClose }: ExtendModalProps) {
         </div>
       </div>
     </div>,
-    document.body
+    document.body,
   );
 }

@@ -10,7 +10,9 @@ const INITIAL_STATE: GameState = {
 };
 
 export const GameStateContext = createContext<GameState>(INITIAL_STATE);
-export const GameDispatchContext = createContext<Dispatch<GameAction>>(() => {});
+export const GameDispatchContext = createContext<Dispatch<GameAction>>(
+  () => {},
+);
 
 export function useGameState() {
   return useContext(GameStateContext);

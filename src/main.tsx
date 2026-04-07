@@ -11,5 +11,5 @@ createRoot(document.getElementById("root")!).render(
         <App />
       </WalletProvider>
     </GameProvider>
-  </StrictMode>
+  </StrictMode>,
 );

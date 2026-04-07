@@ -59,13 +59,9 @@ export const idlFactory = ({ IDL }: any) => {
     stake_deposit_and_lock: IDL.Func(
       [IDL.Text, IDL.Nat, IDL.Nat],
       [Result],
-      []
+      [],
     ),
-    stake_lock_tokens: IDL.Func(
-      [IDL.Text, IDL.Nat, IDL.Nat],
-      [Result],
-      []
-    ),
+    stake_lock_tokens: IDL.Func([IDL.Text, IDL.Nat, IDL.Nat], [Result], []),
     stake_unlock: IDL.Func([IDL.Text], [Result], []),
     stake_unlock_and_withdraw: IDL.Func([IDL.Text], [Result], []),
     stake_withdraw: IDL.Func([IDL.Text, IDL.Nat], [Result], []),
@@ -77,38 +73,30 @@ export const idlFactory = ({ IDL }: any) => {
     stake_get_position: IDL.Func(
       [IDL.Text],
       [IDL.Opt(StakingPosition)],
-      ["query"]
+      ["query"],
     ),
     stake_get_user_rewards: IDL.Func(
       [IDL.Opt(IDL.Text)],
       [IDL.Vec(UserReward)],
-      ["query"]
+      ["query"],
     ),
     stake_get_reward_pools_for_token: IDL.Func(
       [IDL.Text],
       [IDL.Vec(RewardPool)],
-      ["query"]
+      ["query"],
     ),
     stake_get_lock_constraints: IDL.Func([], [LockConstraints], ["query"]),
-    stake_get_next_distribution: IDL.Func(
-      [],
-      [NextDistribution],
-      ["query"]
-    ),
+    stake_get_next_distribution: IDL.Func([], [NextDistribution], ["query"]),
     stake_get_estimated_daily_rewards: IDL.Func(
       [IDL.Text],
       [IDL.Nat],
-      ["query"]
+      ["query"],
     ),
-    stake_get_available_balance: IDL.Func(
-      [IDL.Text],
-      [IDL.Nat],
-      ["query"]
-    ),
+    stake_get_available_balance: IDL.Func([IDL.Text], [IDL.Nat], ["query"]),
     stake_get_stakers_for_token: IDL.Func(
       [IDL.Text],
       [IDL.Vec(IDL.Text)],
-      ["query"]
+      ["query"],
     ),
     stake_get_version: IDL.Func([], [IDL.Text], ["query"]),
   });
@@ -173,22 +161,19 @@ export interface StakingService {
   stake_deposit_and_lock(
     tokenId: string,
     amount: bigint,
-    durationMs: bigint
+    durationMs: bigint,
   ): Promise<Result>;
   stake_lock_tokens(
     tokenId: string,
     amount: bigint,
-    durationMs: bigint
+    durationMs: bigint,
   ): Promise<Result>;
   stake_unlock(tokenId: string): Promise<Result>;
   stake_unlock_and_withdraw(tokenId: string): Promise<Result>;
   stake_withdraw(tokenId: string, amount: bigint): Promise<Result>;
   stake_claim_rewards(tokenId: string): Promise<Result>;
   stake_increase_position(tokenId: string, amount: bigint): Promise<Result>;
-  stake_increase_duration(
-    tokenId: string,
-    durationMs: bigint
-  ): Promise<Result>;
+  stake_increase_duration(tokenId: string, durationMs: bigint): Promise<Result>;
 
   // Query calls
   stake_get_position(tokenId: string): Promise<[StakingPosition] | []>;

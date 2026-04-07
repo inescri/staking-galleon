@@ -22,7 +22,7 @@ export function useStakingCanister() {
 
   const authenticatedActor = useMemo(
     () => (identity ? createStakingActor(identity) : null),
-    [identity]
+    [identity],
   );
 
   const anonymousActor = useMemo(() => createStakingActor(), []);
@@ -44,7 +44,7 @@ export function useStakingCanister() {
         setIsLoading(false);
       }
     },
-    [authenticatedActor]
+    [authenticatedActor],
   );
 
   // --- Update calls ---
@@ -55,23 +55,20 @@ export function useStakingCanister() {
         const result = await authenticatedActor!.stake_deposit_and_lock(
           tokenId,
           amount,
-          durationMs
+          durationMs,
         );
         return unwrapResult(result);
       }),
-    [callUpdate, authenticatedActor]
+    [callUpdate, authenticatedActor],
   );
 
   const deposit = useCallback(
     (tokenId: string, amount: bigint) =>
       callUpdate(async () => {
-        const result = await authenticatedActor!.stake_deposit(
-          tokenId,
-          amount
-        );
+        const result = await authenticatedActor!.stake_deposit(tokenId, amount);
         return unwrapResult(result);
       }),
-    [callUpdate, authenticatedActor]
+    [callUpdate, authenticatedActor],
   );
 
   const lockTokens = useCallback(
@@ -80,11 +77,11 @@ export function useStakingCanister() {
         const result = await authenticatedActor!.stake_lock_tokens(
           tokenId,
           amount,
-          durationMs
+          durationMs,
         );
         return unwrapResult(result);
       }),
-    [callUpdate, authenticatedActor]
+    [callUpdate, authenticatedActor],
   );
 
   const unlock = useCallback(
@@ -93,7 +90,7 @@ export function useStakingCanister() {
         const result = await authenticatedActor!.stake_unlock(tokenId);
         return unwrapResult(result);
       }),
-    [callUpdate, authenticatedActor]
+    [callUpdate, authenticatedActor],
   );
 
   const unlockAndWithdraw = useCallback(
@@ -103,7 +100,7 @@ export function useStakingCanister() {
           await authenticatedActor!.stake_unlock_and_withdraw(tokenId);
         return unwrapResult(result);
       }),
-    [callUpdate, authenticatedActor]
+    [callUpdate, authenticatedActor],
   );
 
   const withdraw = useCallback(
@@ -111,21 +108,20 @@ export function useStakingCanister() {
       callUpdate(async () => {
         const result = await authenticatedActor!.stake_withdraw(
           tokenId,
-          amount
+          amount,
         );
         return unwrapResult(result);
       }),
-    [callUpdate, authenticatedActor]
+    [callUpdate, authenticatedActor],
   );
 
   const claimRewards = useCallback(
     (tokenId: string) =>
       callUpdate(async () => {
-        const result =
-          await authenticatedActor!.stake_claim_rewards(tokenId);
+        const result = await authenticatedActor!.stake_claim_rewards(tokenId);
         return unwrapResult(result);
       }),
-    [callUpdate, authenticatedActor]
+    [callUpdate, authenticatedActor],
   );
 
   const increasePosition = useCallback(
@@ -133,11 +129,11 @@ export function useStakingCanister() {
       callUpdate(async () => {
         const result = await authenticatedActor!.stake_increase_position(
           tokenId,
-          amount
+          amount,
         );
         return unwrapResult(result);
       }),
-    [callUpdate, authenticatedActor]
+    [callUpdate, authenticatedActor],
   );
 
   const increaseDuration = useCallback(
@@ -145,11 +141,11 @@ export function useStakingCanister() {
       callUpdate(async () => {
         const result = await authenticatedActor!.stake_increase_duration(
           tokenId,
-          durationMs
+          durationMs,
         );
         return unwrapResult(result);
       }),
-    [callUpdate, authenticatedActor]
+    [callUpdate, authenticatedActor],
   );
 
   // --- Query calls ---
@@ -157,25 +153,23 @@ export function useStakingCanister() {
   const getPosition = useCallback(
     async (tokenId: string): Promise<StakingPosition | null> => {
       const result = await anonymousActor.stake_get_position(tokenId);
-      return result.length > 0 ? result[0] ?? null : null;
+      return result.length > 0 ? (result[0] ?? null) : null;
     },
-    [anonymousActor]
+    [anonymousActor],
   );
 
   const getUserRewards = useCallback(
     async (tokenId?: string): Promise<UserReward[]> => {
-      return anonymousActor.stake_get_user_rewards(
-        tokenId ? [tokenId] : []
-      );
+      return anonymousActor.stake_get_user_rewards(tokenId ? [tokenId] : []);
     },
-    [anonymousActor]
+    [anonymousActor],
   );
 
   const getRewardPools = useCallback(
     async (tokenId: string): Promise<RewardPool[]> => {
       return anonymousActor.stake_get_reward_pools_for_token(tokenId);
     },
-    [anonymousActor]
+    [anonymousActor],
   );
 
   const getLockConstraints = useCallback(async (): Promise<LockConstraints> => {
@@ -191,21 +185,21 @@ export function useStakingCanister() {
     async (tokenId: string): Promise<bigint> => {
       return anonymousActor.stake_get_estimated_daily_rewards(tokenId);
     },
-    [anonymousActor]
+    [anonymousActor],
   );
 
   const getAvailableBalance = useCallback(
     async (tokenId: string): Promise<bigint> => {
       return anonymousActor.stake_get_available_balance(tokenId);
     },
-    [anonymousActor]
+    [anonymousActor],
   );
 
   const getStakersForToken = useCallback(
     async (tokenId: string): Promise<string[]> => {
       return anonymousActor.stake_get_stakers_for_token(tokenId);
     },
-    [anonymousActor]
+    [anonymousActor],
   );
 
   const getVersion = useCallback(async (): Promise<string> => {

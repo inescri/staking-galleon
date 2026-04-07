@@ -1,8 +1,4 @@
-import {
-  useEffect,
-  useReducer,
-  type ReactNode,
-} from "react";
+import { useEffect, useReducer, type ReactNode } from "react";
 import { GameStateContext, GameDispatchContext } from "./useGame";
 import {
   stakingPositionToExpedition,
@@ -76,7 +72,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         activeExpeditions: state.activeExpeditions.filter((e) => e.id !== id),
         completedExpeditions: [completed, ...state.completedExpeditions].slice(
           0,
-          20
+          20,
         ),
         balance: state.balance + expedition.stakeAmount,
         pendingReturns: [...state.pendingReturns, completed],
@@ -87,7 +83,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       return {
         ...state,
         pendingReturns: state.pendingReturns.filter(
-          (r) => r.id !== action.payload.id
+          (r) => r.id !== action.payload.id,
         ),
       };
     }
@@ -96,7 +92,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       return {
         ...state,
         pendingDispatches: state.pendingDispatches.filter(
-          (d) => d.id !== action.payload.id
+          (d) => d.id !== action.payload.id,
         ),
       };
     }
@@ -112,7 +108,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
                 durationMs: e.durationMs + additionalDurationMs,
                 tier: inferTier(e.durationMs + additionalDurationMs),
               }
-            : e
+            : e,
         ),
       };
     }
@@ -135,7 +131,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 
       const onChainIds = new Set(onChainExpeditions.map((e) => e.id));
       const localOnly = state.activeExpeditions.filter(
-        (e) => !onChainIds.has(e.id)
+        (e) => !onChainIds.has(e.id),
       );
 
       return {
@@ -163,7 +159,9 @@ function loadCompletedExpeditions(): CompletedExpedition[] {
 function saveCompletedExpeditions(entries: CompletedExpedition[]): void {
   try {
     localStorage.setItem(VOYAGE_LOG_KEY, JSON.stringify(entries));
-  } catch (e) { console.warn("localStorage write failed", e); }
+  } catch (e) {
+    console.warn("localStorage write failed", e);
+  }
 }
 
 const ACTIVE_EXPEDITIONS_KEY = "active-expeditions";
@@ -180,7 +178,9 @@ function loadActiveExpeditions(): Expedition[] {
 function saveActiveExpeditions(entries: Expedition[]): void {
   try {
     localStorage.setItem(ACTIVE_EXPEDITIONS_KEY, JSON.stringify(entries));
-  } catch (e) { console.warn("localStorage write failed", e); }
+  } catch (e) {
+    console.warn("localStorage write failed", e);
+  }
 }
 
 export function GameProvider({ children }: { children: ReactNode }) {

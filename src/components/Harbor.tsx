@@ -6,12 +6,10 @@ import type { Expedition } from "../contexts/GameContext";
 function HarborShip({ expedition }: { expedition: Expedition }) {
   const { progress } = useCountdown(
     expedition.startedAt,
-    expedition.durationMs
+    expedition.durationMs,
   );
 
-  return (
-    <ShipSprite tier={expedition.tier} progress={progress} size={36} />
-  );
+  return <ShipSprite tier={expedition.tier} progress={progress} size={36} />;
 }
 
 export function Harbor() {
@@ -29,7 +27,9 @@ export function Harbor() {
           <HarborShip key={exp.id} expedition={exp} />
         ))}
         {activeExpeditions.length === 0 && (
-          <div className="harbor-empty">No ships at sea... Launch an expedition!</div>
+          <div className="harbor-empty">
+            No ships at sea... Launch an expedition!
+          </div>
         )}
         <div className="wave wave-1" />
         <div className="wave wave-2" />
