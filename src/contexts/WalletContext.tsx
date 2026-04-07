@@ -2,6 +2,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useEffect,
   useState,
   type ReactNode,
 } from "react";
@@ -18,6 +19,7 @@ interface WalletContextValue {
   identity: Identity | null;
   principal: string;
   isConnecting: boolean;
+  isRestoring: boolean;
   connectionError: string | null;
   connectWallet: () => Promise<void>;
   disconnectWallet: () => void;
@@ -46,6 +48,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     useState<OdinConnectedUser | null>(null);
   const [identity, setIdentity] = useState<Identity | null>(null);
   const [isConnecting, setIsConnecting] = useState(false);
+  const [isRestoring, setIsRestoring] = useState(true);
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const dispatch = useGameDispatch();
 
@@ -77,6 +80,17 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     }
   }, [dispatch]);
 
+  useEffect(() => {
+    const user = odinConnect.restoreSession();
+    if (user) {
+      setConnectedUser(user);
+      setIdentity(user.getIdentity() ?? null);
+      fetchBalancesAndPositions(user).finally(() => setIsRestoring(false));
+    } else {
+      setIsRestoring(false);
+    }
+  }, [fetchBalancesAndPositions]);
+
   const connectWallet = useCallback(async () => {
     setIsConnecting(true);
     setConnectionError(null);
@@ -97,7 +111,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     } finally {
       setIsConnecting(false);
     }
-  }, [fetchBalancesAndPositions]);
+  }, [fetchBalancesAndPositions])
 
   const refreshBalances = useCallback(async () => {
     if (connectedUser) {
@@ -106,6 +120,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   }, [connectedUser, fetchBalancesAndPositions]);
 
   const disconnectWallet = useCallback(() => {
+    odinConnect.disconnect();
     setConnectedUser(null);
     setIdentity(null);
     dispatch({ type: "SET_BALANCE", payload: 0 });
@@ -116,6 +131,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     identity,
     principal: connectedUser?.principal || "",
     isConnecting,
+    isRestoring,
     connectionError,
     connectWallet,
     disconnectWallet,
