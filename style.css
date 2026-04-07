@@ -913,8 +913,10 @@ body {
 }
 
 .modal-confirm-btn:disabled {
-  background: var(--text-dim) !important;
-  color: var(--sea-dark) !important;
+  background: var(--gold) !important;
+  color: var(--sea-deep) !important;
+  border-color: var(--gold-dark) !important;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
