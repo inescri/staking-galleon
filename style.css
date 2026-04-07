@@ -855,7 +855,7 @@ body {
   color: var(--text-dim);
 }
 
-.expedition-progress {
+.expedition-time {
   font-family: "Press Start 2P", monospace;
   font-size: 0.5rem;
   color: var(--sea-light);
