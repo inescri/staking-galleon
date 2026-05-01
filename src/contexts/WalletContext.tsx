@@ -11,7 +11,7 @@ import {
 
 const odinConnect = new OdinConnect({
   name: "Galleon Stakes",
-  env: "_preview",
+  env: "dev",
 });
 
 function computeTokenBalance(token: {
