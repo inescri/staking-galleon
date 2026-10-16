@@ -120,6 +120,7 @@ export interface GameCanister {
   get_config: ActorMethod<[], GameConfig>;
   get_pool_stats: ActorMethod<[], PoolStats>;
   get_version: ActorMethod<[], string>;
+  fund_pool: ActorMethod<[bigint], Result<bigint>>;
 }
 
 function unitVariant(keys: readonly string[]): IDL.VariantClass {
@@ -187,5 +188,6 @@ export const idlFactory: IDL.InterfaceFactory = ({ IDL }) => {
     get_config: IDL.Func([], [GameConfig], ["query"]),
     get_pool_stats: IDL.Func([], [PoolStats], ["query"]),
     get_version: IDL.Func([], [IDL.Text], ["query"]),
+    fund_pool: IDL.Func([IDL.Nat], [Result(IDL.Nat)], []),
   });
 };

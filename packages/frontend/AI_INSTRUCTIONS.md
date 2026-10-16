@@ -48,9 +48,9 @@ vite.config.ts      # build config (outDir: dist → served by the asset caniste
   handle the outcome in an effect keyed on `request` using
   `approvalFor(request, "stake" | "settle")`, read the choice from
   `returnState`, and `claimRequest(id)` before the canister call so it runs
-  at most once. Two flows exist: `stake` (approve the game token for the
-  fixed stake → `launch`) and `settle` (approve the BTC payout fee →
-  `settle` / `claim`).
+  at most once. Three flows exist: `stake` (approve the game token for the
+  fixed stake → `launch`), `settle` (approve the BTC payout fee →
+  `settle` / `claim`) and `fund` (approve a treasury deposit → `fund_pool`).
 - Never auto-retry `connect()` after `rejected` / `unverified`.
 - See `node_modules/odin-connect/MIGRATION-2.0.md` and the template's README.
 

@@ -88,6 +88,15 @@ export function useGameCanister() {
     [callUpdate, authenticatedActor],
   );
 
+  /** Pull pre-approved tokens into the house pool; returns the new `available`. */
+  const fundPool = useCallback(
+    (amount: bigint): Promise<bigint> =>
+      callUpdate(async () =>
+        unwrapResult(await authenticatedActor!.fund_pool(amount)),
+      ),
+    [callUpdate, authenticatedActor],
+  );
+
   /** The caller's ships — keyed by caller, so it needs the delegation. */
   const getMyShips = useCallback((): Promise<Ship[]> => {
     if (!authenticatedActor) throw new Error("Wallet not connected");
@@ -108,6 +117,7 @@ export function useGameCanister() {
     launch,
     settle,
     claim,
+    fundPool,
     getMyShips,
     getConfig,
     getPoolStats,

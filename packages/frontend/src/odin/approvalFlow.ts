@@ -12,10 +12,13 @@ import { DIFFICULTIES, type Difficulty } from "../canister/idl";
  *            amount, so only the choice rides along.
  *   settle — approve BTC for the payout fee, then `settle(shipId)` (or
  *            `claim(shipId)` for a ship whose payout is pending).
+ *   fund   — approve the game token for a treasury deposit, then
+ *            `fund_pool(amount)` with the amount from `request.input`.
  */
 export type ApprovalReturnState =
   | { flow: "stake"; tier: Difficulty; durationIndex: number }
-  | { flow: "settle"; shipId: string };
+  | { flow: "settle"; shipId: string }
+  | { flow: "fund" };
 
 export type ApprovalFlow = ApprovalReturnState["flow"];
 
@@ -52,6 +55,9 @@ export function parseApprovalReturnState(
     /^[0-9]+$/.test(value.shipId)
   ) {
     return { flow: "settle", shipId: value.shipId };
+  }
+  if (value.flow === "fund") {
+    return { flow: "fund" };
   }
   return null;
 }

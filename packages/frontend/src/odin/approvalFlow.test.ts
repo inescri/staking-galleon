@@ -21,9 +21,12 @@ function approve(id: string, returnState: unknown): OdinRequestState {
 }
 
 describe("parseApprovalReturnState", () => {
-  it("accepts the stake and settle shapes", () => {
+  it("accepts the stake, settle and fund shapes", () => {
     expect(parseApprovalReturnState(stake)).toEqual(stake);
     expect(parseApprovalReturnState(settle)).toEqual(settle);
+    expect(parseApprovalReturnState({ flow: "fund" })).toEqual({
+      flow: "fund",
+    });
   });
 
   it("rejects anything else", () => {

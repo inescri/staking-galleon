@@ -3,6 +3,7 @@ import { useGameState } from "../contexts/useGame";
 import { useWallet } from "../contexts/useWallet";
 import { TOKEN_URL } from "../canister/config";
 import { formatDoubloons, formatUnits, TIER_CONFIGS } from "../utils/rewards";
+import { FundTreasury } from "./FundTreasury";
 
 export function Treasury() {
   const { balance, completedExpeditions } = useGameState();
@@ -57,6 +58,8 @@ export function Treasury() {
           Buy
         </a>
       </div>
+
+      <FundTreasury />
 
       {completedExpeditions.length > 0 && (
         <div className="voyage-log">
