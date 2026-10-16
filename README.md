@@ -64,7 +64,7 @@ dfx.json                  # `canister` (azle) + `frontend` (assets)
 ```bash
 pnpm install                     # also installs the Azle dfx extension
 dfx start --clean --background
-dfx deploy canister --argument '(record { ledger_id = principal "w5cxm-6iaaa-aaaaj-az4jq-cai"; token_id = "2j5i" })'
+dfx deploy canister --argument '(record { ledger_id = principal "w5cxm-6iaaa-aaaaj-az4jq-cai"; token_id = "hjun" })'
 pnpm dev:frontend
 ```
 
@@ -125,7 +125,7 @@ Frontend (`packages/frontend/.env.example`):
   `yspgd-ciaaa-aaaaj-a6rrq-cai`).
 - `VITE_APP_CANISTER_ID` — overrides the id bridged from the root `.env`.
 - `VITE_DFX_NETWORK` — `ic` (default) or `local`.
-- `VITE_TOKEN_ID` — `2j5i`.
+- `VITE_TOKEN_ID` — `hjun`.
 
 Canister: `ledger_id` and `token_id` are init arguments; the admin can change
 them with `set_ledger_id` / `set_token_id` until the first launch or pool
@@ -137,7 +137,7 @@ the hosted origin before a public deploy.
 ## Deploy
 
 1. Edit `TRUSTED_ORIGINS` in `packages/canister/src/index.ts`.
-2. `dfx deploy --network ic canister --argument '(record { ledger_id = principal "<ledger>"; token_id = "2j5i" })'`
+2. `dfx deploy --network ic canister --argument '(record { ledger_id = principal "<ledger>"; token_id = "hjun" })'`
 3. `dfx canister call canister icrc28_trusted_origins '()' --network ic`
 4. Seed the pool: approve the canister for the game token from the admin's
    Odin account, then `dfx canister call canister fund_pool '(<base units>)' --network ic`.

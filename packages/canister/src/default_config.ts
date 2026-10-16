@@ -1,7 +1,7 @@
 import type { GameConfig } from "./game";
 
 /**
- * The game token (Odin `2j5i`) has `decimals = 3` and `divisibility = 8`, so
+ * The game token (Odin `hjun`) has `decimals = 3` and `divisibility = 8`, so
  * one whole token is 10^11 base units. The canister only ever stores and
  * returns base units; the frontend formats them with the token's real units.
  */

@@ -32,7 +32,7 @@ export const DFX_NETWORK = envOr(
 export const IS_LOCAL = DFX_NETWORK === "local";
 
 /** Odin token id staked by the game. */
-export const TOKEN_ID = envOr(import.meta.env.VITE_TOKEN_ID, "2j5i");
+export const TOKEN_ID = envOr(import.meta.env.VITE_TOKEN_ID, "hjun");
 
 /** The token's page on the Odin site of the configured `VITE_ODIN_ENV`. */
 export const TOKEN_URL = `${odin.origin}/token/${TOKEN_ID}`;

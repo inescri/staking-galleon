@@ -28,7 +28,7 @@ export const TIER_CONFIGS: Record<Tier, TierConfig> = {
 };
 
 /**
- * Units of the game token (`2j5i`) used only until the real ones have been
+ * Units of the game token (`hjun`) used only until the real ones have been
  * fetched with the balance.
  */
 export const FALLBACK_TOKEN_UNITS: TokenUnits = {

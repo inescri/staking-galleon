@@ -76,7 +76,7 @@ pnpm build:canister          # dfx build canister --check (needs rustup wasm32 t
 pnpm dev:frontend            # Vite dev server
 
 dfx start --clean --background
-dfx deploy canister --argument '(record { ledger_id = principal "w5cxm-6iaaa-aaaaj-az4jq-cai"; token_id = "2j5i" })'
+dfx deploy canister --argument '(record { ledger_id = principal "w5cxm-6iaaa-aaaaj-az4jq-cai"; token_id = "hjun" })'
 ```
 
 CI (`.github/workflows/ci.yml`) runs lint, typecheck, test, the frontend
