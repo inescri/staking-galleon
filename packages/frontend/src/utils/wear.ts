@@ -5,13 +5,6 @@
  */
 export type WearLevel = "fresh" | "weathered" | "battered" | "derelict";
 
-export const WEAR_LEVELS: readonly WearLevel[] = [
-  "fresh",
-  "weathered",
-  "battered",
-  "derelict",
-];
-
 const HOUR_MS = 60 * 60 * 1000;
 const DAY_MS = 24 * HOUR_MS;
 

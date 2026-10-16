@@ -1,3 +1,4 @@
+import type { CSSProperties } from "react";
 import { ShipImage } from "./ShipImage";
 import { seaDepth } from "../utils/wear";
 
@@ -24,21 +25,23 @@ export function ShipSprite({
   size = 32,
 }: ShipSpriteProps) {
   const depth = seaDepth(elapsedMs);
-  const scaledSize = Math.round(size * (1 - (1 - FAR_SCALE) * depth));
 
   return (
     <div
       className="ship-sprite ship-sailing"
-      style={{
-        left: `${5 + progress * 85}%`,
-        top: `${NEAR_TOP - (NEAR_TOP - FAR_TOP) * depth}%`,
-        opacity: 1 - (1 - FAR_OPACITY) * depth,
-        // Nearer ships draw over farther ones.
-        zIndex: 2 + Math.round((1 - depth) * 10),
-        animationDelay: `${progress * 500}ms`,
-      }}
+      style={
+        {
+          left: `${5 + progress * 85}%`,
+          top: `${NEAR_TOP - (NEAR_TOP - FAR_TOP) * depth}%`,
+          opacity: 1 - (1 - FAR_OPACITY) * depth,
+          "--ship-scale": 1 - (1 - FAR_SCALE) * depth,
+          // Nearer ships draw over farther ones.
+          zIndex: 2 + Math.round((1 - depth) * 10),
+          animationDelay: `${progress * 500}ms`,
+        } as CSSProperties
+      }
     >
-      <ShipImage elapsedMs={elapsedMs} size={scaledSize} />
+      <ShipImage elapsedMs={elapsedMs} size={size} />
     </div>
   );
 }

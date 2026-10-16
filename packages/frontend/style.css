@@ -640,17 +640,15 @@ body {
 /* Ships */
 
 .ship-sprite {
-  /* `top`, `opacity` and `z-index` come from ShipSprite: ships drift toward
-     the horizon the longer they are at sea. */
+  /* `top`, `opacity`, `z-index` and `--ship-scale` come from ShipSprite:
+     ships drift toward the horizon the longer they are at sea. */
   position: absolute;
-  top: 34%;
   transform: translateY(-50%);
   transition:
     left 1s linear,
     top 1s linear,
     opacity 1s linear;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
-  z-index: 2;
 }
 
 .ship-sailing {
@@ -661,7 +659,12 @@ body {
 
 .ship-image {
   display: block;
-  transition: filter 1s linear;
+  image-rendering: pixelated;
+  /* Scaled rather than resized so the shrink eases like `top`/`opacity`. */
+  transform: scale(var(--ship-scale, 1));
+  transition:
+    filter 1s linear,
+    transform 1s linear;
 }
 
 .ship-wear-weathered {
@@ -821,11 +824,6 @@ body {
   border: 2px solid var(--pixel-border);
   vertical-align: middle;
   flex-shrink: 0;
-}
-
-.tier-icon-card {
-  width: 22px;
-  height: 22px;
 }
 
 .tier-icon-log {

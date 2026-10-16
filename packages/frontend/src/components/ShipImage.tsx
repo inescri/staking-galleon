@@ -23,7 +23,6 @@ export function ShipImage({
       width={size}
       height={size}
       draggable={false}
-      style={{ imageRendering: "pixelated" }}
     />
   );
 }
