@@ -1,8 +1,18 @@
 {
   "canisters": {
+    "canister": {
+      "type": "azle",
+      "main": "packages/canister/src/index.ts"
+    },
     "frontend": {
       "type": "assets",
-      "source": ["packages/frontend/dist"]
+      "source": ["packages/frontend/dist"],
+      "dependencies": ["canister"]
+    }
+  },
+  "defaults": {
+    "build": {
+      "packtool": ""
     }
   },
   "output_env_file": ".env",

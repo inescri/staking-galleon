@@ -2,14 +2,14 @@ import { useGameState } from "../contexts/useGame";
 import { ExpeditionCard } from "./ExpeditionCard";
 
 export function FleetStatus() {
-  const { activeExpeditions } = useGameState();
+  const { activeExpeditions, rules } = useGameState();
 
   if (activeExpeditions.length === 0) return null;
 
   return (
     <div className="fleet-status">
       <h2 className="section-title">
-        Active Fleet ({activeExpeditions.length}/5)
+        Active Fleet ({activeExpeditions.length}/{rules?.maxShips ?? "…"})
       </h2>
       <div className="fleet-list">
         {activeExpeditions.map((exp) => (

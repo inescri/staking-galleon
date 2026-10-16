@@ -20,7 +20,7 @@ export function useCountdown(
   const [remainingMs, setRemainingMs] = useState(calcRemaining);
   const completedRef = useRef(false);
 
-  // Re-sync when the countdown target changes (e.g. a voyage extension):
+  // Re-sync when the countdown target changes (a re-synced ship):
   // adjust state during render instead of in the effect below.
   const [prevCalc, setPrevCalc] = useState(() => calcRemaining);
   if (prevCalc !== calcRemaining) {

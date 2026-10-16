@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { useGameState } from "../contexts/useGame";
-import { useWallet, truncatePrincipal } from "../contexts/useWallet";
+import { useWallet } from "../contexts/useWallet";
 import { TOKEN_URL } from "../canister/config";
-import { formatDoubloons, TIER_CONFIGS } from "../utils/rewards";
+import { formatDoubloons, formatUnits, TIER_CONFIGS } from "../utils/rewards";
 
 export function Treasury() {
   const { balance, completedExpeditions } = useGameState();
-  const { refreshBalances } = useWallet();
+  const { refreshBalances, token } = useWallet();
   const [refreshing, setRefreshing] = useState(false);
 
   const handleRefresh = async () => {
@@ -64,15 +64,19 @@ export function Treasury() {
           <div className="log-entries">
             {completedExpeditions.slice(0, 8).map((exp) => {
               const config = TIER_CONFIGS[exp.tier];
-              const principal = exp.id.split(":").slice(1).join(":");
               return (
                 <div
-                  key={exp.id + exp.completedAt.toString()}
-                  className="log-entry"
+                  key={exp.id}
+                  className={`log-entry ${exp.succeeded ? "log-win" : "log-loss"}`}
                 >
                   <span className="log-tier">{config.emoji}</span>
                   <span className="log-stake">
-                    {formatDoubloons(exp.stakeAmount)} dbl
+                    {formatUnits(exp.stake, token)} dbl
+                  </span>
+                  <span className="log-outcome">
+                    {exp.succeeded
+                      ? `+${formatUnits(exp.payout - exp.stake, token)}`
+                      : `\u2212${formatUnits(exp.stake, token)}`}
                   </span>
                   <span className="log-date">
                     {new Date(exp.completedAt).toLocaleDateString(undefined, {
@@ -81,9 +85,6 @@ export function Treasury() {
                       hour: "numeric",
                       minute: "2-digit",
                     })}
-                  </span>
-                  <span className="log-principal">
-                    {truncatePrincipal(principal)}
                   </span>
                 </div>
               );

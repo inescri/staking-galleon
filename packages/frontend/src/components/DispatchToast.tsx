@@ -1,7 +1,8 @@
 import { useEffect } from "react";
 import { useGameDispatch } from "../contexts/useGame";
 import type { DispatchedExpedition } from "../contexts/GameContext";
-import { TIER_CONFIGS, formatDoubloons } from "../utils/rewards";
+import { useWallet } from "../contexts/useWallet";
+import { TIER_CONFIGS, formatUnits } from "../utils/rewards";
 
 export function DispatchToast({
   expedition,
@@ -9,6 +10,7 @@ export function DispatchToast({
   expedition: DispatchedExpedition;
 }) {
   const dispatch = useGameDispatch();
+  const { token } = useWallet();
   const config = TIER_CONFIGS[expedition.tier];
 
   useEffect(() => {
@@ -29,7 +31,7 @@ export function DispatchToast({
       <div className="toast-content">
         <span className="toast-title">Ship Dispatched!</span>
         <span className="toast-result">
-          {formatDoubloons(expedition.stakeAmount)} doubloons staked
+          {formatUnits(expedition.stake, token)} doubloons staked
         </span>
       </div>
     </div>

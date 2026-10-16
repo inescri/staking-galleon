@@ -4,12 +4,12 @@ import { useWallet } from "../contexts/useWallet";
 import {
   TIER_CONFIGS,
   TIERS,
-  formatDoubloons,
+  formatBps,
+  formatUnits,
   type Tier,
 } from "../utils/rewards";
-import { OdinUtils } from "odin-connect";
-import { useStakingCanister } from "../hooks/useStakingCanister";
-import { STAKING_CANISTER_ID, TOKEN_ID } from "../canister/config";
+import { useGameCanister } from "../hooks/useGameCanister";
+import { APP_CANISTER_ID, TOKEN_ID } from "../canister/config";
 import {
   approvalFor,
   claimRequest,
@@ -17,23 +17,21 @@ import {
 } from "../odin/approvalFlow";
 
 export function SendShipForm() {
-  const { balance, activeExpeditions } = useGameState();
+  const { balanceUnits, activeExpeditions, rules } = useGameState();
   const dispatch = useGameDispatch();
   const {
     connectedUser,
     identity,
-    principal,
     request,
     token,
     isRestoring,
     refreshBalances,
   } = useWallet();
-  const { depositAndLock } = useStakingCanister();
+  const { launch } = useGameCanister();
 
   const [selectedTier, setSelectedTier] = useState<Tier>("coastal");
-  const [stakeAmount, setStakeAmount] = useState(100);
-  const [duration, setDuration] = useState(30);
-  const [isStaking, setIsStaking] = useState(false);
+  const [durationIndex, setDurationIndex] = useState(0);
+  const [isLaunching, setIsLaunching] = useState(false);
   const [approveError, setApproveError] = useState<string | null>(null);
 
   // This flow's ICRC-2 approval, if it is the SDK's latest request.
@@ -41,57 +39,61 @@ export function SendShipForm() {
   // and redirect mode (and simply absent after a redirect reload).
   const approval = approvalFor(request, "stake");
   const isApproving = approval?.request.status === "pending";
-  const isLoading = isApproving || isStaking;
+  const isLoading = isApproving || isLaunching;
 
-  const config = TIER_CONFIGS[selectedTier];
+  const tierRules = rules?.tiers[selectedTier];
+  const option = tierRules?.durations[durationIndex];
+  const atSea = activeExpeditions.filter(
+    (e) =>
+      e.status === "launching" ||
+      e.status === "sailing" ||
+      e.status === "settling",
+  ).length;
+  const fleetFull = rules !== null && atSea >= rules.maxShips;
+  const insufficient =
+    tierRules !== undefined && balanceUnits < tierRules.stake;
+
   const canLaunch =
-    stakeAmount > 0 &&
-    stakeAmount <= balance &&
-    activeExpeditions.length < 5 &&
-    duration >= config.minDuration &&
-    duration <= config.maxDuration &&
+    APP_CANISTER_ID !== "" &&
+    rules !== null &&
+    tierRules !== undefined &&
+    option !== undefined &&
+    !fleetFull &&
+    !insufficient &&
     token !== null &&
     !isRestoring &&
     !isLoading;
 
   const handleTierChange = (tier: Tier) => {
     setSelectedTier(tier);
-    const c = TIER_CONFIGS[tier];
-    setDuration(c.minDuration);
-    if (stakeAmount > balance) setStakeAmount(Math.floor(balance));
+    setDurationIndex(0);
   };
 
-  // 1. From the button: start the ICRC-2 approval of the staking canister.
-  //    Not awaited — in a wallet in-app browser the SDK redirects to Odin and
-  //    the page reloads, so an awaited promise would never return. The result
-  //    arrives as `request` and is handled by the effect below. Everything
-  //    the follow-up needs beyond the approved amount rides in `returnState`.
+  // 1. From the button: start the ICRC-2 approval of the game canister for
+  //    the difficulty's fixed stake. Not awaited — in a wallet in-app browser
+  //    the SDK redirects to Odin and the page reloads, so an awaited promise
+  //    would never return. The result arrives as `request` and is handled by
+  //    the effect below; the choice rides in `returnState`.
   const handleLaunch = () => {
-    if (!canLaunch || !connectedUser || token === null) return;
+    if (!canLaunch || !connectedUser || tierRules === undefined) return;
 
     setApproveError(null);
-    // Same units as the displayed balance (the token's own decimals and
-    // divisibility), so what is approved is what the user sees.
-    const onChainAmount = OdinUtils.convertToOdinAmount(stakeAmount, token);
     const returnState: ApprovalReturnState = {
       flow: "stake",
       tier: selectedTier,
-      durationMs: duration * 1000,
-      stakeAmount,
+      durationIndex,
     };
     void connectedUser.icrcApprove({
       token: TOKEN_ID,
-      spender: STAKING_CANISTER_ID,
-      amount: onChainAmount,
+      spender: APP_CANISTER_ID,
+      amount: tierRules.stake,
       returnState,
     });
   };
 
   // 2. When the approval settles (popup, or after the redirect reload): on
-  //    success, lock the approved amount in the staking canister. The amount
-  //    comes from `request.input`, the rest from `returnState` — not from
-  //    form state, which a redirect wipes. "success" is only a UI signal;
-  //    the canister's icrc2_transfer_from is the on-chain check.
+  //    success, launch the ship. The canister pulls its configured stake; the
+  //    approval's "success" is only a UI signal.
   useEffect(() => {
     const current = approvalFor(request, "stake");
     if (current === null) return;
@@ -117,61 +119,53 @@ export function SendShipForm() {
     if (identity === null) {
       if (claimRequest(id)) {
         setApproveError(
-          "Approved, but the wallet session has no delegation to stake " +
+          "Approved, but the wallet session has no delegation to launch " +
             "with. Reconnect and launch again.",
         );
       }
       return;
     }
     // At most once per approval: claimed before the await, so re-renders,
-    // StrictMode and remounts cannot stake twice.
+    // StrictMode and remounts cannot launch twice.
     if (!claimRequest(id)) return;
 
-    const { tier, durationMs, stakeAmount: amount } = current.returnState;
+    const { tier, durationIndex: chosen } = current.returnState;
     void (async () => {
-      setIsStaking(true);
+      setIsLaunching(true);
       setApproveError(null);
       try {
-        await depositAndLock(TOKEN_ID, input.amount, BigInt(durationMs));
+        const shipId = await launch(tier, chosen);
         dispatch({
-          type: "LAUNCH_EXPEDITION",
-          payload: {
-            id: `${TOKEN_ID}:${principal}`,
-            stakeAmount: amount,
-            durationMs,
-            tier,
-          },
+          type: "SHIP_LAUNCHED",
+          payload: { id: shipId.toString(), tier, stake: input.amount },
         });
-        setStakeAmount(Math.min(100, Math.floor(balance - amount)));
         await refreshBalances();
       } catch (err) {
         const message =
           err instanceof Error
             ? err.message
-            : "Staking failed. Please try again.";
-        console.error("Staking failed:", err);
-        setApproveError(message);
+            : "Launch failed. Please try again.";
+        console.error("Launch failed:", err);
+        setApproveError(describeLaunchError(message));
       } finally {
-        setIsStaking(false);
+        setIsLaunching(false);
       }
     })();
-  }, [
-    request,
-    identity,
-    isRestoring,
-    principal,
-    balance,
-    depositAndLock,
-    dispatch,
-    refreshBalances,
-  ]);
+  }, [request, identity, isRestoring, launch, dispatch, refreshBalances]);
 
-  const setPercent = (pct: number) => {
-    setStakeAmount(Math.floor(balance * pct));
-  };
-
-  const durationMin = Math.floor(duration / 60);
-  const durationSec = duration % 60;
+  const buttonLabel = isApproving
+    ? "Approving..."
+    : isLaunching
+      ? "Dispatching..."
+      : APP_CANISTER_ID === ""
+        ? "Canister not configured"
+        : rules === null
+          ? "Loading charts..."
+          : fleetFull
+            ? "Fleet Full"
+            : insufficient
+              ? "Insufficient Doubloons"
+              : "⚓ Launch Expedition";
 
   return (
     <div className="send-ship-form pixel-panel">
@@ -199,60 +193,48 @@ export function SendShipForm() {
       </div>
 
       <div className="form-group">
-        <label className="form-label">Stake Amount</label>
-        <div className="stake-input-row">
-          <input
-            type="number"
-            className="pixel-input"
-            value={stakeAmount}
-            min={1}
-            max={balance}
-            onChange={(e) => setStakeAmount(Number(e.target.value))}
-          />
-          <span className="input-suffix">dbl</span>
-        </div>
-        <div className="percent-buttons">
-          {[0.25, 0.5, 0.75, 1].map((pct) => (
-            <button
-              key={pct}
-              className="pixel-btn-sm"
-              onClick={() => setPercent(pct)}
-            >
-              {pct * 100}%
-            </button>
-          ))}
+        <label className="form-label">Stake</label>
+        <div className="stake-fixed">
+          {tierRules ? `${formatUnits(tierRules.stake, token)} dbl` : "…"}
         </div>
       </div>
 
       <div className="form-group">
-        <label className="form-label">
-          Voyage Duration:{" "}
-          <span className="duration-display">
-            {durationMin > 0 ? `${durationMin}m ` : ""}
-            {durationSec}s
-          </span>
-        </label>
-        <input
-          type="range"
-          className="pixel-slider"
-          min={config.minDuration}
-          max={config.maxDuration}
-          value={duration}
-          onChange={(e) => setDuration(Number(e.target.value))}
-        />
-        <div className="slider-labels">
-          <span>
-            {Math.floor(config.minDuration / 60)}m {config.minDuration % 60}s
-          </span>
-          <span>
-            {Math.floor(config.maxDuration / 60)}m {config.maxDuration % 60}s
-          </span>
+        <label className="form-label">Voyage</label>
+        <div className="duration-menu">
+          {tierRules?.durations.map((d) => (
+            <button
+              key={d.index}
+              className={`duration-btn ${durationIndex === d.index ? "active" : ""}`}
+              onClick={() => setDurationIndex(d.index)}
+            >
+              <span className="duration-label">{d.label}</span>
+              <span className="duration-risk">{formatBps(d.failBps)} risk</span>
+              <span className="duration-reward">
+                +{formatBps(d.multiplierBps - 10_000)}
+              </span>
+            </button>
+          ))}
         </div>
+        {tierRules && option && (
+          <p className="duration-summary">
+            Returns{" "}
+            {formatUnits(
+              tierRules.stake +
+                (tierRules.stake * BigInt(option.multiplierBps - 10_000)) /
+                  10_000n,
+              token,
+            )}{" "}
+            dbl on success; the whole stake is lost otherwise.
+          </p>
+        )}
       </div>
 
       <div className="launch-info">
-        <span>Fleet: {activeExpeditions.length}/5</span>
-        <span>Balance: {formatDoubloons(balance)} dbl</span>
+        <span>
+          Fleet: {atSea}/{rules?.maxShips ?? "…"}
+        </span>
+        <span>Balance: {formatUnits(balanceUnits, token)} dbl</span>
       </div>
 
       {approveError && <span className="wallet-error">{approveError}</span>}
@@ -262,16 +244,21 @@ export function SendShipForm() {
         disabled={!canLaunch}
         onClick={handleLaunch}
       >
-        {isApproving
-          ? "Approving..."
-          : isStaking
-            ? "Dispatching..."
-            : activeExpeditions.length >= 5
-              ? "Fleet Full"
-              : stakeAmount > balance
-                ? "Insufficient Doubloons"
-                : "\u2693 Launch Expedition"}
+        {buttonLabel}
       </button>
     </div>
   );
+}
+
+/** Map the canister's stable error codes to player-facing text. */
+function describeLaunchError(message: string): string {
+  if (message.startsWith("POOL_INSUFFICIENT")) {
+    return "The treasury cannot cover this voyage's reward yet. Try a smaller voyage or come back later.";
+  }
+  if (message.startsWith("FLEET_FULL")) return "Your fleet is full.";
+  if (message.startsWith("PAUSED")) return "Launches are paused right now.";
+  if (message.startsWith("PULL_FAILED")) {
+    return "The stake could not be collected from your wallet. Check your balance and approval, then try again.";
+  }
+  return message;
 }

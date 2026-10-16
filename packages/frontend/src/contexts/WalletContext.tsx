@@ -12,11 +12,12 @@ import {
   type TokenUnits,
   type WalletContextValue,
 } from "./useWallet";
-import { createStakingActor } from "../canister/actor";
-import { STAKING_CANISTER_ID, TOKEN_ID } from "../canister/config";
+import { createGameActor } from "../canister/actor";
+import { APP_CANISTER_ID, TOKEN_ID } from "../canister/config";
 import { odin } from "../odin/client";
 import { useOdinState } from "../odin/useOdinState";
 import { connectErrorMessage, deriveAuthStatus } from "../odin/authStatus";
+import { parseGameConfig } from "../utils/game";
 
 function computeTokenBalance(token: OdinBalance): number {
   const divisor = Math.pow(10, token.divisibility + token.decimals);
@@ -36,21 +37,43 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const status = deriveAuthStatus(state);
   const dispatch = useGameDispatch();
   const [token, setToken] = useState<TokenUnits | null>(null);
-  // The user whose balance and position have been fetched at least once.
+  // The user whose balance and ships have been fetched at least once.
   const [hydratedUser, setHydratedUser] = useState<OdinConnectedUser | null>(
     null,
   );
 
-  const fetchBalancesAndPositions = useCallback(
+  // The game rules are public: load them once so the form can render stakes
+  // and durations before (and without) a wallet.
+  useEffect(() => {
+    if (APP_CANISTER_ID === "") return;
+    let cancelled = false;
+    const load = async () => {
+      try {
+        const config = await createGameActor().get_config();
+        if (!cancelled) {
+          dispatch({ type: "SET_RULES", payload: parseGameConfig(config) });
+        }
+      } catch (err) {
+        console.error("Failed to fetch game config:", err);
+      }
+    };
+    void load();
+    return () => {
+      cancelled = true;
+    };
+  }, [dispatch]);
+
+  const fetchBalancesAndShips = useCallback(
     async (user: OdinConnectedUser) => {
-      // The Odin API balance and the canister position are independent;
-      // fetch them concurrently and handle each outcome on its own.
-      const delegationIdentity = user.getIdentity() ?? undefined;
-      const actor = createStakingActor(delegationIdentity);
-      const [balanceResult, positionResult] = await Promise.allSettled([
-        user.getBalance(TOKEN_ID),
-        actor.stake_get_position(TOKEN_ID),
-      ]);
+      // The Odin API balance, the caller's ships and the rules are
+      // independent; fetch them concurrently and handle each on its own.
+      const actor = createGameActor(user.getIdentity() ?? undefined);
+      const [balanceResult, shipsResult, configResult] =
+        await Promise.allSettled([
+          user.getBalance(TOKEN_ID),
+          actor.get_my_ships(),
+          actor.get_config(),
+        ]);
 
       if (balanceResult.status === "fulfilled" && balanceResult.value) {
         const tokenBalance = balanceResult.value;
@@ -60,32 +83,36 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         });
         dispatch({
           type: "SET_BALANCE",
-          payload: computeTokenBalance(tokenBalance),
+          payload: {
+            balance: computeTokenBalance(tokenBalance),
+            balanceUnits: tokenBalance.balance,
+          },
         });
       } else {
         if (balanceResult.status === "rejected") {
-          console.error(
-            "Failed to fetch token balances:",
-            balanceResult.reason,
-          );
+          console.error("Failed to fetch token balance:", balanceResult.reason);
         } else {
           setToken(null);
         }
-        dispatch({ type: "SET_BALANCE", payload: 0 });
+        dispatch({
+          type: "SET_BALANCE",
+          payload: { balance: 0, balanceUnits: 0n },
+        });
       }
 
-      if (positionResult.status === "fulfilled") {
-        const position = positionResult.value;
-        if (position.length > 0 && position[0]) {
-          dispatch({ type: "SYNC_POSITIONS", payload: [position[0]] });
-        } else {
-          dispatch({ type: "SYNC_POSITIONS", payload: [] });
-        }
+      if (shipsResult.status === "fulfilled") {
+        dispatch({ type: "SYNC_SHIPS", payload: shipsResult.value });
       } else {
-        console.error(
-          "Failed to fetch staking position:",
-          positionResult.reason,
-        );
+        console.error("Failed to fetch ships:", shipsResult.reason);
+      }
+
+      if (configResult.status === "fulfilled") {
+        dispatch({
+          type: "SET_RULES",
+          payload: parseGameConfig(configResult.value),
+        });
+      } else {
+        console.error("Failed to fetch game config:", configResult.reason);
       }
     },
     [dispatch],
@@ -98,14 +125,18 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     if (!connectedUser) return;
     let cancelled = false;
     const load = async () => {
-      await fetchBalancesAndPositions(connectedUser);
+      try {
+        await fetchBalancesAndShips(connectedUser);
+      } catch (err) {
+        console.error("Failed to load wallet state:", err);
+      }
       if (!cancelled) setHydratedUser(connectedUser);
     };
     void load();
     return () => {
       cancelled = true;
     };
-  }, [connectedUser, fetchBalancesAndPositions]);
+  }, [connectedUser, fetchBalancesAndShips]);
 
   const connectWallet = useCallback(() => {
     // Fire and forget: the outcome lands in `state` (popup or redirect). The
@@ -113,20 +144,24 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     void odin.connect({
       requires_api: false,
       requires_delegation: true,
-      targets: [STAKING_CANISTER_ID],
+      targets: APP_CANISTER_ID === "" ? [] : [APP_CANISTER_ID],
     });
   }, []);
 
   const refreshBalances = useCallback(async () => {
     if (connectedUser) {
-      await fetchBalancesAndPositions(connectedUser);
+      await fetchBalancesAndShips(connectedUser);
     }
-  }, [connectedUser, fetchBalancesAndPositions]);
+  }, [connectedUser, fetchBalancesAndShips]);
 
   const disconnectWallet = useCallback(() => {
     odin.disconnect();
     setToken(null);
-    dispatch({ type: "SET_BALANCE", payload: 0 });
+    dispatch({
+      type: "SET_BALANCE",
+      payload: { balance: 0, balanceUnits: 0n },
+    });
+    dispatch({ type: "SYNC_SHIPS", payload: [] });
   }, [dispatch]);
 
   const isHydrating = connectedUser !== null && hydratedUser !== connectedUser;
