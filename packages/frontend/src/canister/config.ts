@@ -47,6 +47,19 @@ export const BTC_TOKEN_ID = "btc";
  */
 export const PAYOUT_FEE_APPROVAL = 200_000n;
 
+/**
+ * Principals allowed to see the treasury deposit form. Client-side gate
+ * only: `fund_pool` itself stays open on the canister (it only ever pulls
+ * the caller's own approved tokens). Comma-separated in `VITE_ADMIN_PRINCIPALS`.
+ */
+export const ADMIN_PRINCIPALS: readonly string[] = envOr(
+  import.meta.env.VITE_ADMIN_PRINCIPALS,
+  "",
+)
+  .split(",")
+  .map((p) => p.trim())
+  .filter((p) => p !== "");
+
 /** Replica/boundary host. */
 export const IC_HOST = envOr(
   import.meta.env.VITE_IC_HOST,
