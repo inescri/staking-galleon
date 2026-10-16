@@ -198,7 +198,10 @@ export function ExpeditionCard({ expedition }: { expedition: Expedition }) {
     <div
       className="expedition-card pixel-panel"
       style={
-        { "--tier-art": `url(${TIER_ICONS[expedition.tier]})` } as CSSProperties
+        {
+          "--tier-art": `url(${TIER_ICONS[expedition.tier]})`,
+          "--tier-color": config.color,
+        } as CSSProperties
       }
     >
       <div className="expedition-header">

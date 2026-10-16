@@ -979,9 +979,14 @@ body {
 
 .expedition-card {
   padding: 12px;
-  /* `--tier-art` is the difficulty's pixel art, set inline by ExpeditionCard. */
+  /* `--tier-art` (the difficulty's pixel art) and `--tier-color` are set
+     inline by ExpeditionCard so each card is colour-coded by tier. */
+  --tier-color: var(--pixel-border);
   background-image:
-    linear-gradient(rgba(8, 24, 36, 0.82), rgba(8, 24, 36, 0.9)),
+    linear-gradient(
+      color-mix(in srgb, var(--tier-color) 22%, rgb(8 24 36 / 0.82)),
+      color-mix(in srgb, var(--tier-color) 10%, rgb(8 24 36 / 0.9))
+    ),
     var(--tier-art, none);
   background-size: cover;
   background-position: center;
