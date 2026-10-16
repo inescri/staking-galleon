@@ -4,7 +4,7 @@ import { useGameDispatch } from "../contexts/useGame";
 import type { Expedition } from "../contexts/GameContext";
 import { useStakingCanister } from "../hooks/useStakingCanister";
 import { useWallet } from "../contexts/useWallet";
-import { TOKEN_ID } from "../canister/actor";
+import { TOKEN_ID } from "../canister/config";
 import { TIER_CONFIGS } from "../utils/rewards";
 import { useCountdown } from "../hooks/useCountdown";
 

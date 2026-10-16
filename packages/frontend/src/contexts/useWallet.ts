@@ -1,6 +1,6 @@
 import { createContext, useContext } from "react";
 import type { Identity } from "@dfinity/agent";
-import type { OdinConnectedUser } from "odin-connect";
+import type { OdinConnectedUser, OdinRequestState } from "odin-connect";
 
 export interface WalletContextValue {
   connectedUser: OdinConnectedUser | null;
@@ -9,7 +9,15 @@ export interface WalletContextValue {
   isConnecting: boolean;
   isRestoring: boolean;
   connectionError: string | null;
-  connectWallet: () => Promise<void>;
+  /**
+   * The latest `connect()` or action (`user.icrcApprove()`, …) and its
+   * outcome, straight from the SDK state. Flows react to it instead of
+   * awaiting the call: in redirect mode the page reloads before an awaited
+   * promise could return.
+   */
+  request: OdinRequestState | null;
+  /** Start a connect; the outcome arrives through `isConnecting` / `connectionError` / `connectedUser`. */
+  connectWallet: () => void;
   disconnectWallet: () => void;
   refreshBalances: () => Promise<void>;
 }
