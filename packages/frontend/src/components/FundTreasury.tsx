@@ -2,7 +2,11 @@ import { useCallback, useEffect, useState } from "react";
 import { OdinUtils } from "odin-connect";
 import { useWallet } from "../contexts/useWallet";
 import { useGameCanister } from "../hooks/useGameCanister";
-import { APP_CANISTER_ID, TOKEN_ID } from "../canister/config";
+import {
+  ADMIN_PRINCIPALS,
+  APP_CANISTER_ID,
+  TOKEN_ID,
+} from "../canister/config";
 import type { PoolStats } from "../canister/idl";
 import { formatUnits } from "../utils/rewards";
 import {
@@ -12,19 +16,21 @@ import {
 } from "../odin/approvalFlow";
 
 /**
- * House pool status plus a deposit form. `fund_pool` is open to anyone (it
- * only pulls the caller's own pre-approved tokens), so this is how the admin
- * seeds rewards and how a generous player can top them up.
+ * House pool status for everyone, plus a deposit form for the principals in
+ * `VITE_ADMIN_PRINCIPALS`. The gate is cosmetic: `fund_pool` is open on the
+ * canister (it only pulls the caller's own pre-approved tokens).
  */
 export function FundTreasury() {
   const {
     connectedUser,
     identity,
+    principal,
     request,
     token,
     isRestoring,
     refreshBalances,
   } = useWallet();
+  const isAdmin = principal !== "" && ADMIN_PRINCIPALS.includes(principal);
   const { fundPool, getPoolStats } = useGameCanister();
   const [stats, setStats] = useState<PoolStats | null>(null);
   const [amount, setAmount] = useState("");
@@ -154,32 +160,36 @@ export function FundTreasury() {
         )}
       </div>
       <p className="fund-hint">
-        Rewards are reserved from the available pool at launch. Deposit
-        doubloons to make bigger voyages launchable.
+        Rewards are reserved from the available pool at launch; bigger voyages
+        need a bigger pool.
       </p>
-      <div className="fund-row">
-        <input
-          type="number"
-          className="pixel-input"
-          placeholder="Amount in dbl"
-          min={0}
-          value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          disabled={connectedUser === null}
-        />
-        <button
-          className="pixel-btn-sm"
-          disabled={!canFund}
-          onClick={handleFund}
-        >
-          {isApproving ? "Approving..." : isFunding ? "Depositing..." : "Fund"}
-        </button>
-      </div>
-      {connectedUser === null && (
-        <p className="fund-hint">Connect a wallet to deposit.</p>
+      {isAdmin && (
+        <>
+          <div className="fund-row">
+            <input
+              type="number"
+              className="pixel-input"
+              placeholder="Amount in dbl"
+              min={0}
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+            />
+            <button
+              className="pixel-btn-sm"
+              disabled={!canFund}
+              onClick={handleFund}
+            >
+              {isApproving
+                ? "Approving..."
+                : isFunding
+                  ? "Depositing..."
+                  : "Fund"}
+            </button>
+          </div>
+          {message && <span className="toast-result">{message}</span>}
+          {error && <span className="wallet-error">{error}</span>}
+        </>
       )}
-      {message && <span className="toast-result">{message}</span>}
-      {error && <span className="wallet-error">{error}</span>}
     </details>
   );
 }
