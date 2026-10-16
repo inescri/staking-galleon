@@ -468,11 +468,16 @@ export function canClaim(ship: Ship): string | null {
   return null;
 }
 
-/** Admin recovery transitions allowed for a manually verified stuck ship. */
+/**
+ * Admin recovery transitions allowed for a manually verified stuck ship.
+ * `launching -> sailing` is for a ship whose stake pull settled but whose
+ * post-await effect never ran (the admin must confirm the stake was pulled).
+ */
 export function isRecoveryTransition(
   from: ShipStatus,
   to: ShipStatus,
 ): boolean {
+  if (from === "launching") return to === "sailing";
   if (from === "settling") return to === "sailing";
   if (from === "paying") return to === "payout_pending" || to === "paid";
   return false;

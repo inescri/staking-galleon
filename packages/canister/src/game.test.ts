@@ -418,6 +418,8 @@ describe("ship guards", () => {
   });
 
   it("allows only the documented recovery transitions", () => {
+    expect(isRecoveryTransition("launching", "sailing")).toBe(true);
+    expect(isRecoveryTransition("launching", "lost")).toBe(false);
     expect(isRecoveryTransition("settling", "sailing")).toBe(true);
     expect(isRecoveryTransition("paying", "payout_pending")).toBe(true);
     expect(isRecoveryTransition("paying", "paid")).toBe(true);

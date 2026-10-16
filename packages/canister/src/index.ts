@@ -379,22 +379,36 @@ export default class {
         break;
       }
     }
+    // The lock we took is identified by its `statusChangedAt`. A stale lock
+    // (older than STUCK_SETTLE_MS) may have been re-entered by a later settle
+    // call while we awaited; if so that call owns the ship now and this one
+    // must not touch it.
+    const current = this.ships.get(shipId);
+    const stillOurs =
+      current !== undefined &&
+      current.status === "settling" &&
+      current.statusChangedAt === ship.statusChangedAt;
     if (roll === null) {
-      const current = this.ships.get(shipId);
-      if (current !== undefined && current.status === "settling") {
-        this.setStatus(current, "sailing");
-      }
+      if (stillOurs) this.setStatus(current, "sailing");
       return { Err: ERR.RAND_UNAVAILABLE };
     }
+    if (!stillOurs) {
+      return { Err: `${ERR.BAD_STATUS}:${current?.status ?? "missing"}` };
+    }
 
-    // EFFECTS: record the outcome. Nothing else mutates a 'settling' ship,
-    // so the re-read record is the one we locked.
+    // EFFECTS: record the outcome. The pool transition is computed first so
+    // an accounting error leaves the ship record untouched (still locked for
+    // admin_recover_ship) instead of in a terminal status with a stale pool.
     let outcome: SettleOutcome;
     try {
-      const current = this.ships.get(shipId) ?? ship;
       const decided = decideOutcome(roll, current.failBps);
       const settledAt = nowMs();
       if (decided === "lost") {
+        const nextPool = applySettleLost(
+          this.getPool(),
+          current.stake,
+          current.reservedReward,
+        );
         this.putShip({
           ...current,
           status: "lost",
@@ -403,18 +417,17 @@ export default class {
           settledAt,
           statusChangedAt: settledAt,
         });
-        this.putPool(
-          applySettleLost(
-            this.getPool(),
-            current.stake,
-            current.reservedReward,
-          ),
-        );
+        this.putPool(nextPool);
         this.bump("lost");
         this.trimIndex(current.owner);
         return { Ok: { lost: { stakeLost: current.stake } } };
       }
       const payout = current.stake + current.reservedReward;
+      const nextPool = applySettleWon(
+        this.getPool(),
+        current.stake,
+        current.reservedReward,
+      );
       this.putShip({
         ...current,
         status: "payout_pending",
@@ -424,9 +437,7 @@ export default class {
         settledAt,
         statusChangedAt: settledAt,
       });
-      this.putPool(
-        applySettleWon(this.getPool(), current.stake, current.reservedReward),
-      );
+      this.putPool(nextPool);
       this.bump("won");
       outcome = { won: { payout, paid: false } };
     } catch (error) {
@@ -487,13 +498,14 @@ export default class {
     try {
       const current = this.ships.get(shipId) ?? ship;
       const paidAt = nowMs();
+      const nextPool = applyPaid(this.getPool(), current.payout);
       this.putShip({
         ...current,
         status: "paid",
         paidAt,
         statusChangedAt: paidAt,
       });
-      this.putPool(applyPaid(this.getPool(), current.payout));
+      this.putPool(nextPool);
       this.bump("paid");
       this.meta.remove(`payout_error:${shipId}`);
       this.trimIndex(current.owner);
@@ -725,19 +737,40 @@ export default class {
     if (!isRecoveryTransition(ship.status, to)) {
       return { Err: `${ERR.BAD_TRANSITION}:${ship.status}->${to}` };
     }
-    if (to === "paid") {
-      const paidAt = nowMs();
-      this.putShip({
-        ...ship,
-        status: "paid",
-        paidAt,
-        statusChangedAt: paidAt,
-      });
-      this.putPool(applyPaid(this.getPool(), ship.payout));
-      this.bump("paid");
-      this.trimIndex(ship.owner);
-    } else {
-      this.setStatus(ship, to);
+    // Pool transitions are computed before the ship record is written so an
+    // accounting error leaves the ship untouched.
+    try {
+      if (to === "paid") {
+        const paidAt = nowMs();
+        const nextPool = applyPaid(this.getPool(), ship.payout);
+        this.putShip({
+          ...ship,
+          status: "paid",
+          paidAt,
+          statusChangedAt: paidAt,
+        });
+        this.putPool(nextPool);
+        this.bump("paid");
+        this.trimIndex(ship.owner);
+      } else if (ship.status === "launching" && to === "sailing") {
+        // The stake pull settled but the post-await effect did not run:
+        // start the voyage now, as launch would have.
+        const start = nowMs();
+        const nextPool = applyLaunchConfirmed(this.getPool(), ship.stake);
+        this.putShip({
+          ...ship,
+          status: "sailing",
+          startedAt: start,
+          endsAt: start + ship.durationMs,
+          statusChangedAt: start,
+        });
+        this.putPool(nextPool);
+        this.bump("launched");
+      } else {
+        this.setStatus(ship, to);
+      }
+    } catch (error) {
+      return { Err: `INTERNAL:${errorText(error)}` };
     }
     return { Ok: null };
   }
