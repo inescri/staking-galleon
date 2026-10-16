@@ -9,22 +9,20 @@ import type { TokenUnits } from "../contexts/useWallet";
 export type Tier = Difficulty;
 export const TIERS = DIFFICULTIES;
 
-/** Display meta only — stakes, durations, risk and reward come from the canister. */
+/**
+ * Display meta only — stakes, durations, risk and reward come from the
+ * canister. Icons live in `components/TierIcon.tsx`.
+ */
 export interface TierConfig {
   name: string;
-  emoji: string;
   color: string;
 }
 
 export const TIER_CONFIGS: Record<Tier, TierConfig> = {
-  coastal: { name: "Coastal Trade", emoji: "⛵", color: "#53a8b6" },
-  open_sea: { name: "Open Sea", emoji: "\u{1F6A2}", color: "#FFB347" },
-  deep_ocean: { name: "Deep Ocean", emoji: "\u{1F30A}", color: "#E67E22" },
-  kraken_waters: {
-    name: "Kraken Waters",
-    emoji: "\u{1F419}",
-    color: "#c0392b",
-  },
+  coastal: { name: "Coastal Trade", color: "#53a8b6" },
+  open_sea: { name: "Open Sea", color: "#FFB347" },
+  deep_ocean: { name: "Deep Ocean", color: "#E67E22" },
+  kraken_waters: { name: "Kraken Waters", color: "#c0392b" },
 };
 
 /**

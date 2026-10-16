@@ -3,8 +3,9 @@ import { useGameState } from "../contexts/useGame";
 import { useWallet } from "../contexts/useWallet";
 import { BUY_BTC_AMOUNT, TOKEN_ID, TOKEN_URL } from "../canister/config";
 import { claimRequest } from "../odin/approvalFlow";
-import { formatDoubloons, formatUnits, TIER_CONFIGS } from "../utils/rewards";
+import { formatDoubloons, formatUnits } from "../utils/rewards";
 import { FundTreasury } from "./FundTreasury";
+import { TierIcon } from "./TierIcon";
 
 export function Treasury() {
   const { balance, completedExpeditions } = useGameState();
@@ -101,13 +102,12 @@ export function Treasury() {
           <h3 className="section-title">Voyage Log</h3>
           <div className="log-entries">
             {completedExpeditions.slice(0, 8).map((exp) => {
-              const config = TIER_CONFIGS[exp.tier];
               return (
                 <div
                   key={exp.id}
                   className={`log-entry ${exp.succeeded ? "log-win" : "log-loss"}`}
                 >
-                  <span className="log-tier">{config.emoji}</span>
+                  <TierIcon tier={exp.tier} className="tier-icon-log" />
                   <span className="log-stake">
                     {formatUnits(exp.stake, token)} dbl
                   </span>

@@ -787,8 +787,32 @@ body {
   border-width: 3px;
 }
 
-.tier-emoji {
-  font-size: 1.3rem;
+.tier-icon {
+  image-rendering: pixelated;
+  object-fit: cover;
+  border: 2px solid var(--pixel-border);
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.tier-icon-btn {
+  width: 48px;
+  height: 48px;
+}
+
+.tier-icon-card {
+  width: 22px;
+  height: 22px;
+}
+
+.tier-icon-log {
+  width: 24px;
+  height: 24px;
+}
+
+.tier-icon-toast {
+  width: 36px;
+  height: 36px;
 }
 
 .tier-name {

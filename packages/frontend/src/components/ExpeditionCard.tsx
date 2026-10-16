@@ -10,6 +10,7 @@ import {
   PAYOUT_FEE_APPROVAL,
 } from "../canister/config";
 import { TIER_CONFIGS, formatBps, formatUnits } from "../utils/rewards";
+import { TierIcon } from "./TierIcon";
 import {
   approvalFor,
   claimRequest,
@@ -189,7 +190,8 @@ export function ExpeditionCard({ expedition }: { expedition: Expedition }) {
     <div className="expedition-card pixel-panel">
       <div className="expedition-header">
         <span className="expedition-tier">
-          {config.emoji} {config.name}
+          <TierIcon tier={expedition.tier} className="tier-icon-card" />{" "}
+          {config.name}
         </span>
         <span className="expedition-stake">
           &nbsp;{formatUnits(expedition.stake, token)} dbl

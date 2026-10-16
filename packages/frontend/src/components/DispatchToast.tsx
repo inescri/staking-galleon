@@ -2,7 +2,8 @@ import { useEffect } from "react";
 import { useGameDispatch } from "../contexts/useGame";
 import type { DispatchedExpedition } from "../contexts/GameContext";
 import { useWallet } from "../contexts/useWallet";
-import { TIER_CONFIGS, formatUnits } from "../utils/rewards";
+import { formatUnits } from "../utils/rewards";
+import { TierIcon } from "./TierIcon";
 
 export function DispatchToast({
   expedition,
@@ -11,7 +12,6 @@ export function DispatchToast({
 }) {
   const dispatch = useGameDispatch();
   const { token } = useWallet();
-  const config = TIER_CONFIGS[expedition.tier];
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -27,7 +27,9 @@ export function DispatchToast({
         dispatch({ type: "DISMISS_DISPATCH", payload: { id: expedition.id } })
       }
     >
-      <span className="toast-icon">{config.emoji}</span>
+      <span className="toast-icon">
+        <TierIcon tier={expedition.tier} className="tier-icon-toast" />
+      </span>
       <div className="toast-content">
         <span className="toast-title">Ship Dispatched!</span>
         <span className="toast-result">

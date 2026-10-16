@@ -10,6 +10,7 @@ import {
 } from "../utils/rewards";
 import { useGameCanister } from "../hooks/useGameCanister";
 import { APP_CANISTER_ID, TOKEN_ID } from "../canister/config";
+import { TierIcon } from "./TierIcon";
 import {
   approvalFor,
   claimRequest,
@@ -185,7 +186,7 @@ export function SendShipForm() {
               }
               onClick={() => handleTierChange(tier)}
             >
-              <span className="tier-emoji">{c.emoji}</span>
+              <TierIcon tier={tier} className="tier-icon-btn" />
               <span className="tier-name">{c.name}</span>
             </button>
           );
