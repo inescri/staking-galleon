@@ -652,6 +652,25 @@ body {
   animation: bob 2.5s ease-in-out infinite;
 }
 
+/* Wear: the same sprite, weathered by time at sea (see utils/wear.ts) */
+
+.ship-image {
+  display: block;
+  transition: filter 1s linear;
+}
+
+.ship-wear-weathered {
+  filter: saturate(0.8) sepia(0.2);
+}
+
+.ship-wear-battered {
+  filter: saturate(0.55) sepia(0.45) brightness(0.9) contrast(1.1);
+}
+
+.ship-wear-derelict {
+  filter: saturate(0.3) sepia(0.65) brightness(0.75) contrast(1.2);
+}
+
 @keyframes bob {
   0%,
   100% {
