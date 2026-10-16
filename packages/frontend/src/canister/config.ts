@@ -10,19 +10,6 @@ function envOr(raw: string | undefined, fallback: string): string {
   return raw === undefined || raw === "" ? fallback : raw;
 }
 
-/** Mainnet game canister (deployed against the Odin dev ledger). */
-const MAINNET_CANISTER_ID = "gkvcg-5aaaa-aaaae-qkpzq-cai";
-
-/**
- * The game canister: ICRC-2 spender, delegation target and actor target.
- * Explicit `VITE_APP_CANISTER_ID` wins; else the id dfx wrote on the last
- * deploy; else the mainnet id.
- */
-export const APP_CANISTER_ID = envOr(
-  import.meta.env.VITE_APP_CANISTER_ID,
-  envOr(import.meta.env.VITE_DFX_CANISTER_ID, MAINNET_CANISTER_ID),
-);
-
 /** dfx network: `ic` (default — hosted builds set nothing) or `local`. */
 export const DFX_NETWORK = envOr(
   import.meta.env.VITE_DFX_NETWORK,
@@ -30,6 +17,24 @@ export const DFX_NETWORK = envOr(
 );
 
 export const IS_LOCAL = DFX_NETWORK === "local";
+
+/** Mainnet game canister (deployed against the Odin dev ledger). */
+const MAINNET_CANISTER_ID = "gkvcg-5aaaa-aaaae-qkpzq-cai";
+
+/**
+ * The game canister: ICRC-2 spender, delegation target and actor target.
+ * Explicit `VITE_APP_CANISTER_ID` wins; else the id dfx wrote on the last
+ * deploy; else the mainnet id — but only on `ic`. A `local` build with no
+ * id stays unconfigured (the UI says so) rather than silently talking to
+ * the mainnet canister.
+ */
+export const APP_CANISTER_ID = envOr(
+  import.meta.env.VITE_APP_CANISTER_ID,
+  envOr(
+    import.meta.env.VITE_DFX_CANISTER_ID,
+    IS_LOCAL ? "" : MAINNET_CANISTER_ID,
+  ),
+);
 
 /** Odin token id staked by the game. */
 export const TOKEN_ID = envOr(import.meta.env.VITE_TOKEN_ID, "hjun");

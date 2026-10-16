@@ -1,5 +1,4 @@
 import { useCallback, useEffect, useState } from "react";
-import { OdinUtils } from "odin-connect";
 import { useWallet } from "../contexts/useWallet";
 import { useGameCanister } from "../hooks/useGameCanister";
 import {
@@ -8,6 +7,7 @@ import {
   TOKEN_ID,
 } from "../canister/config";
 import type { PoolStats } from "../canister/idl";
+import { parseTokenAmount } from "../utils/game";
 import { formatUnits } from "../utils/rewards";
 import {
   approvalFor,
@@ -53,12 +53,10 @@ export function FundTreasury() {
 
   const approval = approvalFor(request, "fund");
   const isApproving = approval?.request.status === "pending";
-  const parsed = Number(amount);
+  const parsed = token === null ? null : parseTokenAmount(amount, token);
   const canFund =
     connectedUser !== null &&
-    token !== null &&
-    Number.isFinite(parsed) &&
-    parsed > 0 &&
+    parsed !== null &&
     !isApproving &&
     !isFunding &&
     !isRestoring;
@@ -66,14 +64,14 @@ export function FundTreasury() {
   // 1. Approve the game token for the deposit; the amount travels in the
   //    SDK's `request.input`, so nothing needs to survive a redirect.
   const handleFund = () => {
-    if (!canFund || !connectedUser || token === null) return;
+    if (!canFund || !connectedUser || parsed === null) return;
     setError(null);
     setMessage(null);
     const returnState: ApprovalReturnState = { flow: "fund" };
     void connectedUser.icrcApprove({
       token: TOKEN_ID,
       spender: APP_CANISTER_ID,
-      amount: OdinUtils.convertToOdinAmount(parsed, token),
+      amount: parsed,
       returnState,
     });
   };

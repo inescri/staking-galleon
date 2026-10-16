@@ -43,10 +43,13 @@ export function ExpeditionCard({ expedition }: { expedition: Expedition }) {
     approval?.returnState.shipId === expedition.id &&
     approval.request.status === "pending";
   const awaitingPayout = expedition.status === "payout_pending";
+  // Stake pull still in flight: `startedAt` is 0, so the countdown is
+  // meaningless until the next sync shows the ship sailing.
+  const isLaunching = expedition.status === "launching";
   const locked =
     expedition.status === "settling" ||
     expedition.status === "paying" ||
-    expedition.status === "launching";
+    isLaunching;
   const busy = isApproving || isReturning || locked;
 
   // 1. Return Ship / Claim: approve the BTC ledger fee the canister pulls to
@@ -178,13 +181,15 @@ export function ExpeditionCard({ expedition }: { expedition: Expedition }) {
     ? "Approving fee..."
     : isReturning
       ? "Returning..."
-      : expedition.status === "settling"
-        ? "Rolling the dice..."
-        : expedition.status === "paying"
-          ? "Paying out..."
-          : awaitingPayout
-            ? "Claim Payout"
-            : "Return Ship";
+      : isLaunching
+        ? "Launching..."
+        : expedition.status === "settling"
+          ? "Rolling the dice..."
+          : expedition.status === "paying"
+            ? "Paying out..."
+            : awaitingPayout
+              ? "Claim Payout"
+              : "Return Ship";
 
   return (
     <div className="expedition-card pixel-panel">
@@ -205,13 +210,15 @@ export function ExpeditionCard({ expedition }: { expedition: Expedition }) {
         <div
           className="progress-bar-fill"
           style={{
-            width: `${progress * 100}%`,
+            width: `${(isLaunching ? 0 : progress) * 100}%`,
             backgroundColor: config.color,
           }}
         />
       </div>
       <div className="expedition-footer">
-        {isComplete || awaitingPayout ? (
+        {isLaunching ? (
+          <span className="expedition-time">Setting sail…</span>
+        ) : isComplete || awaitingPayout ? (
           <>
             <span className="expedition-time">
               {awaitingPayout

@@ -5,6 +5,7 @@ import type { GameConfig, Ship } from "../canister/idl";
 import {
   isActiveStatus,
   parseGameConfig,
+  parseTokenAmount,
   shipToCompleted,
   shipToExpedition,
 } from "./game";
@@ -120,5 +121,35 @@ describe("isActiveStatus", () => {
     expect(isActiveStatus("payout_pending")).toBe(true);
     expect(isActiveStatus("paid")).toBe(false);
     expect(isActiveStatus("lost")).toBe(false);
+  });
+});
+
+describe("parseTokenAmount", () => {
+  const units = { decimals: 3, divisibility: 8 };
+
+  it("converts plain decimals to base units", () => {
+    expect(parseTokenAmount("1", units)).toBe(100_000_000_000n);
+    expect(parseTokenAmount(" 12.5 ", units)).toBe(1_250_000_000_000n);
+    expect(parseTokenAmount("0.00000000001", units)).toBe(1n);
+  });
+
+  it("truncates digits beyond the token precision", () => {
+    expect(parseTokenAmount("0.000000000019", units)).toBe(1n);
+  });
+
+  it("rejects anything that is not a positive plain decimal", () => {
+    for (const bad of [
+      "",
+      "0",
+      "0.0",
+      "-1",
+      "1e-7",
+      "1e21",
+      ".5",
+      "1.",
+      "abc",
+    ]) {
+      expect(parseTokenAmount(bad, units)).toBeNull();
+    }
   });
 });

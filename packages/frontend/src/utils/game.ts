@@ -5,6 +5,8 @@ import {
   type Ship,
   type ShipStatus,
 } from "../canister/idl";
+import { OdinUtils } from "odin-connect";
+import type { TokenUnits } from "../contexts/useWallet";
 import type { Tier } from "./rewards";
 
 /** One duration option as the UI uses it. */
@@ -145,4 +147,20 @@ export function shipToCompleted(ship: Ship): CompletedExpedition {
     payout: succeeded ? ship.payout : 0n,
     completedAt: Number(ship.settledAt[0] ?? ship.endsAt),
   };
+}
+
+/**
+ * A user-typed token amount ("12.5") as base units, or null when it is not a
+ * plain positive decimal. Exponent forms, signs and blanks are rejected here
+ * because the SDK's converter would throw (or return 0) on them. Extra
+ * fraction digits beyond the token's precision are truncated.
+ */
+export function parseTokenAmount(
+  text: string,
+  token: TokenUnits,
+): bigint | null {
+  const trimmed = text.trim();
+  if (!/^[0-9]+(\.[0-9]+)?$/.test(trimmed)) return null;
+  const amount = OdinUtils.convertToOdinAmount(trimmed, token);
+  return amount > 0n ? amount : null;
 }
