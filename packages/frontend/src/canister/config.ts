@@ -10,13 +10,17 @@ function envOr(raw: string | undefined, fallback: string): string {
   return raw === undefined || raw === "" ? fallback : raw;
 }
 
+/** Mainnet game canister (deployed against the Odin dev ledger). */
+const MAINNET_CANISTER_ID = "gkvcg-5aaaa-aaaae-qkpzq-cai";
+
 /**
  * The game canister: ICRC-2 spender, delegation target and actor target.
- * Explicit `VITE_APP_CANISTER_ID` wins; else the id dfx wrote on deploy.
+ * Explicit `VITE_APP_CANISTER_ID` wins; else the id dfx wrote on the last
+ * deploy; else the mainnet id.
  */
 export const APP_CANISTER_ID = envOr(
   import.meta.env.VITE_APP_CANISTER_ID,
-  envOr(import.meta.env.VITE_DFX_CANISTER_ID, ""),
+  envOr(import.meta.env.VITE_DFX_CANISTER_ID, MAINNET_CANISTER_ID),
 );
 
 /** dfx network: `ic` (default — hosted builds set nothing) or `local`. */

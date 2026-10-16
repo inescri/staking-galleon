@@ -107,6 +107,15 @@ to mainnet — see **Deploy**.
 Errors come back as `Err: text` with stable codes (`POOL_INSUFFICIENT`,
 `FLEET_FULL`, `SHIP_STILL_AT_SEA`, `PAYOUT_FAILED:…`, …).
 
+## Deployed canisters
+
+| Network | Canister                      | Ledger                                 |
+| ------- | ----------------------------- | -------------------------------------- |
+| ic      | `gkvcg-5aaaa-aaaae-qkpzq-cai` | Odin dev `w5cxm-6iaaa-aaaaj-az4jq-cai` |
+
+The frontend falls back to this id when neither `VITE_APP_CANISTER_ID` nor a
+dfx-bridged id is set. `canister_ids.json` is gitignored.
+
 ## Configuration
 
 Frontend (`packages/frontend/.env.example`):
