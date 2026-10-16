@@ -29,6 +29,7 @@ import {
   countAtSea,
   decideOutcome,
   expectedValueBps,
+  isPristine,
   isRecoveryTransition,
   poolTotal,
   rollBps,
@@ -363,6 +364,15 @@ describe("pool accounting", () => {
       expect(poolTotal(pool)).toBe(ledger);
       for (const v of Object.values(pool)) expect(v).toBeGreaterThanOrEqual(0n);
     }
+  });
+});
+
+describe("isPristine", () => {
+  it("is true only with no ships and an empty pool", () => {
+    expect(isPristine(0, ZERO_POOL)).toBe(true);
+    expect(isPristine(1, ZERO_POOL)).toBe(false);
+    expect(isPristine(0, { ...ZERO_POOL, available: 1n })).toBe(false);
+    expect(isPristine(0, { ...ZERO_POOL, pendingPayouts: 1n })).toBe(false);
   });
 });
 

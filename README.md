@@ -89,19 +89,20 @@ to mainnet — see **Deploy**.
 
 ## Canister API
 
-| Method                                  | Kind   | Notes                                                  |
-| --------------------------------------- | ------ | ------------------------------------------------------ |
-| `launch(difficulty, durationIndex)`     | update | Pulls the fixed stake; `Ok(shipId)`                    |
-| `settle(shipId)`                        | update | Owner, after `endsAt`; rolls and pays                  |
-| `claim(shipId)`                         | update | Retry the payout of a won ship                         |
-| `get_my_ships()` / `get_ships(owner)`   | query  | Ships at sea and settled (bounded)                     |
-| `get_config()`                          | query  | Difficulties, stakes, durations, `maxShips`            |
-| `get_pool_stats()`                      | query  | `available / reserved / activeStakes / pendingPayouts` |
-| `fund_pool(amount)`                     | update | Anyone; pulls pre-approved tokens into the pool        |
-| `withdraw_pool(amount)`                 | update | Admin                                                  |
-| `set_config`, `set_paused`, `set_owner` | update | Admin; ships at sea keep their launch-time rules       |
-| `admin_recover_ship(shipId, status)`    | update | Admin; unstick a verified `settling` / `paying` ship   |
-| `icrc28_trusted_origins()`              | update | Origins allowed to request delegations                 |
+| Method                                  | Kind   | Notes                                                    |
+| --------------------------------------- | ------ | -------------------------------------------------------- |
+| `launch(difficulty, durationIndex)`     | update | Pulls the fixed stake; `Ok(shipId)`                      |
+| `settle(shipId)`                        | update | Owner, after `endsAt`; rolls and pays                    |
+| `claim(shipId)`                         | update | Retry the payout of a won ship                           |
+| `get_my_ships()` / `get_ships(owner)`   | query  | Ships at sea and settled (bounded)                       |
+| `get_config()`                          | query  | Difficulties, stakes, durations, `maxShips`              |
+| `get_pool_stats()`                      | query  | `available / reserved / activeStakes / pendingPayouts`   |
+| `fund_pool(amount)`                     | update | Anyone; pulls pre-approved tokens into the pool          |
+| `withdraw_pool(amount)`                 | update | Admin                                                    |
+| `set_config`, `set_paused`, `set_owner` | update | Admin; ships at sea keep their launch-time rules         |
+| `set_ledger_id`, `set_token_id`         | update | Admin; only while no ship launched and the pool is empty |
+| `admin_recover_ship(shipId, status)`    | update | Admin; unstick a verified `settling` / `paying` ship     |
+| `icrc28_trusted_origins()`              | update | Origins allowed to request delegations                   |
 
 Errors come back as `Err: text` with stable codes (`POOL_INSUFFICIENT`,
 `FLEET_FULL`, `SHIP_STILL_AT_SEA`, `PAYOUT_FAILED:…`, …).
@@ -117,7 +118,9 @@ Frontend (`packages/frontend/.env.example`):
 - `VITE_DFX_NETWORK` — `ic` (default) or `local`.
 - `VITE_TOKEN_ID` — `2j5i`.
 
-Canister: `ledger_id` and `token_id` are init arguments. Difficulties live in
+Canister: `ledger_id` and `token_id` are init arguments; the admin can change
+them with `set_ledger_id` / `set_token_id` until the first launch or pool
+deposit (`NOT_PRISTINE` afterwards, since funds live on that ledger). Difficulties live in
 `packages/canister/src/default_config.ts` and can be replaced at runtime with
 `set_config`. `TRUSTED_ORIGINS` in `src/index.ts` lists localhost only — add
 the hosted origin before a public deploy.

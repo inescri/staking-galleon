@@ -54,6 +54,7 @@ import {
   countAtSea,
   decideOutcome,
   findDifficulty,
+  isPristine,
   isRecoveryTransition,
   poolTotal,
   rollBps,
@@ -659,6 +660,44 @@ export default class {
     if (owner.isAnonymous()) return { Err: ERR.ANONYMOUS };
     this.meta.insert("owner", owner.toText());
     return { Ok: null };
+  }
+
+  /**
+   * Admin: point the canister at another Odin ledger (dev ↔ prod). Only
+   * while pristine — no ship ever launched and an empty pool — because all
+   * held funds live on the current ledger.
+   */
+  @update([IDL.Principal], ResultIdl(IDL.Null))
+  set_ledger_id(ledger: Principal): Result<null> {
+    if (!this.isAdmin(msgCaller())) return { Err: ERR.NOT_ADMIN };
+    if (ledger.isAnonymous()) return { Err: ERR.ANONYMOUS };
+    if (!isPristine(this.ships.len(), this.getPool())) {
+      return { Err: ERR.NOT_PRISTINE };
+    }
+    this.meta.insert("ledger_id", ledger.toText());
+    return { Ok: null };
+  }
+
+  /**
+   * Admin: change the game token. Same pristine-only rule as
+   * `set_ledger_id`: stakes and the pool sit under the current token's
+   * subaccount. Note `DEFAULT_CONFIG` stakes assume 10^11 base units.
+   */
+  @update([IDL.Text], ResultIdl(IDL.Null))
+  set_token_id(tokenId: string): Result<null> {
+    if (!this.isAdmin(msgCaller())) return { Err: ERR.NOT_ADMIN };
+    if (tokenId.trim() === "")
+      return { Err: `${ERR.INVALID_CONFIG}:empty token id` };
+    if (!isPristine(this.ships.len(), this.getPool())) {
+      return { Err: ERR.NOT_PRISTINE };
+    }
+    this.meta.insert("token_id", tokenId);
+    return { Ok: null };
+  }
+
+  @query([], IDL.Principal)
+  get_ledger_id(): Principal {
+    return this.ledger();
   }
 
   /**

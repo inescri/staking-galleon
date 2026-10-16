@@ -144,6 +144,7 @@ export const ERR = {
   INVALID_CONFIG: "INVALID_CONFIG",
   INVALID_AMOUNT: "INVALID_AMOUNT",
   BAD_TRANSITION: "BAD_TRANSITION",
+  NOT_PRISTINE: "NOT_PRISTINE",
 } as const;
 
 // ── Validation ────────────────────────────────────────────────────────────
@@ -404,6 +405,16 @@ export function applyWithdraw(pool: PoolState, amount: bigint): PoolState {
 }
 
 // ── END HARDENED POOL CORE ──
+
+/**
+ * The ledger and token may only change while the canister holds nothing:
+ * every stake, reservation and payout lives on the current ledger under the
+ * current token's subaccount, so switching with funds present would orphan
+ * them. "Nothing" means no ship was ever launched and the pool is empty.
+ */
+export function isPristine(shipCount: number, pool: PoolState): boolean {
+  return shipCount === 0 && poolTotal(pool) === 0n;
+}
 
 // ── Ship state guards ─────────────────────────────────────────────────────
 
