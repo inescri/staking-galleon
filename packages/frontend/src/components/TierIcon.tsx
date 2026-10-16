@@ -4,7 +4,7 @@ import deepOcean from "../assets/tiers/deep_ocean.jpg";
 import krakenWaters from "../assets/tiers/kraken_waters.jpg";
 import { TIER_CONFIGS, type Tier } from "../utils/rewards";
 
-const TIER_ICONS: Record<Tier, string> = {
+export const TIER_ICONS: Record<Tier, string> = {
   coastal,
   open_sea: openSea,
   deep_ocean: deepOcean,

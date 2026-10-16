@@ -10,7 +10,7 @@ import {
 } from "../utils/rewards";
 import { useGameCanister } from "../hooks/useGameCanister";
 import { APP_CANISTER_ID, TOKEN_ID } from "../canister/config";
-import { TierIcon } from "./TierIcon";
+import { TIER_ICONS } from "./TierIcon";
 import {
   approvalFor,
   claimRequest,
@@ -179,14 +179,14 @@ export function SendShipForm() {
             <button
               key={tier}
               className={`tier-btn ${selectedTier === tier ? "active" : ""}`}
-              style={
-                selectedTier === tier
+              style={{
+                backgroundImage: `url(${TIER_ICONS[tier]})`,
+                ...(selectedTier === tier
                   ? { borderColor: c.color, color: c.color }
-                  : undefined
-              }
+                  : undefined),
+              }}
               onClick={() => handleTierChange(tier)}
             >
-              <TierIcon tier={tier} className="tier-icon-btn" />
               <span className="tier-name">{c.name}</span>
             </button>
           );
