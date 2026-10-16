@@ -20,9 +20,16 @@ export function useCountdown(
   const [remainingMs, setRemainingMs] = useState(calcRemaining);
   const completedRef = useRef(false);
 
+  // Re-sync when the countdown target changes (e.g. a voyage extension):
+  // adjust state during render instead of in the effect below.
+  const [prevCalc, setPrevCalc] = useState(() => calcRemaining);
+  if (prevCalc !== calcRemaining) {
+    setPrevCalc(() => calcRemaining);
+    setRemainingMs(calcRemaining());
+  }
+
   useEffect(() => {
     completedRef.current = false;
-    setRemainingMs(calcRemaining());
 
     const interval = setInterval(() => {
       const remaining = calcRemaining();

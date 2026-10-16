@@ -4,7 +4,7 @@ import type { Expedition } from "../contexts/GameContext";
 import { useWallet, truncatePrincipal } from "../contexts/useWallet";
 import { useCountdown } from "../hooks/useCountdown";
 import { useStakingCanister } from "../hooks/useStakingCanister";
-import { TOKEN_ID } from "../canister/actor";
+import { TOKEN_ID } from "../canister/config";
 import { TIER_CONFIGS, formatDoubloons } from "../utils/rewards";
 import { ExtendModal } from "./ExtendModal";
 

@@ -1,0 +1,10 @@
+{
+  "canisters": {
+    "frontend": {
+      "type": "assets",
+      "source": ["packages/frontend/dist"]
+    }
+  },
+  "output_env_file": ".env",
+  "version": 1
+}

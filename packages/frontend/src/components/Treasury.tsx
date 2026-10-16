@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useGameState } from "../contexts/useGame";
 import { useWallet, truncatePrincipal } from "../contexts/useWallet";
-import { TOKEN_URL } from "../canister/actor";
+import { TOKEN_URL } from "../canister/config";
 import { formatDoubloons, TIER_CONFIGS } from "../utils/rewards";
 
 export function Treasury() {
