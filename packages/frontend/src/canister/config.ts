@@ -38,10 +38,16 @@ export const TOKEN_ID = envOr(import.meta.env.VITE_TOKEN_ID, "hjun");
 export const TOKEN_URL = `${odin.origin}/token/${TOKEN_ID}`;
 
 /**
- * BTC the Treasury "Buy" button spends on the game token through Odin's
- * `user.buy()`. Odin BTC amounts are in millisatoshis (1 sat = 1000).
+ * Sats the Treasury "Buy" button spends on the game token through Odin's
+ * `user.buy()` (`VITE_BUY_SATS`, default 20 000). Odin BTC amounts are in
+ * millisatoshis, so the SDK receives `sats * 1000`.
  */
-export const BUY_BTC_AMOUNT = 1000n;
+function parseSats(raw: string | undefined, fallback: bigint): bigint {
+  const text = envOr(raw, "").replace(/_/g, "");
+  return /^[0-9]+$/.test(text) && BigInt(text) > 0n ? BigInt(text) : fallback;
+}
+export const BUY_BTC_AMOUNT =
+  parseSats(import.meta.env.VITE_BUY_SATS, 20_000n) * 1000n;
 
 /** Odin's BTC token id — the asset the ledger fee is denominated in. */
 export const BTC_TOKEN_ID = "btc";

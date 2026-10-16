@@ -128,6 +128,8 @@ Frontend (`packages/frontend/.env.example`):
 - `VITE_TOKEN_ID` — `hjun`.
 - `VITE_ADMIN_PRINCIPALS` — comma-separated principals shown the treasury
   deposit form (UI gate only; `fund_pool` is open on the canister).
+- `VITE_BUY_SATS` — sats the Treasury "Buy" button spends per click
+  (default 20000).
 
 Canister: `ledger_id` and `token_id` are init arguments; the admin can change
 them with `set_ledger_id` / `set_token_id` until the first launch or pool
