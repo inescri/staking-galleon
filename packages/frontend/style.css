@@ -640,16 +640,43 @@ body {
 /* Ships */
 
 .ship-sprite {
+  /* `top`, `opacity`, `z-index` and `--ship-scale` come from ShipSprite:
+     ships drift toward the horizon the longer they are at sea. */
   position: absolute;
-  top: 30%;
   transform: translateY(-50%);
-  transition: left 1s linear;
+  transition:
+    left 1s linear,
+    top 1s linear,
+    opacity 1s linear;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
-  z-index: 2;
 }
 
 .ship-sailing {
   animation: bob 2.5s ease-in-out infinite;
+}
+
+/* Wear: the same sprite, weathered by time at sea (see utils/wear.ts) */
+
+.ship-image {
+  display: block;
+  image-rendering: pixelated;
+  /* Scaled rather than resized so the shrink eases like `top`/`opacity`. */
+  transform: scale(var(--ship-scale, 1));
+  transition:
+    filter 1s linear,
+    transform 1s linear;
+}
+
+.ship-wear-weathered {
+  filter: saturate(0.8) sepia(0.2);
+}
+
+.ship-wear-battered {
+  filter: saturate(0.55) sepia(0.45) brightness(0.9) contrast(1.1);
+}
+
+.ship-wear-derelict {
+  filter: saturate(0.3) sepia(0.65) brightness(0.75) contrast(1.2);
 }
 
 @keyframes bob {
@@ -797,11 +824,6 @@ body {
   border: 2px solid var(--pixel-border);
   vertical-align: middle;
   flex-shrink: 0;
-}
-
-.tier-icon-card {
-  width: 22px;
-  height: 22px;
 }
 
 .tier-icon-log {
@@ -955,6 +977,23 @@ body {
 
 .expedition-card {
   padding: 12px;
+  /* `--tier-art` (the difficulty's pixel art) and `--tier-color` are set
+     inline by ExpeditionCard so each card is colour-coded by tier. */
+  --tier-color: var(--pixel-border);
+  background-image:
+    linear-gradient(
+      color-mix(in srgb, var(--tier-color) 22%, rgb(8 24 36 / 0.82)),
+      color-mix(in srgb, var(--tier-color) 10%, rgb(8 24 36 / 0.9))
+    ),
+    var(--tier-art, none);
+  background-size: cover;
+  background-position: center;
+  image-rendering: pixelated;
+}
+
+.ship-image-card {
+  vertical-align: middle;
+  display: inline-block;
 }
 
 .expedition-header {

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { useGameDispatch } from "../contexts/useGame";
 import type { Expedition } from "../contexts/GameContext";
 import { useWallet } from "../contexts/useWallet";
@@ -10,7 +10,8 @@ import {
   PAYOUT_FEE_APPROVAL,
 } from "../canister/config";
 import { TIER_CONFIGS, formatBps, formatUnits } from "../utils/rewards";
-import { TierIcon } from "./TierIcon";
+import { TIER_ICONS } from "../utils/tierIcons";
+import { ShipImage } from "./ShipImage";
 import {
   approvalFor,
   claimRequest,
@@ -32,7 +33,7 @@ export function ExpeditionCard({ expedition }: { expedition: Expedition }) {
   const [returnError, setReturnError] = useState<string | null>(null);
   const config = TIER_CONFIGS[expedition.tier];
 
-  const { minutes, seconds, progress, isComplete } = useCountdown(
+  const { minutes, seconds, progress, elapsedMs, isComplete } = useCountdown(
     expedition.startedAt,
     expedition.durationMs,
   );
@@ -43,8 +44,8 @@ export function ExpeditionCard({ expedition }: { expedition: Expedition }) {
     approval?.returnState.shipId === expedition.id &&
     approval.request.status === "pending";
   const awaitingPayout = expedition.status === "payout_pending";
-  // Stake pull still in flight: `startedAt` is 0, so the countdown is
-  // meaningless until the next sync shows the ship sailing.
+  // Stake pull still in flight: `startedAt` is 0 and the countdown has not
+  // begun until the next sync shows the ship sailing.
   const isLaunching = expedition.status === "launching";
   const locked =
     expedition.status === "settling" ||
@@ -192,10 +193,22 @@ export function ExpeditionCard({ expedition }: { expedition: Expedition }) {
               : "Return Ship";
 
   return (
-    <div className="expedition-card pixel-panel">
+    <div
+      className="expedition-card pixel-panel"
+      style={
+        {
+          "--tier-art": `url("${TIER_ICONS[expedition.tier]}")`,
+          "--tier-color": config.color,
+        } as CSSProperties
+      }
+    >
       <div className="expedition-header">
         <span className="expedition-tier">
-          <TierIcon tier={expedition.tier} className="tier-icon-card" />{" "}
+          <ShipImage
+            elapsedMs={elapsedMs}
+            size={22}
+            className="ship-image-card"
+          />{" "}
           {config.name}
         </span>
         <span className="expedition-stake">
@@ -210,7 +223,7 @@ export function ExpeditionCard({ expedition }: { expedition: Expedition }) {
         <div
           className="progress-bar-fill"
           style={{
-            width: `${(isLaunching ? 0 : progress) * 100}%`,
+            width: `${progress * 100}%`,
             backgroundColor: config.color,
           }}
         />

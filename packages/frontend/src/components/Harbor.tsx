@@ -4,12 +4,12 @@ import { ShipSprite } from "./ShipSprite";
 import type { Expedition } from "../contexts/GameContext";
 
 function HarborShip({ expedition }: { expedition: Expedition }) {
-  const { progress } = useCountdown(
+  const { progress, elapsedMs } = useCountdown(
     expedition.startedAt,
     expedition.durationMs,
   );
 
-  return <ShipSprite tier={expedition.tier} progress={progress} size={36} />;
+  return <ShipSprite progress={progress} elapsedMs={elapsedMs} size={36} />;
 }
 
 export function Harbor() {
