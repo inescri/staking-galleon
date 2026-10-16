@@ -10,7 +10,7 @@ import {
 } from "../utils/rewards";
 import { useGameCanister } from "../hooks/useGameCanister";
 import { APP_CANISTER_ID, TOKEN_ID } from "../canister/config";
-import { TIER_ICONS } from "./TierIcon";
+import { TIER_ICONS } from "../utils/tierIcons";
 import {
   approvalFor,
   claimRequest,
