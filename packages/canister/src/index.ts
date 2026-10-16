@@ -87,6 +87,8 @@ const VERSION = "galleon-stakes 0.1.0 (schema 1)";
 const TRUSTED_ORIGINS: string[] = [
   "http://localhost:5173",
   "http://localhost:5174",
+  // Production — Netlify-hosted frontend.
+  "https://galleon-expeditions.netlify.app",
 ];
 
 /** Settled ship ids kept per owner (ships at sea are always kept). */

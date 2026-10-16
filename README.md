@@ -135,8 +135,9 @@ Canister: `ledger_id` and `token_id` are init arguments; the admin can change
 them with `set_ledger_id` / `set_token_id` until the first launch or pool
 deposit (`NOT_PRISTINE` afterwards, since funds live on that ledger). Difficulties live in
 `packages/canister/src/default_config.ts` and can be replaced at runtime with
-`set_config`. `TRUSTED_ORIGINS` in `src/index.ts` lists localhost only — add
-the hosted origin before a public deploy.
+`set_config`. `TRUSTED_ORIGINS` in `src/index.ts` lists localhost and
+`https://galleon-expeditions.netlify.app`; add any other hosted origin
+before deploying there.
 
 ## Deploy
 
