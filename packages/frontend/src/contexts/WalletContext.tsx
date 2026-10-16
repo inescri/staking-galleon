@@ -1,22 +1,25 @@
-import { useCallback, useEffect, useMemo, type ReactNode } from "react";
-import type { OdinConnectedUser } from "odin-connect";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+  type ReactNode,
+} from "react";
+import type { OdinBalance, OdinConnectedUser } from "odin-connect";
 import { useGameDispatch } from "./useGame";
-import { WalletContext, type WalletContextValue } from "./useWallet";
+import {
+  WalletContext,
+  type TokenUnits,
+  type WalletContextValue,
+} from "./useWallet";
 import { createStakingActor } from "../canister/actor";
 import { STAKING_CANISTER_ID, TOKEN_ID } from "../canister/config";
 import { odin } from "../odin/client";
 import { useOdinState } from "../odin/useOdinState";
 import { connectErrorMessage, deriveAuthStatus } from "../odin/authStatus";
 
-function computeTokenBalance(token: {
-  balance: bigint;
-  decimals?: number;
-  divisibility?: number;
-}): number {
-  if (!token) return 0;
-  const decimals = token.decimals ?? 0;
-  const divisibility = token.divisibility ?? 8;
-  const divisor = Math.pow(10, divisibility + decimals);
+function computeTokenBalance(token: OdinBalance): number {
+  const divisor = Math.pow(10, token.divisibility + token.decimals);
   return Number(token.balance) / divisor;
 }
 
@@ -32,17 +35,27 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const { user: connectedUser, request } = state;
   const status = deriveAuthStatus(state);
   const dispatch = useGameDispatch();
+  const [token, setToken] = useState<TokenUnits | null>(null);
+  // The user whose balance and position have been fetched at least once.
+  const [hydratedUser, setHydratedUser] = useState<OdinConnectedUser | null>(
+    null,
+  );
 
   const fetchBalancesAndPositions = useCallback(
     async (user: OdinConnectedUser) => {
       try {
         const tokenBalance = await user.getBalance(TOKEN_ID);
         if (tokenBalance) {
+          setToken({
+            decimals: tokenBalance.decimals,
+            divisibility: tokenBalance.divisibility,
+          });
           dispatch({
             type: "SET_BALANCE",
             payload: computeTokenBalance(tokenBalance),
           });
         } else {
+          setToken(null);
           dispatch({ type: "SET_BALANCE", payload: 0 });
         }
       } catch (err) {
@@ -67,11 +80,19 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   );
 
   // Load balances whenever the connected user changes: a fresh connect, a
-  // restored session, or a redirect result after reload.
+  // restored session, or a redirect result after reload. `isRestoring` stays
+  // true until this first fetch has settled.
   useEffect(() => {
-    if (connectedUser) {
-      void fetchBalancesAndPositions(connectedUser);
-    }
+    if (!connectedUser) return;
+    let cancelled = false;
+    const load = async () => {
+      await fetchBalancesAndPositions(connectedUser);
+      if (!cancelled) setHydratedUser(connectedUser);
+    };
+    void load();
+    return () => {
+      cancelled = true;
+    };
   }, [connectedUser, fetchBalancesAndPositions]);
 
   const connectWallet = useCallback(() => {
@@ -92,8 +113,11 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
   const disconnectWallet = useCallback(() => {
     odin.disconnect();
+    setToken(null);
     dispatch({ type: "SET_BALANCE", payload: 0 });
   }, [dispatch]);
+
+  const isHydrating = connectedUser !== null && hydratedUser !== connectedUser;
 
   const connectionError =
     status === "error" ? connectErrorMessage(request) : null;
@@ -104,7 +128,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       identity: connectedUser?.getIdentity() ?? null,
       principal: connectedUser?.principal || "",
       isConnecting: status === "connecting",
-      isRestoring: status === "restoring",
+      isRestoring: status === "restoring" || isHydrating,
+      token,
       connectionError,
       request,
       connectWallet,
@@ -114,6 +139,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     [
       connectedUser,
       status,
+      isHydrating,
+      token,
       connectionError,
       request,
       connectWallet,

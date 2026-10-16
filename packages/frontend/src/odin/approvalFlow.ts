@@ -1,5 +1,5 @@
 import type { OdinRequestState } from "odin-connect";
-import type { Tier } from "../utils/rewards";
+import { TIERS, type Tier } from "../utils/rewards";
 
 /**
  * `returnState` the stake flow attaches to its ICRC-2 approval. The approved
@@ -13,13 +13,6 @@ export interface ApprovalReturnState {
   durationMs: number;
   stakeAmount: number;
 }
-
-const TIERS: readonly Tier[] = [
-  "coastal",
-  "open_sea",
-  "deep_ocean",
-  "kraken_waters",
-];
 
 type IcrcApproveRequest = Extract<OdinRequestState, { action: "icrc_approve" }>;
 

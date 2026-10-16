@@ -1,7 +1,12 @@
 import { useEffect, useState } from "react";
 import { useGameState, useGameDispatch } from "../contexts/useGame";
 import { useWallet } from "../contexts/useWallet";
-import { TIER_CONFIGS, formatDoubloons, type Tier } from "../utils/rewards";
+import {
+  TIER_CONFIGS,
+  TIERS,
+  formatDoubloons,
+  type Tier,
+} from "../utils/rewards";
 import { OdinUtils } from "odin-connect";
 import { useStakingCanister } from "../hooks/useStakingCanister";
 import { STAKING_CANISTER_ID, TOKEN_ID } from "../canister/config";
@@ -11,13 +16,18 @@ import {
   type ApprovalReturnState,
 } from "../odin/approvalFlow";
 
-const TIERS: Tier[] = ["coastal", "open_sea", "deep_ocean", "kraken_waters"];
-
 export function SendShipForm() {
   const { balance, activeExpeditions } = useGameState();
   const dispatch = useGameDispatch();
-  const { connectedUser, identity, principal, request, refreshBalances } =
-    useWallet();
+  const {
+    connectedUser,
+    identity,
+    principal,
+    request,
+    token,
+    isRestoring,
+    refreshBalances,
+  } = useWallet();
   const { depositAndLock } = useStakingCanister();
 
   const [selectedTier, setSelectedTier] = useState<Tier>("coastal");
@@ -40,6 +50,8 @@ export function SendShipForm() {
     activeExpeditions.length < 5 &&
     duration >= config.minDuration &&
     duration <= config.maxDuration &&
+    token !== null &&
+    !isRestoring &&
     !isLoading;
 
   const handleTierChange = (tier: Tier) => {
@@ -55,13 +67,12 @@ export function SendShipForm() {
   //    arrives as `request` and is handled by the effect below. Everything
   //    the follow-up needs beyond the approved amount rides in `returnState`.
   const handleLaunch = () => {
-    if (!canLaunch || !connectedUser) return;
+    if (!canLaunch || !connectedUser || token === null) return;
 
     setApproveError(null);
-    const onChainAmount = OdinUtils.convertToOdinAmount(stakeAmount, {
-      decimals: 3,
-      divisibility: 8,
-    });
+    // Same units as the displayed balance (the token's own decimals and
+    // divisibility), so what is approved is what the user sees.
+    const onChainAmount = OdinUtils.convertToOdinAmount(stakeAmount, token);
     const returnState: ApprovalReturnState = {
       flow: "stake",
       tier: selectedTier,
@@ -97,9 +108,21 @@ export function SendShipForm() {
       return;
     }
     if (status !== "success") return;
-    // After a redirect reload the delegation identity is still being
-    // restored; this effect re-runs once it exists.
-    if (identity === null) return;
+    // Wait for the restored session and its first balance fetch; the effect
+    // re-runs when they land.
+    if (isRestoring) return;
+    // The identity is fixed per connected user, so a missing delegation at
+    // this point never appears later. Claim the approval and say so, instead
+    // of leaving the button enabled to grant a second, dangling allowance.
+    if (identity === null) {
+      if (claimRequest(id)) {
+        setApproveError(
+          "Approved, but the wallet session has no delegation to stake " +
+            "with. Reconnect and launch again.",
+        );
+      }
+      return;
+    }
     // At most once per approval: claimed before the await, so re-renders,
     // StrictMode and remounts cannot stake twice.
     if (!claimRequest(id)) return;
@@ -135,6 +158,7 @@ export function SendShipForm() {
   }, [
     request,
     identity,
+    isRestoring,
     principal,
     balance,
     depositAndLock,

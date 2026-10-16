@@ -1,13 +1,27 @@
 import { createContext, useContext } from "react";
 import type { Identity } from "@dfinity/agent";
-import type { OdinConnectedUser, OdinRequestState } from "odin-connect";
+import type {
+  OdinBalance,
+  OdinConnectedUser,
+  OdinRequestState,
+} from "odin-connect";
+
+/** The staked token's on-chain units, from the fetched balance. */
+export type TokenUnits = Pick<OdinBalance, "decimals" | "divisibility">;
 
 export interface WalletContextValue {
   connectedUser: OdinConnectedUser | null;
   identity: Identity | null;
   principal: string;
   isConnecting: boolean;
+  /**
+   * True while the stored session is being restored and until the connected
+   * user's balance and position have been fetched once, so the connected UI
+   * never renders with a placeholder balance of 0.
+   */
   isRestoring: boolean;
+  /** Units of the staked token; null until a balance has been fetched. */
+  token: TokenUnits | null;
   connectionError: string | null;
   /**
    * The latest `connect()` or action (`user.icrcApprove()`, …) and its

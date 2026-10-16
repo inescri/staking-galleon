@@ -39,6 +39,9 @@ export const TIER_CONFIGS: Record<Tier, TierConfig> = {
   },
 };
 
+/** Every tier, in display order. The one list the app iterates and validates against. */
+export const TIERS = Object.keys(TIER_CONFIGS) as readonly Tier[];
+
 export function formatDoubloons(n: number): string {
   return n.toLocaleString("en-US", {
     minimumFractionDigits: 0,
