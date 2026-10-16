@@ -1,5 +1,4 @@
-import shipImage from "../assets/ships/ship.png";
-import { wearLevel } from "../utils/wear";
+import { ShipImage } from "./ShipImage";
 
 interface ShipSpriteProps {
   /** How far along the voyage the ship is, 0..1. Drives horizontal position. */
@@ -14,8 +13,6 @@ export function ShipSprite({
   elapsedMs,
   size = 32,
 }: ShipSpriteProps) {
-  const wear = wearLevel(elapsedMs);
-
   return (
     <div
       className="ship-sprite ship-sailing"
@@ -24,14 +21,7 @@ export function ShipSprite({
         animationDelay: `${progress * 500}ms`,
       }}
     >
-      <img
-        className={`ship-image ship-wear-${wear}`}
-        src={shipImage}
-        alt={`${wear} ship`}
-        width={size}
-        height={size}
-        style={{ imageRendering: "pixelated" }}
-      />
+      <ShipImage elapsedMs={elapsedMs} size={size} />
     </div>
   );
 }

@@ -974,6 +974,18 @@ body {
 
 .expedition-card {
   padding: 12px;
+  /* `--tier-art` is the difficulty's pixel art, set inline by ExpeditionCard. */
+  background-image:
+    linear-gradient(rgba(8, 24, 36, 0.82), rgba(8, 24, 36, 0.9)),
+    var(--tier-art, none);
+  background-size: cover;
+  background-position: center;
+  image-rendering: pixelated;
+}
+
+.ship-image-card {
+  vertical-align: middle;
+  display: inline-block;
 }
 
 .expedition-header {

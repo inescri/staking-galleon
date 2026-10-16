@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { useGameDispatch } from "../contexts/useGame";
 import type { Expedition } from "../contexts/GameContext";
 import { useWallet } from "../contexts/useWallet";
@@ -10,7 +10,8 @@ import {
   PAYOUT_FEE_APPROVAL,
 } from "../canister/config";
 import { TIER_CONFIGS, formatBps, formatUnits } from "../utils/rewards";
-import { TierIcon } from "./TierIcon";
+import { TIER_ICONS } from "../utils/tierIcons";
+import { ShipImage } from "./ShipImage";
 import {
   approvalFor,
   claimRequest,
@@ -32,7 +33,7 @@ export function ExpeditionCard({ expedition }: { expedition: Expedition }) {
   const [returnError, setReturnError] = useState<string | null>(null);
   const config = TIER_CONFIGS[expedition.tier];
 
-  const { minutes, seconds, progress, isComplete } = useCountdown(
+  const { minutes, seconds, progress, remainingMs, isComplete } = useCountdown(
     expedition.startedAt,
     expedition.durationMs,
   );
@@ -191,11 +192,22 @@ export function ExpeditionCard({ expedition }: { expedition: Expedition }) {
               ? "Claim Payout"
               : "Return Ship";
 
+  const elapsedMs = isLaunching ? 0 : expedition.durationMs - remainingMs;
+
   return (
-    <div className="expedition-card pixel-panel">
+    <div
+      className="expedition-card pixel-panel"
+      style={
+        { "--tier-art": `url(${TIER_ICONS[expedition.tier]})` } as CSSProperties
+      }
+    >
       <div className="expedition-header">
         <span className="expedition-tier">
-          <TierIcon tier={expedition.tier} className="tier-icon-card" />{" "}
+          <ShipImage
+            elapsedMs={elapsedMs}
+            size={22}
+            className="ship-image-card"
+          />{" "}
           {config.name}
         </span>
         <span className="expedition-stake">
