@@ -31,3 +31,16 @@ export function wearLevel(elapsedMs: number): WearLevel {
   }
   return level;
 }
+
+/** Time at sea after which a ship sits on the horizon (the longest voyage). */
+const FAR_MS = 7 * DAY_MS;
+
+/**
+ * How far out a ship looks, 0 (just left the dock) to 1 (on the horizon),
+ * by time at sea. Logarithmic so the first hours already move the ship
+ * while multi-day voyages keep creeping toward the horizon.
+ */
+export function seaDepth(elapsedMs: number): number {
+  const clamped = Math.min(Math.max(elapsedMs, 0), FAR_MS);
+  return Math.log1p(clamped / HOUR_MS) / Math.log1p(FAR_MS / HOUR_MS);
+}

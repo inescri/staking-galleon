@@ -640,10 +640,15 @@ body {
 /* Ships */
 
 .ship-sprite {
+  /* `top`, `opacity` and `z-index` come from ShipSprite: ships drift toward
+     the horizon the longer they are at sea. */
   position: absolute;
-  top: 30%;
+  top: 34%;
   transform: translateY(-50%);
-  transition: left 1s linear;
+  transition:
+    left 1s linear,
+    top 1s linear,
+    opacity 1s linear;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
   z-index: 2;
 }
