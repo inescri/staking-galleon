@@ -338,9 +338,19 @@ body {
     color 0.2s;
 }
 
-.buy-doubloons-link:hover {
+.buy-doubloons-link {
+  cursor: pointer;
+  line-height: normal;
+}
+
+.buy-doubloons-link:hover:not(:disabled) {
   background: var(--gold);
   color: var(--panel-bg);
+}
+
+.buy-doubloons-link:disabled {
+  opacity: 0.6;
+  cursor: wait;
 }
 
 /* Wallet */

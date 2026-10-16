@@ -1,14 +1,38 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useGameState } from "../contexts/useGame";
 import { useWallet } from "../contexts/useWallet";
-import { TOKEN_URL } from "../canister/config";
+import { BUY_BTC_AMOUNT, TOKEN_ID, TOKEN_URL } from "../canister/config";
+import { claimRequest } from "../odin/approvalFlow";
 import { formatDoubloons, formatUnits, TIER_CONFIGS } from "../utils/rewards";
 import { FundTreasury } from "./FundTreasury";
 
 export function Treasury() {
   const { balance, completedExpeditions } = useGameState();
-  const { refreshBalances, token } = useWallet();
+  const { connectedUser, request, refreshBalances, token } = useWallet();
   const [refreshing, setRefreshing] = useState(false);
+  const [buyError, setBuyError] = useState<string | null>(null);
+
+  const isBuying = request?.action === "buy" && request.status === "pending";
+
+  // Buy through Odin: started without awaiting (redirect mode reloads the
+  // page); the outcome lands in `request` and is handled below.
+  const handleBuy = () => {
+    if (!connectedUser || isBuying) return;
+    setBuyError(null);
+    void connectedUser.buy({ token: TOKEN_ID, btcAmount: BUY_BTC_AMOUNT });
+  };
+
+  useEffect(() => {
+    if (request?.action !== "buy") return;
+    const { id, status } = request;
+    if (status === "success") {
+      if (claimRequest(id)) void refreshBalances();
+    } else if (status === "rejected") {
+      if (claimRequest(id)) setBuyError("Purchase was cancelled.");
+    } else if (status === "failed") {
+      if (claimRequest(id)) setBuyError(request.error ?? "Purchase failed.");
+    }
+  }, [request, refreshBalances]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -49,15 +73,26 @@ export function Treasury() {
             </svg>
           </button>
         </span>
-        <a
-          href={TOKEN_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="buy-doubloons-link"
-        >
-          Buy
-        </a>
+        {connectedUser ? (
+          <button
+            className="buy-doubloons-link"
+            onClick={handleBuy}
+            disabled={isBuying}
+          >
+            {isBuying ? "Buying..." : "Buy"}
+          </button>
+        ) : (
+          <a
+            href={TOKEN_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="buy-doubloons-link"
+          >
+            Buy
+          </a>
+        )}
       </div>
+      {buyError && <span className="wallet-error">{buyError}</span>}
 
       <FundTreasury />
 

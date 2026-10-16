@@ -37,6 +37,12 @@ export const TOKEN_ID = envOr(import.meta.env.VITE_TOKEN_ID, "hjun");
 /** The token's page on the Odin site of the configured `VITE_ODIN_ENV`. */
 export const TOKEN_URL = `${odin.origin}/token/${TOKEN_ID}`;
 
+/**
+ * BTC the Treasury "Buy" button spends on the game token through Odin's
+ * `user.buy()`. Odin BTC amounts are in millisatoshis (1 sat = 1000).
+ */
+export const BUY_BTC_AMOUNT = 1000n;
+
 /** Odin's BTC token id — the asset the ledger fee is denominated in. */
 export const BTC_TOKEN_ID = "btc";
 
