@@ -10,8 +10,4 @@ export default defineConfig({
   resolve: {
     dedupe: ["react", "react-dom"],
   },
-  build: {
-    outDir: "dist",
-    emptyOutDir: true,
-  },
 });

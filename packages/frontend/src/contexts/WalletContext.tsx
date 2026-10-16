@@ -43,37 +43,49 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
   const fetchBalancesAndPositions = useCallback(
     async (user: OdinConnectedUser) => {
-      try {
-        const tokenBalance = await user.getBalance(TOKEN_ID);
-        if (tokenBalance) {
-          setToken({
-            decimals: tokenBalance.decimals,
-            divisibility: tokenBalance.divisibility,
-          });
-          dispatch({
-            type: "SET_BALANCE",
-            payload: computeTokenBalance(tokenBalance),
-          });
+      // The Odin API balance and the canister position are independent;
+      // fetch them concurrently and handle each outcome on its own.
+      const delegationIdentity = user.getIdentity() ?? undefined;
+      const actor = createStakingActor(delegationIdentity);
+      const [balanceResult, positionResult] = await Promise.allSettled([
+        user.getBalance(TOKEN_ID),
+        actor.stake_get_position(TOKEN_ID),
+      ]);
+
+      if (balanceResult.status === "fulfilled" && balanceResult.value) {
+        const tokenBalance = balanceResult.value;
+        setToken({
+          decimals: tokenBalance.decimals,
+          divisibility: tokenBalance.divisibility,
+        });
+        dispatch({
+          type: "SET_BALANCE",
+          payload: computeTokenBalance(tokenBalance),
+        });
+      } else {
+        if (balanceResult.status === "rejected") {
+          console.error(
+            "Failed to fetch token balances:",
+            balanceResult.reason,
+          );
         } else {
           setToken(null);
-          dispatch({ type: "SET_BALANCE", payload: 0 });
         }
-      } catch (err) {
-        console.error("Failed to fetch token balances:", err);
         dispatch({ type: "SET_BALANCE", payload: 0 });
       }
 
-      try {
-        const delegationIdentity = user.getIdentity() ?? undefined;
-        const actor = createStakingActor(delegationIdentity);
-        const position = await actor.stake_get_position(TOKEN_ID);
+      if (positionResult.status === "fulfilled") {
+        const position = positionResult.value;
         if (position.length > 0 && position[0]) {
           dispatch({ type: "SYNC_POSITIONS", payload: [position[0]] });
         } else {
           dispatch({ type: "SYNC_POSITIONS", payload: [] });
         }
-      } catch (err) {
-        console.error("Failed to fetch staking position:", err);
+      } else {
+        console.error(
+          "Failed to fetch staking position:",
+          positionResult.reason,
+        );
       }
     },
     [dispatch],
