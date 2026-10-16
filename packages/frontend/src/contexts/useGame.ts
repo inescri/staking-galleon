@@ -1,15 +1,11 @@
 import { createContext, useContext, type Dispatch } from "react";
-import type { GameState, GameAction } from "../utils/game";
+import {
+  INITIAL_GAME_STATE,
+  type GameState,
+  type GameAction,
+} from "../utils/game";
 
-const INITIAL_STATE: GameState = {
-  balance: 0,
-  activeExpeditions: [],
-  completedExpeditions: [],
-  pendingReturns: [],
-  pendingDispatches: [],
-};
-
-export const GameStateContext = createContext<GameState>(INITIAL_STATE);
+export const GameStateContext = createContext<GameState>(INITIAL_GAME_STATE);
 export const GameDispatchContext = createContext<Dispatch<GameAction>>(
   () => {},
 );

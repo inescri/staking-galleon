@@ -2,13 +2,14 @@
   "name": "staking-galleon",
   "version": "0.0.0",
   "private": true,
-  "description": "Galleon Stakes — pirate-themed token staking game on Odin Fun",
+  "description": "Galleon Stakes \u2014 pirate-themed voyage staking game on Odin Fun",
   "packageManager": "pnpm@10.33.0",
   "engines": {
     "node": ">=22"
   },
   "scripts": {
     "build": "pnpm build:frontend",
+    "build:canister": "dfx build canister --check",
     "build:frontend": "pnpm --filter @staking-galleon/frontend build",
     "dev:frontend": "pnpm --filter @staking-galleon/frontend dev",
     "lint": "pnpm -r lint",

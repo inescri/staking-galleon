@@ -37,7 +37,10 @@ export function App() {
       </main>
 
       <footer className="app-footer">
-        <p>All deposits are mocked. No real tokens involved.</p>
+        <p>
+          Every voyage risks its whole stake. Lost stakes feed the treasury that
+          pays the winners.
+        </p>
       </footer>
     </div>
   );

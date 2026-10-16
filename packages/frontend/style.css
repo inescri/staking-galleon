@@ -338,9 +338,19 @@ body {
     color 0.2s;
 }
 
-.buy-doubloons-link:hover {
+.buy-doubloons-link {
+  cursor: pointer;
+  line-height: normal;
+}
+
+.buy-doubloons-link:hover:not(:disabled) {
   background: var(--gold);
   color: var(--panel-bg);
+}
+
+.buy-doubloons-link:disabled {
+  opacity: 0.6;
+  cursor: wait;
 }
 
 /* Wallet */
@@ -430,6 +440,55 @@ body {
 
 /* Voyage Log */
 
+.fund-treasury {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 2px solid var(--pixel-border);
+}
+
+.fund-treasury summary {
+  cursor: pointer;
+  font-family: "Press Start 2P", monospace;
+  font-size: 0.55rem;
+  color: var(--sea-light);
+  text-transform: uppercase;
+}
+
+.pool-stats {
+  font-family: "VT323", monospace;
+  font-size: 1rem;
+  color: var(--text-dim);
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.pool-stats b {
+  color: var(--gold);
+  font-weight: normal;
+}
+
+.fund-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.fund-row .pixel-input {
+  flex: 1;
+  min-width: 0;
+}
+
+.fund-hint {
+  font-family: "VT323", monospace;
+  font-size: 0.95rem;
+  color: var(--text-dim);
+  margin: 0;
+}
+
 .voyage-log {
   margin-top: 16px;
   border-top: 2px solid var(--pixel-border);
@@ -462,12 +521,6 @@ body {
 .log-stake {
   color: var(--text-dim);
   min-width: 60px;
-}
-
-.log-principal {
-  margin-left: auto;
-  color: var(--text-dim);
-  font-size: 0.85rem;
 }
 
 /* ======== HARBOR ======== */
@@ -712,36 +765,63 @@ body {
 .tier-btn {
   font-family: "VT323", monospace;
   font-size: 1rem;
-  padding: 8px 4px;
-  background: var(--sea-deep);
-  color: var(--text-dim);
+  padding: 0;
+  aspect-ratio: 1;
+  background-color: var(--sea-deep);
+  background-size: cover;
+  background-position: center;
+  image-rendering: pixelated;
+  color: var(--text-primary);
   border: 2px solid var(--pixel-border);
   cursor: pointer;
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: 4px;
+  justify-content: flex-end;
+  overflow: hidden;
+  filter: saturate(0.6) brightness(0.8);
   transition: all 0.15s;
 }
 
 .tier-btn:hover {
-  background: var(--panel-bg-light);
+  filter: saturate(0.9) brightness(0.95);
 }
 
 .tier-btn.active {
-  background: var(--panel-bg-light);
-  color: var(--text-primary);
+  filter: none;
   border-width: 3px;
 }
 
-.tier-emoji {
-  font-size: 1.3rem;
+.tier-icon {
+  image-rendering: pixelated;
+  object-fit: cover;
+  border: 2px solid var(--pixel-border);
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+
+.tier-icon-card {
+  width: 22px;
+  height: 22px;
+}
+
+.tier-icon-log {
+  width: 24px;
+  height: 24px;
+}
+
+.tier-icon-toast {
+  width: 36px;
+  height: 36px;
 }
 
 .tier-name {
+  width: 100%;
+  padding: 4px 2px;
   font-size: 0.85rem;
   text-align: center;
   line-height: 1.2;
+  background: rgba(0, 0, 0, 0.55);
+  text-shadow: 1px 1px 0 #000;
 }
 
 .form-group {
@@ -757,73 +837,90 @@ body {
   text-transform: uppercase;
 }
 
-.stake-input-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.stake-input-row .pixel-input {
-  flex: 1;
-}
-
-.input-suffix {
-  font-family: "Press Start 2P", monospace;
-  font-size: 0.55rem;
-  color: var(--text-dim);
-}
-
-.percent-buttons {
-  display: flex;
-  gap: 6px;
-}
-
-.percent-buttons .pixel-btn-sm {
-  flex: 1;
-  text-align: center;
-}
-
 .duration-display {
   color: var(--gold);
 }
 
-/* Slider */
-
-.pixel-slider {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 100%;
-  height: 8px;
+.stake-fixed {
+  font-family: "VT323", monospace;
+  font-size: 1.3rem;
+  color: var(--gold);
+  padding: 6px 10px;
   background: var(--sea-deep);
   border: 2px solid var(--pixel-border);
-  outline: none;
-  cursor: pointer;
 }
 
-.pixel-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 18px;
-  height: 18px;
-  background: var(--gold);
-  border: 2px solid var(--gold-dark);
-  cursor: pointer;
+.duration-menu {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+  gap: 6px;
 }
 
-.pixel-slider::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
-  background: var(--gold);
-  border: 2px solid var(--gold-dark);
-  border-radius: 0;
-  cursor: pointer;
-}
-
-.slider-labels {
-  display: flex;
-  justify-content: space-between;
-  font-size: 0.9rem;
+.duration-btn {
+  font-family: "VT323", monospace;
+  padding: 8px 4px;
+  background: var(--sea-deep);
   color: var(--text-dim);
+  border: 2px solid var(--pixel-border);
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  transition: all 0.15s;
+}
+
+.duration-btn:hover {
+  background: var(--panel-bg-light);
+}
+
+.duration-btn.active {
+  background: var(--panel-bg-light);
+  color: var(--text-primary);
+  border-color: var(--gold);
+  border-width: 3px;
+}
+
+.duration-label {
+  font-size: 1.2rem;
+  color: var(--gold);
+}
+
+.duration-risk {
+  font-size: 0.9rem;
+  color: var(--danger);
+}
+
+.duration-reward {
+  font-size: 0.9rem;
+  color: var(--success);
+}
+
+.duration-summary {
+  font-family: "VT323", monospace;
+  font-size: 1rem;
+  color: var(--text-dim);
+  margin: 0;
+}
+
+.expedition-odds {
+  font-family: "VT323", monospace;
+  font-size: 0.95rem;
+  color: var(--text-dim);
+  margin-left: auto;
+}
+
+.log-outcome {
+  font-family: "VT323", monospace;
+  font-size: 1rem;
+}
+
+.log-win .log-outcome {
+  color: var(--success);
+}
+
+.log-loss .log-outcome {
+  color: var(--danger);
 }
 
 .launch-info {
@@ -912,17 +1009,6 @@ body {
 
 /* ======== MODAL ======== */
 
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.7);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 200;
-  animation: fade-in 0.15s ease-out;
-}
-
 @keyframes fade-in {
   from {
     opacity: 0;
@@ -930,47 +1016,6 @@ body {
   to {
     opacity: 1;
   }
-}
-
-.modal-content {
-  width: 90%;
-  max-width: 400px;
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-.modal-expedition-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 1.1rem;
-  color: var(--text-dim);
-}
-
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  margin-top: 4px;
-}
-
-.modal-confirm-btn {
-  background: var(--gold) !important;
-  color: var(--sea-deep) !important;
-  border-color: var(--gold-dark) !important;
-}
-
-.modal-confirm-btn:hover {
-  filter: brightness(1.1);
-}
-
-.modal-confirm-btn:disabled {
-  background: var(--gold) !important;
-  color: var(--sea-deep) !important;
-  border-color: var(--gold-dark) !important;
-  opacity: 0.5;
-  cursor: not-allowed;
 }
 
 /* Expedition card actions row */
@@ -1056,6 +1101,14 @@ body {
 
 .toast-profit .toast-result {
   color: var(--success);
+}
+
+.toast-loss {
+  border-color: var(--danger);
+}
+
+.toast-loss .toast-result {
+  color: var(--danger);
 }
 
 /* ======== SCROLLBAR ======== */

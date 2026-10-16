@@ -16,7 +16,7 @@ export interface WalletContextValue {
   isConnecting: boolean;
   /**
    * True while the stored session is being restored and until the connected
-   * user's balance and position have been fetched once, so the connected UI
+   * user's balance and ships have been fetched once, so the connected UI
    * never renders with a placeholder balance of 0.
    */
   isRestoring: boolean;

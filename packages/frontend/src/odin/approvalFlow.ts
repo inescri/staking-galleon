@@ -1,18 +1,26 @@
 import type { OdinRequestState } from "odin-connect";
-import { TIERS, type Tier } from "../utils/rewards";
+import { DIFFICULTIES, type Difficulty } from "../canister/idl";
 
 /**
- * `returnState` the stake flow attaches to its ICRC-2 approval. The approved
- * amount is in `request.input`, but the tier, duration and display amount are
- * form state — gone after a redirect reload — so they ride along here.
- * `returnState` survives the redirect (bigints included).
+ * `returnState` the game attaches to its ICRC-2 approvals so the follow-up
+ * canister call can be made after the approval settles — including after a
+ * redirect reload, where form state is gone. `returnState` survives the
+ * redirect.
+ *
+ *   stake  — approve the game token for a difficulty's fixed stake, then
+ *            `launch(difficulty, durationIndex)`. The canister dictates the
+ *            amount, so only the choice rides along.
+ *   settle — approve BTC for the payout fee, then `settle(shipId)` (or
+ *            `claim(shipId)` for a ship whose payout is pending).
+ *   fund   — approve the game token for a treasury deposit, then
+ *            `fund_pool(amount)` with the amount from `request.input`.
  */
-export interface ApprovalReturnState {
-  flow: "stake";
-  tier: Tier;
-  durationMs: number;
-  stakeAmount: number;
-}
+export type ApprovalReturnState =
+  | { flow: "stake"; tier: Difficulty; durationIndex: number }
+  | { flow: "settle"; shipId: string }
+  | { flow: "fund" };
+
+export type ApprovalFlow = ApprovalReturnState["flow"];
 
 type IcrcApproveRequest = Extract<OdinRequestState, { action: "icrc_approve" }>;
 
@@ -30,28 +38,41 @@ export function parseApprovalReturnState(
   if (
     value.flow === "stake" &&
     typeof value.tier === "string" &&
-    (TIERS as readonly string[]).includes(value.tier) &&
-    typeof value.durationMs === "number" &&
-    typeof value.stakeAmount === "number"
+    (DIFFICULTIES as readonly string[]).includes(value.tier) &&
+    typeof value.durationIndex === "number" &&
+    Number.isInteger(value.durationIndex) &&
+    value.durationIndex >= 0
   ) {
     return {
       flow: "stake",
-      tier: value.tier as Tier,
-      durationMs: value.durationMs,
-      stakeAmount: value.stakeAmount,
+      tier: value.tier as Difficulty,
+      durationIndex: value.durationIndex,
     };
+  }
+  if (
+    value.flow === "settle" &&
+    typeof value.shipId === "string" &&
+    /^[0-9]+$/.test(value.shipId)
+  ) {
+    return { flow: "settle", shipId: value.shipId };
+  }
+  if (value.flow === "fund") {
+    return { flow: "fund" };
   }
   return null;
 }
 
 /**
- * The latest request when it is this flow's ICRC-2 approval, else null.
+ * The latest request when it is the given flow's ICRC-2 approval, else null.
  * Only the latest request is in state; an older one is never returned.
  */
-export function approvalFor(
+export function approvalFor<F extends ApprovalFlow>(
   request: OdinRequestState | null,
-  flow: ApprovalReturnState["flow"],
-): { request: IcrcApproveRequest; returnState: ApprovalReturnState } | null {
+  flow: F,
+): {
+  request: IcrcApproveRequest;
+  returnState: Extract<ApprovalReturnState, { flow: F }>;
+} | null {
   if (request?.action !== "icrc_approve") {
     return null;
   }
@@ -59,16 +80,19 @@ export function approvalFor(
   if (returnState?.flow !== flow) {
     return null;
   }
-  return { request, returnState };
+  return {
+    request,
+    returnState: returnState as Extract<ApprovalReturnState, { flow: F }>,
+  };
 }
 
 /**
  * Request ids whose outcome has already been acted on during this page load.
  *
  * The follow-up to an approval is a canister update call that moves funds
- * (`stake_deposit_and_lock`), so it must run at most once per approval. A
- * settled request stays in the SDK state after it has been handled, and
- * effects re-run (re-render, StrictMode, a remounted form), so the id is
+ * (`launch`, `settle`), so it must run at most once per approval. A settled
+ * request stays in the SDK state after it has been handled, and effects
+ * re-run (re-render, StrictMode, a remounted component), so the id is
  * claimed synchronously *before* the call, in module scope so it outlives
  * any one component instance. After a reload the SDK no longer reports the
  * old request (`request` is null), so nothing needs persisting.

@@ -1,13 +1,39 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useGameState } from "../contexts/useGame";
-import { useWallet, truncatePrincipal } from "../contexts/useWallet";
-import { TOKEN_URL } from "../canister/config";
-import { formatDoubloons, TIER_CONFIGS } from "../utils/rewards";
+import { useWallet } from "../contexts/useWallet";
+import { BUY_BTC_AMOUNT, TOKEN_ID, TOKEN_URL } from "../canister/config";
+import { claimRequest } from "../odin/approvalFlow";
+import { formatDoubloons, formatUnits } from "../utils/rewards";
+import { FundTreasury } from "./FundTreasury";
+import { TierIcon } from "./TierIcon";
 
 export function Treasury() {
   const { balance, completedExpeditions } = useGameState();
-  const { refreshBalances } = useWallet();
+  const { connectedUser, request, refreshBalances, token } = useWallet();
   const [refreshing, setRefreshing] = useState(false);
+  const [buyError, setBuyError] = useState<string | null>(null);
+
+  const isBuying = request?.action === "buy" && request.status === "pending";
+
+  // Buy through Odin: started without awaiting (redirect mode reloads the
+  // page); the outcome lands in `request` and is handled below.
+  const handleBuy = () => {
+    if (!connectedUser || isBuying) return;
+    setBuyError(null);
+    void connectedUser.buy({ token: TOKEN_ID, btcAmount: BUY_BTC_AMOUNT });
+  };
+
+  useEffect(() => {
+    if (request?.action !== "buy") return;
+    const { id, status } = request;
+    if (status === "success") {
+      if (claimRequest(id)) void refreshBalances();
+    } else if (status === "rejected") {
+      if (claimRequest(id)) setBuyError("Purchase was cancelled.");
+    } else if (status === "failed") {
+      if (claimRequest(id)) setBuyError(request.error ?? "Purchase failed.");
+    }
+  }, [request, refreshBalances]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -48,31 +74,47 @@ export function Treasury() {
             </svg>
           </button>
         </span>
-        <a
-          href={TOKEN_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="buy-doubloons-link"
-        >
-          Buy
-        </a>
+        {connectedUser ? (
+          <button
+            className="buy-doubloons-link"
+            onClick={handleBuy}
+            disabled={isBuying}
+          >
+            {isBuying ? "Buying..." : "Buy"}
+          </button>
+        ) : (
+          <a
+            href={TOKEN_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="buy-doubloons-link"
+          >
+            Buy
+          </a>
+        )}
       </div>
+      {buyError && <span className="wallet-error">{buyError}</span>}
+
+      <FundTreasury />
 
       {completedExpeditions.length > 0 && (
         <div className="voyage-log">
           <h3 className="section-title">Voyage Log</h3>
           <div className="log-entries">
             {completedExpeditions.slice(0, 8).map((exp) => {
-              const config = TIER_CONFIGS[exp.tier];
-              const principal = exp.id.split(":").slice(1).join(":");
               return (
                 <div
-                  key={exp.id + exp.completedAt.toString()}
-                  className="log-entry"
+                  key={exp.id}
+                  className={`log-entry ${exp.succeeded ? "log-win" : "log-loss"}`}
                 >
-                  <span className="log-tier">{config.emoji}</span>
+                  <TierIcon tier={exp.tier} className="tier-icon-log" />
                   <span className="log-stake">
-                    {formatDoubloons(exp.stakeAmount)} dbl
+                    {formatUnits(exp.stake, token)} dbl
+                  </span>
+                  <span className="log-outcome">
+                    {exp.succeeded
+                      ? `+${formatUnits(exp.payout - exp.stake, token)}`
+                      : `\u2212${formatUnits(exp.stake, token)}`}
                   </span>
                   <span className="log-date">
                     {new Date(exp.completedAt).toLocaleDateString(undefined, {
@@ -81,9 +123,6 @@ export function Treasury() {
                       hour: "numeric",
                       minute: "2-digit",
                     })}
-                  </span>
-                  <span className="log-principal">
-                    {truncatePrincipal(principal)}
                   </span>
                 </div>
               );

@@ -1,6 +1,7 @@
 /**
  * Canister/network config, read from Vite env with the game's defaults.
- * Override in `.env` (see `.env.example`).
+ * Override in `.env` (see `.env.example`). On `dfx deploy` the canister id
+ * is also bridged from the root `.env` by `vite.config.ts`.
  */
 import { odin } from "../odin/client";
 
@@ -9,17 +10,75 @@ function envOr(raw: string | undefined, fallback: string): string {
   return raw === undefined || raw === "" ? fallback : raw;
 }
 
-/** Staking canister principal — delegation target + actor target. */
-export const STAKING_CANISTER_ID = envOr(
-  import.meta.env.VITE_STAKING_CANISTER_ID,
-  "sfgyi-iyaaa-aaaam-qepyq-cai",
+/** dfx network: `ic` (default — hosted builds set nothing) or `local`. */
+export const DFX_NETWORK = envOr(
+  import.meta.env.VITE_DFX_NETWORK,
+  envOr(import.meta.env.VITE_DFX_NETWORK_FROM_DFX, "ic"),
+);
+
+export const IS_LOCAL = DFX_NETWORK === "local";
+
+/** Mainnet game canister (deployed against the Odin dev ledger). */
+const MAINNET_CANISTER_ID = "gkvcg-5aaaa-aaaae-qkpzq-cai";
+
+/**
+ * The game canister: ICRC-2 spender, delegation target and actor target.
+ * Explicit `VITE_APP_CANISTER_ID` wins; else the id dfx wrote on the last
+ * deploy; else the mainnet id — but only on `ic`. A `local` build with no
+ * id stays unconfigured (the UI says so) rather than silently talking to
+ * the mainnet canister.
+ */
+export const APP_CANISTER_ID = envOr(
+  import.meta.env.VITE_APP_CANISTER_ID,
+  envOr(
+    import.meta.env.VITE_DFX_CANISTER_ID,
+    IS_LOCAL ? "" : MAINNET_CANISTER_ID,
+  ),
 );
 
 /** Odin token id staked by the game. */
-export const TOKEN_ID = envOr(import.meta.env.VITE_TOKEN_ID, "2j5i");
+export const TOKEN_ID = envOr(import.meta.env.VITE_TOKEN_ID, "hjun");
 
 /** The token's page on the Odin site of the configured `VITE_ODIN_ENV`. */
 export const TOKEN_URL = `${odin.origin}/token/${TOKEN_ID}`;
 
-/** IC boundary host (mainnet). */
-export const IC_HOST = envOr(import.meta.env.VITE_IC_HOST, "https://icp0.io");
+/**
+ * Sats the Treasury "Buy" button spends on the game token through Odin's
+ * `user.buy()` (`VITE_BUY_SATS`, default 20 000). Odin BTC amounts are in
+ * millisatoshis, so the SDK receives `sats * 1000`.
+ */
+function parseSats(raw: string | undefined, fallback: bigint): bigint {
+  const text = envOr(raw, "").replace(/_/g, "");
+  return /^[0-9]+$/.test(text) && BigInt(text) > 0n ? BigInt(text) : fallback;
+}
+export const BUY_BTC_AMOUNT =
+  parseSats(import.meta.env.VITE_BUY_SATS, 20_000n) * 1000n;
+
+/** Odin's BTC token id — the asset the ledger fee is denominated in. */
+export const BTC_TOKEN_ID = "btc";
+
+/**
+ * BTC (millisats) the winner approves before Return Ship: the canister pulls
+ * one ledger fee to fund the payout transfer, and the pull itself costs the
+ * same fee again. Mirrors `ODIN_BTC_FEE` in `packages/canister/src/odin.ts`.
+ */
+export const PAYOUT_FEE_APPROVAL = 200_000n;
+
+/**
+ * Principals allowed to see the treasury deposit form. Client-side gate
+ * only: `fund_pool` itself stays open on the canister (it only ever pulls
+ * the caller's own approved tokens). Comma-separated in `VITE_ADMIN_PRINCIPALS`.
+ */
+export const ADMIN_PRINCIPALS: readonly string[] = envOr(
+  import.meta.env.VITE_ADMIN_PRINCIPALS,
+  "",
+)
+  .split(",")
+  .map((p) => p.trim())
+  .filter((p) => p !== "");
+
+/** Replica/boundary host. */
+export const IC_HOST = envOr(
+  import.meta.env.VITE_IC_HOST,
+  IS_LOCAL ? "http://127.0.0.1:4943" : "https://icp0.io",
+);

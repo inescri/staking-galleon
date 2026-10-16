@@ -62,7 +62,7 @@ export function connectErrorMessage(
   switch (request.status) {
     case "rejected":
       if (request.error === "untrusted_origin") {
-        return "This app's origin is not trusted by the staking canister.";
+        return "This app's origin is not trusted by the game canister.";
       }
       if (request.error === "popup_closed") {
         return "The Odin window was closed before signing in.";

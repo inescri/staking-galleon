@@ -7,12 +7,8 @@ import {
   parseApprovalReturnState,
 } from "./approvalFlow";
 
-const stake = {
-  flow: "stake",
-  tier: "coastal",
-  durationMs: 30_000,
-  stakeAmount: 100,
-} as const;
+const stake = { flow: "stake", tier: "coastal", durationIndex: 1 } as const;
+const settle = { flow: "settle", shipId: "42" } as const;
 
 function approve(id: string, returnState: unknown): OdinRequestState {
   return {
@@ -25,23 +21,52 @@ function approve(id: string, returnState: unknown): OdinRequestState {
 }
 
 describe("parseApprovalReturnState", () => {
-  it("accepts the stake shape", () => {
+  it("accepts the stake, settle and fund shapes", () => {
     expect(parseApprovalReturnState(stake)).toEqual(stake);
+    expect(parseApprovalReturnState(settle)).toEqual(settle);
+    expect(parseApprovalReturnState({ flow: "fund" })).toEqual({
+      flow: "fund",
+    });
   });
 
   it("rejects anything else", () => {
     expect(parseApprovalReturnState(undefined)).toBeNull();
     expect(parseApprovalReturnState({ ...stake, tier: "atlantis" })).toBeNull();
-    expect(parseApprovalReturnState({ ...stake, durationMs: "30" })).toBeNull();
+    expect(
+      parseApprovalReturnState({ ...stake, durationIndex: "1" }),
+    ).toBeNull();
+    expect(
+      parseApprovalReturnState({ ...stake, durationIndex: -1 }),
+    ).toBeNull();
+    expect(
+      parseApprovalReturnState({ ...stake, durationIndex: 1.5 }),
+    ).toBeNull();
+    expect(parseApprovalReturnState({ ...settle, shipId: 42 })).toBeNull();
+    expect(parseApprovalReturnState({ ...settle, shipId: "abc" })).toBeNull();
     expect(parseApprovalReturnState({ flow: "other" })).toBeNull();
+  });
+
+  it("ignores the pre-canister stake shape", () => {
+    expect(
+      parseApprovalReturnState({
+        flow: "stake",
+        tier: "coastal",
+        durationMs: 30_000,
+        stakeAmount: 100,
+      }),
+    ).toBeNull();
   });
 });
 
 describe("approvalFor", () => {
-  it("matches the stake flow's approval", () => {
+  it("matches the requested flow's approval", () => {
     const request = approve("r1", stake);
     expect(approvalFor(request, "stake")?.request).toBe(request);
     expect(approvalFor(request, "stake")?.returnState).toEqual(stake);
+    expect(approvalFor(request, "settle")).toBeNull();
+    expect(approvalFor(approve("r2", settle), "settle")?.returnState).toEqual(
+      settle,
+    );
   });
 
   it("ignores other actions and untagged approvals", () => {
@@ -52,15 +77,15 @@ describe("approvalFor", () => {
       input: { requires_api: false, requires_delegation: true, targets: [] },
     };
     expect(approvalFor(connect, "stake")).toBeNull();
-    expect(approvalFor(approve("r2", undefined), "stake")).toBeNull();
+    expect(approvalFor(approve("r3", undefined), "stake")).toBeNull();
     expect(approvalFor(null, "stake")).toBeNull();
   });
 });
 
 describe("claimRequest", () => {
-  it("claims each request id once", () => {
-    expect(claimRequest("once")).toBe(true);
-    expect(claimRequest("once")).toBe(false);
-    expect(claimRequest("other")).toBe(true);
+  it("claims an id once", () => {
+    expect(claimRequest("x1")).toBe(true);
+    expect(claimRequest("x1")).toBe(false);
+    expect(claimRequest("x2")).toBe(true);
   });
 });
