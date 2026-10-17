@@ -34,6 +34,14 @@ export interface WalletContextValue {
   connectWallet: () => void;
   disconnectWallet: () => void;
   refreshBalances: () => Promise<void>;
+  /**
+   * Re-fetch only the Odin balance until it changes from the last fetched
+   * value (bounded). For actions that settle asynchronously on Odin, e.g.
+   * after a buy request reports `success`.
+   */
+  refreshBalanceUntilChanged: () => Promise<void>;
+  /** True while `refreshBalanceUntilChanged` is polling. */
+  isSettling: boolean;
 }
 
 export const WalletContext = createContext<WalletContextValue | null>(null);

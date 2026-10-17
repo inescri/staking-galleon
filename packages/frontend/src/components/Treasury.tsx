@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useGameState } from "../contexts/useGame";
 import { useWallet } from "../contexts/useWallet";
 import { BUY_BTC_AMOUNT, TOKEN_ID, TOKEN_URL } from "../canister/config";
@@ -7,21 +7,21 @@ import { formatDoubloons, formatUnits } from "../utils/rewards";
 import { FundTreasury } from "./FundTreasury";
 import { TierIcon } from "./TierIcon";
 
-const BUY_REFRESH_ATTEMPTS = 10;
-const BUY_REFRESH_INTERVAL_MS = 2000;
-
 export function Treasury() {
-  const { balance, balanceUnits, completedExpeditions } = useGameState();
-  const { connectedUser, request, refreshBalances, token } = useWallet();
+  const { balance, completedExpeditions } = useGameState();
+  const {
+    connectedUser,
+    request,
+    refreshBalances,
+    refreshBalanceUntilChanged,
+    isSettling,
+    token,
+  } = useWallet();
   const [refreshing, setRefreshing] = useState(false);
   const [buyError, setBuyError] = useState<string | null>(null);
 
-  // Latest balance for the post-buy poll below, which outlives one render.
-  const balanceUnitsRef = useRef(balanceUnits);
-  balanceUnitsRef.current = balanceUnits;
-
-  const isBuying =
-    (request?.action === "buy" && request.status === "pending") || refreshing;
+  const isBuying = request?.action === "buy" && request.status === "pending";
+  const isRefreshing = refreshing || isSettling;
 
   // Buy through Odin: started without awaiting (redirect mode reloads the
   // page); the outcome lands in `request` and is handled below.
@@ -31,36 +31,25 @@ export function Treasury() {
     void connectedUser.buy({ token: TOKEN_ID, btcAmount: BUY_BTC_AMOUNT });
   };
 
-  // A successful buy settles on Odin asynchronously, so the balance the API
-  // returns right after `success` is usually still the old one. Re-fetch
-  // until the balance changes (or give up after a few tries).
+  // A successful buy settles on Odin asynchronously, so the balance is
+  // polled until it changes (see `refreshBalanceUntilChanged`). The id is
+  // claimed once, so a StrictMode re-run or remount cannot start a second poll.
   useEffect(() => {
     if (request?.action !== "buy") return;
     const { id, status } = request;
     if (status === "success") {
-      if (!claimRequest(id)) return;
-      // No cleanup/cancel here: the id is claimed once, so a StrictMode
-      // re-run or a remount must not abandon the poll.
-      const before = balanceUnitsRef.current;
-      const poll = async () => {
-        setRefreshing(true);
-        try {
-          for (let attempt = 0; attempt < BUY_REFRESH_ATTEMPTS; attempt++) {
-            await refreshBalances();
-            if (balanceUnitsRef.current !== before) return;
-            await new Promise((r) => setTimeout(r, BUY_REFRESH_INTERVAL_MS));
-          }
-        } finally {
-          setRefreshing(false);
-        }
-      };
-      void poll();
+      if (claimRequest(id)) {
+        refreshBalanceUntilChanged().catch((err: unknown) => {
+          console.error("Failed to refresh balance after buy:", err);
+          setBuyError("Purchase succeeded; refresh to see your balance.");
+        });
+      }
     } else if (status === "rejected") {
       if (claimRequest(id)) setBuyError("Purchase was cancelled.");
     } else if (status === "failed") {
       if (claimRequest(id)) setBuyError(request.error ?? "Purchase failed.");
     }
-  }, [request, refreshBalances]);
+  }, [request, refreshBalanceUntilChanged]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -81,10 +70,10 @@ export function Treasury() {
           <button
             className="refresh-balance-btn"
             onClick={handleRefresh}
-            disabled={refreshing}
+            disabled={isRefreshing}
           >
             <svg
-              className={`refresh-icon${refreshing ? " spinning" : ""}`}
+              className={`refresh-icon${isRefreshing ? " spinning" : ""}`}
               width="16"
               height="16"
               viewBox="0 0 24 24"
