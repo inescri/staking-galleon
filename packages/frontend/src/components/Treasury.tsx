@@ -9,11 +9,19 @@ import { TierIcon } from "./TierIcon";
 
 export function Treasury() {
   const { balance, completedExpeditions } = useGameState();
-  const { connectedUser, request, refreshBalances, token } = useWallet();
+  const {
+    connectedUser,
+    request,
+    refreshBalances,
+    refreshBalanceUntilChanged,
+    isSettling,
+    token,
+  } = useWallet();
   const [refreshing, setRefreshing] = useState(false);
   const [buyError, setBuyError] = useState<string | null>(null);
 
   const isBuying = request?.action === "buy" && request.status === "pending";
+  const isRefreshing = refreshing || isSettling;
 
   // Buy through Odin: started without awaiting (redirect mode reloads the
   // page); the outcome lands in `request` and is handled below.
@@ -23,17 +31,25 @@ export function Treasury() {
     void connectedUser.buy({ token: TOKEN_ID, btcAmount: BUY_BTC_AMOUNT });
   };
 
+  // A successful buy settles on Odin asynchronously, so the balance is
+  // polled until it changes (see `refreshBalanceUntilChanged`). The id is
+  // claimed once, so a StrictMode re-run or remount cannot start a second poll.
   useEffect(() => {
     if (request?.action !== "buy") return;
     const { id, status } = request;
     if (status === "success") {
-      if (claimRequest(id)) void refreshBalances();
+      if (claimRequest(id)) {
+        refreshBalanceUntilChanged().catch((err: unknown) => {
+          console.error("Failed to refresh balance after buy:", err);
+          setBuyError("Purchase succeeded; refresh to see your balance.");
+        });
+      }
     } else if (status === "rejected") {
       if (claimRequest(id)) setBuyError("Purchase was cancelled.");
     } else if (status === "failed") {
       if (claimRequest(id)) setBuyError(request.error ?? "Purchase failed.");
     }
-  }, [request, refreshBalances]);
+  }, [request, refreshBalanceUntilChanged]);
 
   const handleRefresh = async () => {
     setRefreshing(true);
@@ -54,10 +70,10 @@ export function Treasury() {
           <button
             className="refresh-balance-btn"
             onClick={handleRefresh}
-            disabled={refreshing}
+            disabled={isRefreshing}
           >
             <svg
-              className={`refresh-icon${refreshing ? " spinning" : ""}`}
+              className={`refresh-icon${isRefreshing ? " spinning" : ""}`}
               width="16"
               height="16"
               viewBox="0 0 24 24"

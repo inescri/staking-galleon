@@ -2,6 +2,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -24,6 +25,12 @@ function computeTokenBalance(token: OdinBalance): number {
   return Number(token.balance) / divisor;
 }
 
+/** How long `refreshBalanceUntilChanged` keeps re-fetching a settling balance. */
+const SETTLE_ATTEMPTS = 8;
+const SETTLE_INTERVAL_MS = 1500;
+
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
 /**
  * Wraps the app and exposes the Odin Connect session. All auth is delegated
  * to the `odin-connect` SDK: it owns the popup / redirect round trip,
@@ -41,6 +48,12 @@ export function WalletProvider({ children }: { children: ReactNode }) {
   const [hydratedUser, setHydratedUser] = useState<OdinConnectedUser | null>(
     null,
   );
+  // True while a post-action poll (`refreshBalanceUntilChanged`) is running.
+  const [isSettling, setIsSettling] = useState(false);
+  // The last balance actually fetched from Odin (null = none / cleared).
+  // Separate from reducer state so a failed fetch, which resets the
+  // displayed balance, is not mistaken for a change.
+  const lastBalanceUnitsRef = useRef<bigint | null>(null);
 
   // The game rules are public: load them once so the form can render stakes
   // and durations before (and without) a wallet.
@@ -63,20 +76,10 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     };
   }, [dispatch]);
 
-  const fetchBalancesAndShips = useCallback(
-    async (user: OdinConnectedUser) => {
-      // The Odin API balance, the caller's ships and the rules are
-      // independent; fetch them concurrently and handle each on its own.
-      const actor = createGameActor(user.getIdentity() ?? undefined);
-      const [balanceResult, shipsResult, configResult] =
-        await Promise.allSettled([
-          user.getBalance(TOKEN_ID),
-          actor.get_my_ships(),
-          actor.get_config(),
-        ]);
-
-      if (balanceResult.status === "fulfilled" && balanceResult.value) {
-        const tokenBalance = balanceResult.value;
+  const applyBalance = useCallback(
+    (tokenBalance: OdinBalance | null) => {
+      if (tokenBalance) {
+        lastBalanceUnitsRef.current = tokenBalance.balance;
         setToken({
           decimals: tokenBalance.decimals,
           divisibility: tokenBalance.divisibility,
@@ -89,11 +92,33 @@ export function WalletProvider({ children }: { children: ReactNode }) {
           },
         });
       } else {
-        if (balanceResult.status === "rejected") {
-          console.error("Failed to fetch token balance:", balanceResult.reason);
-        } else {
-          setToken(null);
-        }
+        lastBalanceUnitsRef.current = null;
+        setToken(null);
+        dispatch({
+          type: "SET_BALANCE",
+          payload: { balance: 0, balanceUnits: 0n },
+        });
+      }
+    },
+    [dispatch],
+  );
+
+  const fetchBalancesAndShips = useCallback(
+    async (user: OdinConnectedUser) => {
+      // The Odin API balance, the caller's ships and the rules are
+      // independent; fetch them concurrently and handle each on its own.
+      const actor = createGameActor(user.getIdentity() ?? undefined);
+      const [balanceResult, shipsResult, configResult] =
+        await Promise.allSettled([
+          user.getBalance(TOKEN_ID),
+          actor.get_my_ships(),
+          actor.get_config(),
+        ]);
+
+      if (balanceResult.status === "fulfilled") {
+        applyBalance(balanceResult.value);
+      } else {
+        console.error("Failed to fetch token balance:", balanceResult.reason);
         dispatch({
           type: "SET_BALANCE",
           payload: { balance: 0, balanceUnits: 0n },
@@ -115,7 +140,7 @@ export function WalletProvider({ children }: { children: ReactNode }) {
         console.error("Failed to fetch game config:", configResult.reason);
       }
     },
-    [dispatch],
+    [dispatch, applyBalance],
   );
 
   // Load balances whenever the connected user changes: a fresh connect, a
@@ -154,8 +179,42 @@ export function WalletProvider({ children }: { children: ReactNode }) {
     }
   }, [connectedUser, fetchBalancesAndShips]);
 
+  /**
+   * Re-fetch the Odin balance until it differs from the last fetched value.
+   * For actions that settle asynchronously on Odin (a buy): the balance the
+   * API returns right after the request's `success` is usually still the old
+   * one. Balance only — ships and rules are untouched by such actions. Stops
+   * when the user disconnects or changes; a failed attempt is skipped, not
+   * treated as a change. Gives up quietly after `SETTLE_ATTEMPTS`.
+   */
+  const refreshBalanceUntilChanged = useCallback(async () => {
+    const user = connectedUser;
+    if (!user) return;
+    const before = lastBalanceUnitsRef.current;
+    setIsSettling(true);
+    try {
+      for (let attempt = 0; attempt < SETTLE_ATTEMPTS; attempt++) {
+        if (attempt > 0) await sleep(SETTLE_INTERVAL_MS);
+        if (odin.user !== user) return;
+        let tokenBalance: OdinBalance | null;
+        try {
+          tokenBalance = await user.getBalance(TOKEN_ID);
+        } catch (err) {
+          console.error("Failed to fetch token balance:", err);
+          continue;
+        }
+        if (odin.user !== user) return;
+        applyBalance(tokenBalance);
+        if ((tokenBalance?.balance ?? null) !== before) return;
+      }
+    } finally {
+      setIsSettling(false);
+    }
+  }, [connectedUser, applyBalance]);
+
   const disconnectWallet = useCallback(() => {
     odin.disconnect();
+    lastBalanceUnitsRef.current = null;
     setToken(null);
     dispatch({
       type: "SET_BALANCE",
@@ -182,6 +241,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       connectWallet,
       disconnectWallet,
       refreshBalances,
+      refreshBalanceUntilChanged,
+      isSettling,
     }),
     [
       connectedUser,
@@ -193,6 +254,8 @@ export function WalletProvider({ children }: { children: ReactNode }) {
       connectWallet,
       disconnectWallet,
       refreshBalances,
+      refreshBalanceUntilChanged,
+      isSettling,
     ],
   );
 
