@@ -54,58 +54,60 @@ export function Harbor(): ReactElement {
   }, [activeExpeditions]);
 
   return (
-    <div className="harbor">
-      <div className="harbor-sky">
-        <div className="sun" />
-        <div className="cloud cloud-1" />
-        <div className="cloud cloud-2" />
-      </div>
-      <div className="harbor-ocean">
-        {HARBOR_LANES.map((tier) => {
-          const lane = lanePerspective(tier);
-          return (
-            <div
-              key={tier}
-              className={`sea-band sea-band-${tier}`}
-              style={
-                {
-                  // Height share of the ocean; thinner toward the horizon.
-                  flex: `${lane.weight} 1 0`,
-                  // Farther bands get smaller, slower waves.
-                  "--wave-scale": lane.waveScale,
-                  "--wave-speed": lane.waveSpeed,
-                } as CSSProperties
-              }
-            >
-              <div className="wave wave-1" />
-              <div className="wave wave-2" />
-              <div className="wave wave-3" />
-              <span className="sea-band-label">{TIER_CONFIGS[tier].name}</span>
-            </div>
-          );
-        })}
-        {/* Positions need each tier's longest voyage from the config; hold
+    <div className="harbor pixel-panel">
+      <div className="harbor-inner">
+        <div className="harbor-sky">
+          <div className="sun" />
+        </div>
+        <div className="harbor-ocean">
+          {HARBOR_LANES.map((tier) => {
+            const lane = lanePerspective(tier);
+            return (
+              <div
+                key={tier}
+                className={`sea-band sea-band-${tier}`}
+                style={
+                  {
+                    // Height share of the ocean; thinner toward the horizon.
+                    flex: `${lane.weight} 1 0`,
+                    // Farther bands get smaller, slower waves.
+                    "--wave-scale": lane.waveScale,
+                    "--wave-speed": lane.waveSpeed,
+                  } as CSSProperties
+                }
+              >
+                <div className="wave wave-1" />
+                <div className="wave wave-2" />
+                <div className="wave wave-3" />
+                <span className="sea-band-label">
+                  {TIER_CONFIGS[tier].name}
+                </span>
+              </div>
+            );
+          })}
+          {/* Positions need each tier's longest voyage from the config; hold
             ships back until it loads so they don't slide on arrival. */}
-        {rules !== null &&
-          activeExpeditions.map((exp) => (
-            <HarborShip
-              key={exp.id}
-              expedition={exp}
-              maxDurationMs={maxByTier[exp.tier] ?? 0}
-              slot={slots.get(exp.id) ?? 0}
-            />
-          ))}
-        {rules === null && activeExpeditions.length > 0 && (
-          <div className="harbor-empty">Charting the seas...</div>
-        )}
-        {activeExpeditions.length === 0 && (
-          <div className="harbor-empty">
-            No ships at sea... Launch an expedition!
-          </div>
-        )}
-      </div>
-      <div className="harbor-dock">
-        <div className="dock-planks" />
+          {rules !== null &&
+            activeExpeditions.map((exp) => (
+              <HarborShip
+                key={exp.id}
+                expedition={exp}
+                maxDurationMs={maxByTier[exp.tier] ?? 0}
+                slot={slots.get(exp.id) ?? 0}
+              />
+            ))}
+          {rules === null && activeExpeditions.length > 0 && (
+            <div className="harbor-empty">Charting the seas...</div>
+          )}
+          {activeExpeditions.length === 0 && (
+            <div className="harbor-empty">
+              No ships at sea... Launch an expedition!
+            </div>
+          )}
+        </div>
+        <div className="harbor-dock">
+          <div className="dock-planks" />
+        </div>
       </div>
     </div>
   );

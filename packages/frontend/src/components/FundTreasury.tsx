@@ -8,7 +8,7 @@ import {
 } from "../canister/config";
 import type { PoolStats } from "../canister/idl";
 import { parseTokenAmount } from "../utils/game";
-import { formatUnits } from "../utils/rewards";
+import { formatTl } from "../utils/rewards";
 import {
   approvalFor,
   claimRequest,
@@ -110,7 +110,7 @@ export function FundTreasury() {
       try {
         const available = await fundPool(input.amount);
         setMessage(
-          `Deposited ${formatUnits(input.amount, token)} dbl. Pool now has ${formatUnits(available, token)} dbl available.`,
+          `Deposited ${formatTl(input.amount, token)}. Pool now has ${formatTl(available, token)} available.`,
         );
         setAmount("");
         await Promise.all([loadStats(), refreshBalances()]);
@@ -139,17 +139,17 @@ export function FundTreasury() {
         {stats ? (
           <>
             <span>
-              Available: <b>{formatUnits(stats.available, token)}</b> dbl
+              Available: <b>{formatTl(stats.available, token)}</b>
             </span>
             <span>
-              Reserved: <b>{formatUnits(stats.reserved, token)}</b> dbl
+              Reserved: <b>{formatTl(stats.reserved, token)}</b>
             </span>
             <span>
-              At sea: <b>{formatUnits(stats.activeStakes, token)}</b> dbl
+              At sea: <b>{formatTl(stats.activeStakes, token)}</b>
             </span>
             {stats.pendingPayouts > 0n && (
               <span>
-                Owed: <b>{formatUnits(stats.pendingPayouts, token)}</b> dbl
+                Owed: <b>{formatTl(stats.pendingPayouts, token)}</b>
               </span>
             )}
           </>
@@ -167,7 +167,7 @@ export function FundTreasury() {
             <input
               type="number"
               className="pixel-input"
-              placeholder="Amount in dbl"
+              placeholder="Amount in tl"
               min={0}
               value={amount}
               onChange={(e) => setAmount(e.target.value)}

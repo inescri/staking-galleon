@@ -13,7 +13,7 @@ import {
   TIER_CONFIGS,
   formatBps,
   formatRemainingMs,
-  formatUnits,
+  formatTl,
 } from "../utils/rewards";
 import { TIER_ICONS } from "../utils/tierIcons";
 import { ShipImage } from "./ShipImage";
@@ -216,9 +216,6 @@ export function ExpeditionCard({ expedition }: { expedition: Expedition }) {
           />{" "}
           {config.name}
         </span>
-        <span className="expedition-stake">
-          &nbsp;{formatUnits(expedition.stake, token)} dbl
-        </span>
         <span className="expedition-odds">
           {formatBps(expedition.failBps)} risk · +
           {formatBps(expedition.multiplierBps - 10_000)}
@@ -234,10 +231,13 @@ export function ExpeditionCard({ expedition }: { expedition: Expedition }) {
         />
       </div>
       <div className="expedition-footer">
+        <span className="expedition-stake">
+          {formatTl(expedition.stake, token)}
+        </span>
         {isLaunching ? (
           <span className="expedition-time">Setting sail…</span>
         ) : isComplete || awaitingPayout ? (
-          <>
+          <div className="expedition-status">
             <span className="expedition-time">
               {awaitingPayout
                 ? "Returned — payout pending"
@@ -252,10 +252,10 @@ export function ExpeditionCard({ expedition }: { expedition: Expedition }) {
                 {actionLabel}
               </button>
             </div>
-          </>
+          </div>
         ) : (
           <span className="expedition-time">
-            {formatRemainingMs(remainingMs)} remaining
+            {formatRemainingMs(remainingMs)}
           </span>
         )}
       </div>

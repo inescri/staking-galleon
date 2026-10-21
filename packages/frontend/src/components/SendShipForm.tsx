@@ -1,16 +1,19 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { useGameState, useGameDispatch } from "../contexts/useGame";
 import { useWallet } from "../contexts/useWallet";
 import {
   TIER_CONFIGS,
   TIERS,
+  computePayout,
   formatBps,
-  formatUnits,
+  formatTl,
+  rewardBps,
   type Tier,
 } from "../utils/rewards";
 import { useGameCanister } from "../hooks/useGameCanister";
 import { APP_CANISTER_ID, TOKEN_ID } from "../canister/config";
 import { TIER_ICONS } from "../utils/tierIcons";
+import { Icon } from "./Icon";
 import {
   approvalFor,
   claimRequest,
@@ -165,12 +168,15 @@ export function SendShipForm() {
           : fleetFull
             ? "Fleet Full"
             : insufficient
-              ? "Insufficient Doubloons"
+              ? "Insufficient Taels"
               : "⚓ Launch Expedition";
 
   return (
     <div className="send-ship-form pixel-panel">
-      <h2 className="section-title">Send a Ship</h2>
+      <h2 className="section-title">
+        <Icon name="ship" />
+        Send a Ship
+      </h2>
 
       <div className="tier-selector">
         {TIERS.map((tier) => {
@@ -179,30 +185,40 @@ export function SendShipForm() {
             <button
               key={tier}
               className={`tier-btn ${selectedTier === tier ? "active" : ""}`}
-              style={{
-                backgroundImage: `url(${TIER_ICONS[tier]})`,
-                ...(selectedTier === tier
-                  ? { borderColor: c.color, color: c.color }
-                  : undefined),
-              }}
+              style={
+                {
+                  backgroundImage: `url(${TIER_ICONS[tier]})`,
+                  "--tier-color": c.color,
+                } as CSSProperties
+              }
+              title={c.name}
+              aria-pressed={selectedTier === tier}
               onClick={() => handleTierChange(tier)}
             >
-              <span className="tier-name">{c.name}</span>
+              <span className="sr-only">{c.name}</span>
             </button>
           );
         })}
       </div>
 
       <div className="form-group">
-        <label className="form-label">Stake</label>
+        <span className="form-label">
+          Stake · {TIER_CONFIGS[selectedTier].name}
+        </span>
         <div className="stake-fixed">
-          {tierRules ? `${formatUnits(tierRules.stake, token)} dbl` : "…"}
+          {tierRules ? formatTl(tierRules.stake, token) : "…"}
         </div>
       </div>
 
       <div className="form-group">
-        <label className="form-label">Voyage</label>
-        <div className="duration-menu">
+        <span className="form-label" id="voyage-label">
+          Voyage
+        </span>
+        <div
+          className="duration-menu"
+          role="group"
+          aria-labelledby="voyage-label"
+        >
           {tierRules?.durations.map((d) => (
             <button
               key={d.index}
@@ -212,7 +228,7 @@ export function SendShipForm() {
               <span className="duration-label">{d.label}</span>
               <span className="duration-risk">{formatBps(d.failBps)} risk</span>
               <span className="duration-reward">
-                +{formatBps(d.multiplierBps - 10_000)}
+                +{formatBps(rewardBps(d.multiplierBps))}
               </span>
             </button>
           ))}
@@ -220,13 +236,11 @@ export function SendShipForm() {
         {tierRules && option && (
           <p className="duration-summary">
             Returns{" "}
-            {formatUnits(
-              tierRules.stake +
-                (tierRules.stake * BigInt(option.multiplierBps - 10_000)) /
-                  10_000n,
+            {formatTl(
+              computePayout(tierRules.stake, option.multiplierBps),
               token,
             )}{" "}
-            dbl on success; the whole stake is lost otherwise.
+            on success; the whole stake is lost otherwise.
           </p>
         )}
       </div>
@@ -235,7 +249,7 @@ export function SendShipForm() {
         <span>
           Fleet: {atSea}/{rules?.maxShips ?? "…"}
         </span>
-        <span>Balance: {formatUnits(balanceUnits, token)} dbl</span>
+        <span>Balance: {formatTl(balanceUnits, token)}</span>
       </div>
 
       {approveError && <span className="wallet-error">{approveError}</span>}

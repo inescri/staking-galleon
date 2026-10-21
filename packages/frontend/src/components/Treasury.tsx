@@ -3,12 +3,12 @@ import { useGameState } from "../contexts/useGame";
 import { useWallet } from "../contexts/useWallet";
 import { BUY_BTC_AMOUNT, TOKEN_ID, TOKEN_URL } from "../canister/config";
 import { claimRequest } from "../odin/approvalFlow";
-import { formatDoubloons, formatUnits } from "../utils/rewards";
+import { COIN, formatUnits } from "../utils/rewards";
 import { FundTreasury } from "./FundTreasury";
-import { TierIcon } from "./TierIcon";
+import { Icon } from "./Icon";
 
 export function Treasury() {
-  const { balance, completedExpeditions } = useGameState();
+  const { balanceUnits } = useGameState();
   const {
     connectedUser,
     request,
@@ -61,38 +61,31 @@ export function Treasury() {
   };
 
   return (
-    <div className="treasury">
+    <div className="treasury pixel-panel">
       <div className="balance-row">
-        <span className="balance-label">Treasury</span>
+        <span className="balance-label">
+          <Icon name="wallet" size={18} />
+          Treasury
+        </span>
         <span className="balance-amount">
-          <span className="coin-icon">&#x1FA99;</span>{" "}
-          {formatDoubloons(balance)} Doubloons
+          <span className="coin-icon">{COIN}</span>
+          {formatUnits(balanceUnits, token)} tl
           <button
             className="refresh-balance-btn"
             onClick={handleRefresh}
             disabled={isRefreshing}
+            aria-label="Refresh balance"
           >
-            <svg
+            <Icon
+              name="refresh"
+              size={18}
               className={`refresh-icon${isRefreshing ? " spinning" : ""}`}
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <polyline points="23 4 23 10 17 10" />
-              <polyline points="1 20 1 14 7 14" />
-              <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10" />
-              <path d="M20.49 15a9 9 0 0 1-14.85 3.36L1 14" />
-            </svg>
+            />
           </button>
         </span>
         {connectedUser ? (
           <button
-            className="buy-doubloons-link"
+            className="buy-taels-link"
             onClick={handleBuy}
             disabled={isBuying}
           >
@@ -103,7 +96,7 @@ export function Treasury() {
             href={TOKEN_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="buy-doubloons-link"
+            className="buy-taels-link"
           >
             Buy
           </a>
@@ -112,40 +105,6 @@ export function Treasury() {
       {buyError && <span className="wallet-error">{buyError}</span>}
 
       <FundTreasury />
-
-      {completedExpeditions.length > 0 && (
-        <div className="voyage-log">
-          <h3 className="section-title">Voyage Log</h3>
-          <div className="log-entries">
-            {completedExpeditions.slice(0, 8).map((exp) => {
-              return (
-                <div
-                  key={exp.id}
-                  className={`log-entry ${exp.succeeded ? "log-win" : "log-loss"}`}
-                >
-                  <TierIcon tier={exp.tier} className="tier-icon-log" />
-                  <span className="log-stake">
-                    {formatUnits(exp.stake, token)} dbl
-                  </span>
-                  <span className="log-outcome">
-                    {exp.succeeded
-                      ? `+${formatUnits(exp.payout - exp.stake, token)}`
-                      : `\u2212${formatUnits(exp.stake, token)}`}
-                  </span>
-                  <span className="log-date">
-                    {new Date(exp.completedAt).toLocaleDateString(undefined, {
-                      month: "short",
-                      day: "numeric",
-                      hour: "numeric",
-                      minute: "2-digit",
-                    })}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
     </div>
   );
 }

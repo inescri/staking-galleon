@@ -1,14 +1,14 @@
 # Galleon Stakes
 
 A pirate-themed voyage staking game on [Odin Fun](https://odin.fun), running on
-the Internet Computer. Stake doubloons on a voyage, pick how long and how risky,
+the Internet Computer. Stake taels (tl) on a voyage, pick how long and how risky,
 and find out on return whether the ship comes back with a bounty or goes down
 with the stake.
 
 ## How it plays
 
 - **Four difficulties** — Coastal Trade, Open Sea, Deep Ocean, Kraken Waters.
-  Each has **one fixed stake** (100 / 500 / 1 000 / 5 000 dbl by default) and
+  Each has **one fixed stake** (100 / 500 / 1 000 / 5 000 tl by default) and
   a **menu of durations** (hours to days). Every duration carries its own
   **fail chance** and **reward multiplier**; the canister is the source of
   truth for all of them (`get_config`).
@@ -146,7 +146,7 @@ before deploying there.
 3. `dfx canister call canister icrc28_trusted_origins '()' --network ic`
 4. Seed the pool: approve the canister for the game token from the admin's
    Odin account, then `dfx canister call canister fund_pool '(<base units>)' --network ic`.
-   A Kraken Waters 7d voyage reserves 7 250 dbl, so size the pool for the
+   A Kraken Waters 7d voyage reserves 7 250 tl, so size the pool for the
    tiers you want launchable.
 5. Set `VITE_APP_CANISTER_ID` (and `VITE_ODIN_ENV`) for the hosted frontend
    and `pnpm build`.
