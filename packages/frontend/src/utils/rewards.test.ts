@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { formatRemainingMs, formatTl } from "./rewards";
+import { computePayout as canisterComputePayout } from "../../../canister/src/game";
+import { computePayout, formatRemainingMs, formatTl } from "./rewards";
 
 const S = 1000;
 const M = 60 * S;
@@ -35,5 +36,27 @@ describe("formatTl", () => {
   it("puts the sign after the coin", () => {
     expect(formatTl(75n, units, "+")).toBe("\u{1FA99} +75 tl");
     expect(formatTl(100n, units, "−")).toBe("\u{1FA99} −100 tl");
+  });
+});
+
+describe("computePayout", () => {
+  it.each([
+    [100_000_000_000n, 10_000, 100_000_000_000n],
+    [100_000_000_000n, 11_500, 115_000_000_000n],
+    [5_000_000_000_000n, 15_000, 7_500_000_000_000n],
+    [7n, 10_300, 7n],
+    [333n, 12_200, 406n],
+  ])("stake %s at %i bps pays %s", (stake, bps, expected) => {
+    expect(computePayout(stake, bps)).toBe(expected);
+  });
+
+  it("matches the canister's payout math", () => {
+    for (const stake of [0n, 1n, 7n, 333n, 99_999n, 5_000_000_000_000n]) {
+      for (const bps of [10_000, 10_001, 10_300, 12_200, 15_000, 1_000_000]) {
+        expect(computePayout(stake, bps)).toBe(
+          canisterComputePayout(stake, bps),
+        );
+      }
+    }
   });
 });

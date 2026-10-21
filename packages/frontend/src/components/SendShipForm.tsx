@@ -4,8 +4,10 @@ import { useWallet } from "../contexts/useWallet";
 import {
   TIER_CONFIGS,
   TIERS,
+  computePayout,
   formatBps,
   formatTl,
+  rewardBps,
   type Tier,
 } from "../utils/rewards";
 import { useGameCanister } from "../hooks/useGameCanister";
@@ -226,7 +228,7 @@ export function SendShipForm() {
               <span className="duration-label">{d.label}</span>
               <span className="duration-risk">{formatBps(d.failBps)} risk</span>
               <span className="duration-reward">
-                +{formatBps(d.multiplierBps - 10_000)}
+                +{formatBps(rewardBps(d.multiplierBps))}
               </span>
             </button>
           ))}
@@ -235,9 +237,7 @@ export function SendShipForm() {
           <p className="duration-summary">
             Returns{" "}
             {formatTl(
-              tierRules.stake +
-                (tierRules.stake * BigInt(option.multiplierBps - 10_000)) /
-                  10_000n,
+              computePayout(tierRules.stake, option.multiplierBps),
               token,
             )}{" "}
             on success; the whole stake is lost otherwise.

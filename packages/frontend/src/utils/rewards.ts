@@ -66,6 +66,23 @@ export function formatTl(
   return `${COIN} ${sign}${formatUnits(amount, units)} tl`;
 }
 
+/** Basis points of a whole (10 000 = 100%); a 10 000 multiplier is stake back. */
+const BPS = 10_000;
+
+/**
+ * Stake + reward a winning voyage pays, floored to base units. Mirrors the
+ * canister's `computePayout` (`packages/canister/src/game.ts`); a parity test
+ * keeps them in step.
+ */
+export function computePayout(stake: bigint, multiplierBps: number): bigint {
+  return stake + (stake * BigInt(multiplierBps - BPS)) / BigInt(BPS);
+}
+
+/** Reward on top of the stake, in basis points of it (11 500 → 1 500). */
+export function rewardBps(multiplierBps: number): number {
+  return multiplierBps - BPS;
+}
+
 /** "45m", "1h", "36h", "3d". */
 export function formatDurationMs(ms: number): string {
   const minutes = Math.round(ms / 60_000);
