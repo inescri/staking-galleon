@@ -51,6 +51,9 @@ export function Harbor() {
             className={`sea-band sea-band-${tier}`}
             style={{ flexGrow: HARBOR_LANE_WEIGHTS[i] }}
           >
+            <div className="wave wave-1" />
+            <div className="wave wave-2" />
+            <div className="wave wave-3" />
             <span className="sea-band-label">{TIER_CONFIGS[tier].name}</span>
           </div>
         ))}
@@ -66,9 +69,6 @@ export function Harbor() {
             No ships at sea... Launch an expedition!
           </div>
         )}
-        <div className="wave wave-1" />
-        <div className="wave wave-2" />
-        <div className="wave wave-3" />
       </div>
       <div className="harbor-dock">
         <div className="dock-planks" />

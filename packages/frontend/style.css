@@ -629,6 +629,8 @@ body {
 .sea-band {
   flex: 1 1 0;
   position: relative;
+  /* Each band runs its own waves; clip them to the band. */
+  overflow: hidden;
 }
 
 .sea-band + .sea-band {
@@ -661,6 +663,8 @@ body {
   color: var(--text-dim);
   opacity: 0.6;
   pointer-events: none;
+  /* Above the band's waves, below ships. */
+  z-index: 1;
 }
 
 .harbor-empty {
