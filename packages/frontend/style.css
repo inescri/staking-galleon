@@ -856,7 +856,7 @@ body::before {
 
 .tier-btn {
   padding: 0;
-  aspect-ratio: 1.55;
+  height: 60px;
   background-color: var(--bg);
   background-size: cover;
   background-position: center;
