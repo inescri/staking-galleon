@@ -27,10 +27,10 @@
   --text-dim: #8a96b3;
 
   /* Harbor bands, lightest by the dock, darkest on the horizon. */
-  --sea-kraken: #1a4d8f;
-  --sea-ocean: #1d5aa3;
-  --sea-open: #2064b3;
-  --sea-coastal: #246fc2;
+  --sea-kraken: #0a2342;
+  --sea-ocean: #0f3460;
+  --sea-open: #174c7a;
+  --sea-coastal: #1e5f8e;
   --sea-foam: #9bd1ff;
 
   /* Dock */
