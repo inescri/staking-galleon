@@ -80,13 +80,17 @@ body::before {
   background:
     linear-gradient(
       to bottom,
-      rgba(26, 26, 46, 0.5) 0%,
-      rgba(26, 26, 46, 0.8) 60%,
-      rgba(26, 26, 46, 0.9) 100%
+      rgba(26, 26, 46, 0.1) 0%,
+      rgba(26, 26, 46, 0.2) 90%,
+      rgba(26, 26, 46, 0.3) 100%
     ),
     url("/harbor-bg.jpg") center top / 100% auto no-repeat;
   image-rendering: pixelated;
   pointer-events: none;
+  /* Parallax: `--scroll-y` is set by useParallax; the art climbs at 30% of
+     scroll speed. */
+  transform: translateY(calc(var(--scroll-y, 0) * -0.3px));
+  will-change: transform;
   -webkit-mask-image:
     linear-gradient(to bottom, #000 55%, transparent 100%),
     linear-gradient(to right, transparent, #000 15%, #000 85%, transparent);

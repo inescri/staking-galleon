@@ -1,4 +1,5 @@
 import { useGameState } from "./contexts/useGame";
+import { useParallax } from "./hooks/useParallax";
 import { ConnectOdin } from "./components/ConnectOdin";
 import { Treasury } from "./components/Treasury";
 import { Harbor } from "./components/Harbor";
@@ -9,6 +10,7 @@ import { DispatchToast } from "./components/DispatchToast";
 
 export function App() {
   const { pendingReturns, pendingDispatches } = useGameState();
+  useParallax();
 
   return (
     <div className="app">
