@@ -51,7 +51,7 @@ export function ShipSprite({
         } as CSSProperties
       }
     >
-      <ShipImage elapsedMs={elapsedMs} size={size} />
+      <ShipImage elapsedMs={elapsedMs} tier={tier} size={size} />
     </div>
   );
 }

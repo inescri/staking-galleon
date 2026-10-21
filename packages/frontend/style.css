@@ -448,12 +448,10 @@ body::before {
   line-height: 1;
 }
 
-.refresh-balance-btn::after {
-  content: "Refresh balance";
+/* Shared pixel tooltip; each user sets `content` and placement. */
+.refresh-balance-btn::after,
+.sea-band::after {
   position: absolute;
-  bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%);
   background: var(--bg);
   color: var(--gold);
   font-size: 0.7rem;
@@ -465,10 +463,19 @@ body::before {
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.2s;
+}
+
+.refresh-balance-btn::after {
+  content: "Refresh balance";
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
   margin-bottom: 4px;
 }
 
-.refresh-balance-btn:hover::after {
+.refresh-balance-btn:hover::after,
+.sea-band:hover::after,
+.sea-band:focus::after {
   opacity: 1;
 }
 
@@ -678,6 +685,20 @@ body::before {
   overflow: hidden;
 }
 
+/* Tap focuses the band; the tooltip marks it, so skip the focus ring. */
+.sea-band:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Tier name on hover or tap. Bands clip, so it sits inside the band, under ships. */
+.sea-band::after {
+  content: attr(aria-label);
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+  z-index: 1;
+}
+
 .sea-band-kraken_waters {
   background: var(--sea-kraken);
 }
@@ -692,19 +713,6 @@ body::before {
 
 .sea-band-coastal {
   background: var(--sea-coastal);
-}
-
-.sea-band-label {
-  position: absolute;
-  top: 50%;
-  right: 12px;
-  transform: translateY(-50%);
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: rgba(241, 234, 214, 0.85);
-  pointer-events: none;
-  /* Above the band's waves, below ships. */
-  z-index: 1;
 }
 
 .harbor-empty {
