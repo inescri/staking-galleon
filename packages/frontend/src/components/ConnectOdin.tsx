@@ -1,4 +1,5 @@
 import { useWallet, truncatePrincipal } from "../contexts/useWallet";
+import { Icon } from "./Icon";
 
 export function ConnectOdin() {
   const {
@@ -14,7 +15,7 @@ export function ConnectOdin() {
   if (isRestoring) {
     return (
       <div className="wallet-row">
-        <div className="wallet-connect-row">
+        <div className="wallet-connect-row pixel-panel">
           <button className="pixel-btn wallet-connect-btn" disabled>
             Loading...
           </button>
@@ -26,23 +27,24 @@ export function ConnectOdin() {
   return (
     <div className="wallet-row">
       {connectedUser ? (
-        <div className="wallet-connected-row">
+        <div className="wallet-connected-row pixel-panel">
           <div className="wallet-info">
-            <span className="wallet-status-dot" />
+            <Icon name="wallet" size={18} className="wallet-icon" />
             <span className="wallet-principal">
               {truncatePrincipal(principal)}
             </span>
           </div>
 
           <button
-            className="pixel-btn-sm wallet-disconnect-btn"
+            className="btn-outline wallet-disconnect-btn"
             onClick={disconnectWallet}
           >
+            <Icon name="link-off" size={14} />
             Disconnect
           </button>
         </div>
       ) : (
-        <div className="wallet-connect-row">
+        <div className="wallet-connect-row pixel-panel">
           <button
             className="pixel-btn wallet-connect-btn"
             onClick={connectWallet}

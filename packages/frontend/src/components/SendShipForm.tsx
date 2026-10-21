@@ -11,6 +11,7 @@ import {
 import { useGameCanister } from "../hooks/useGameCanister";
 import { APP_CANISTER_ID, TOKEN_ID } from "../canister/config";
 import { TIER_ICONS } from "../utils/tierIcons";
+import { Icon } from "./Icon";
 import {
   approvalFor,
   claimRequest,
@@ -170,7 +171,10 @@ export function SendShipForm() {
 
   return (
     <div className="send-ship-form pixel-panel">
-      <h2 className="section-title">Send a Ship</h2>
+      <h2 className="section-title">
+        <Icon name="ship" />
+        Send a Ship
+      </h2>
 
       <div className="tier-selector">
         {TIERS.map((tier) => {
@@ -179,22 +183,21 @@ export function SendShipForm() {
             <button
               key={tier}
               className={`tier-btn ${selectedTier === tier ? "active" : ""}`}
-              style={{
-                backgroundImage: `url(${TIER_ICONS[tier]})`,
-                ...(selectedTier === tier
-                  ? { borderColor: c.color, color: c.color }
-                  : undefined),
-              }}
+              style={{ backgroundImage: `url(${TIER_ICONS[tier]})` }}
+              title={c.name}
+              aria-pressed={selectedTier === tier}
               onClick={() => handleTierChange(tier)}
             >
-              <span className="tier-name">{c.name}</span>
+              <span className="sr-only">{c.name}</span>
             </button>
           );
         })}
       </div>
 
       <div className="form-group">
-        <label className="form-label">Stake</label>
+        <label className="form-label">
+          Stake · {TIER_CONFIGS[selectedTier].name}
+        </label>
         <div className="stake-fixed">
           {tierRules ? `${formatUnits(tierRules.stake, token)} dbl` : "…"}
         </div>

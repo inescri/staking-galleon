@@ -7,6 +7,7 @@ import { SendShipForm } from "./components/SendShipForm";
 import { FleetStatus } from "./components/FleetStatus";
 import { RewardToast } from "./components/RewardToast";
 import { DispatchToast } from "./components/DispatchToast";
+import { Icon } from "./components/Icon";
 
 export function App() {
   const { pendingReturns, pendingDispatches } = useGameState();
@@ -24,7 +25,10 @@ export function App() {
       </div>
 
       <header className="app-header">
-        <h1 className="game-title">Galleon Stakes</h1>
+        <h1 className="game-title">
+          <Icon name="anchor" size={40} />
+          Galleon Stakes
+        </h1>
         <p className="game-subtitle">
           Send ships. Stake doubloons. Reap the bounty.
         </p>
