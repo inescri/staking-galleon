@@ -448,12 +448,10 @@ body::before {
   line-height: 1;
 }
 
-.refresh-balance-btn::after {
-  content: "Refresh balance";
+/* Shared pixel tooltip; each user sets `content` and placement. */
+.refresh-balance-btn::after,
+.sea-band::after {
   position: absolute;
-  bottom: 100%;
-  left: 50%;
-  transform: translateX(-50%);
   background: var(--bg);
   color: var(--gold);
   font-size: 0.7rem;
@@ -465,10 +463,18 @@ body::before {
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.2s;
+}
+
+.refresh-balance-btn::after {
+  content: "Refresh balance";
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
   margin-bottom: 4px;
 }
 
-.refresh-balance-btn:hover::after {
+.refresh-balance-btn:hover::after,
+.sea-band:hover::after {
   opacity: 1;
 }
 
@@ -676,6 +682,15 @@ body::before {
   position: relative;
   /* Each band runs its own waves; clip them to the band. */
   overflow: hidden;
+}
+
+/* Tier name on hover. Bands clip, so it sits inside the band, under ships. */
+.sea-band::after {
+  content: attr(aria-label);
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+  z-index: 1;
 }
 
 .sea-band-kraken_waters {

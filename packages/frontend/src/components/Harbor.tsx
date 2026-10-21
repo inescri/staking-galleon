@@ -8,6 +8,7 @@ import {
   maxVoyageMsByTier,
 } from "../utils/harbor";
 import type { Expedition } from "../contexts/GameContext";
+import { TIER_CONFIGS } from "../utils/rewards";
 
 function HarborShip({
   expedition,
@@ -65,6 +66,8 @@ export function Harbor(): ReactElement {
               <div
                 key={tier}
                 className={`sea-band sea-band-${tier}`}
+                data-tier={tier}
+                aria-label={TIER_CONFIGS[tier].name}
                 style={
                   {
                     // Height share of the ocean; thinner toward the horizon.
