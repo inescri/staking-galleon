@@ -21,6 +21,8 @@ export const HARBOR_LANE_WEIGHTS: readonly number[] = [0.7, 0.9, 1.1, 1.3];
 /** Sprite scale and opacity on the horizon band; the dock band is 1. */
 const FAR_SCALE = 0.5;
 const FAR_OPACITY = 0.75;
+/** Wave size on the horizon band; the dock band is 1. */
+const FAR_WAVE_SCALE = 0.3;
 /** Wave scroll speed on the horizon band; the dock band is 1. */
 const FAR_WAVE_SPEED = 0.25;
 
@@ -31,6 +33,8 @@ export interface LanePerspective {
   depth: number;
   scale: number;
   opacity: number;
+  /** Wave size factor; farther bands get smaller waves. */
+  waveScale: number;
   /** Wave scroll speed factor; farther bands roll slower. */
   waveSpeed: number;
 }
@@ -47,6 +51,7 @@ export function lanePerspective(tier: Tier): LanePerspective {
     depth,
     scale: 1 - (1 - FAR_SCALE) * depth,
     opacity: 1 - (1 - FAR_OPACITY) * depth,
+    waveScale: 1 - (1 - FAR_WAVE_SCALE) * depth,
     waveSpeed: 1 - (1 - FAR_WAVE_SPEED) * depth,
   };
 }

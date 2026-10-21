@@ -54,7 +54,7 @@ export function Harbor() {
               {
                 flexGrow: HARBOR_LANE_WEIGHTS[i],
                 // Farther bands get smaller, slower waves.
-                "--wave-scale": lanePerspective(tier).scale,
+                "--wave-scale": lanePerspective(tier).waveScale,
                 "--wave-speed": lanePerspective(tier).waveSpeed,
               } as CSSProperties
             }

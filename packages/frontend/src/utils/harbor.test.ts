@@ -46,6 +46,8 @@ describe("lanePerspective", () => {
     expect(near.opacity).toBe(1);
     expect(far.scale).toBeLessThan(lanePerspective("deep_ocean").scale);
     expect(far.opacity).toBeLessThan(near.opacity);
+    expect(near.waveScale).toBe(1);
+    expect(far.waveScale).toBeLessThan(far.scale);
     expect(near.waveSpeed).toBe(1);
     expect(far.waveSpeed).toBeLessThan(far.scale);
   });
