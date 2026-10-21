@@ -4,7 +4,7 @@ import {
   HARBOR_LANE_WEIGHTS,
   harborReach,
   lanePerspective,
-  maxVoyageMs,
+  maxVoyageMsByTier,
 } from "./harbor";
 import { TIERS } from "./rewards";
 import type { GameRules, TierRules } from "./game";
@@ -62,12 +62,12 @@ describe("lanePerspective", () => {
   });
 });
 
-describe("maxVoyageMs", () => {
-  it("is 0 without rules", () => {
-    expect(maxVoyageMs(null)).toBe(0);
+describe("maxVoyageMsByTier", () => {
+  it("is empty without rules", () => {
+    expect(maxVoyageMsByTier(null)).toEqual({});
   });
 
-  it("picks the longest duration across tiers", () => {
+  it("picks the longest duration within each tier", () => {
     const rules: GameRules = {
       maxShips: 5,
       tiers: {
@@ -77,7 +77,12 @@ describe("maxVoyageMs", () => {
         kraken_waters: tier(3 * DAY),
       },
     };
-    expect(maxVoyageMs(rules)).toBe(7 * DAY);
+    expect(maxVoyageMsByTier(rules)).toEqual({
+      coastal: DAY,
+      open_sea: 3 * DAY,
+      deep_ocean: 7 * DAY,
+      kraken_waters: 3 * DAY,
+    });
   });
 });
 

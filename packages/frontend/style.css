@@ -686,7 +686,7 @@ body {
 .ship-sprite {
   /* `left`, `top`, `opacity`, `z-index` and `--ship-scale` come from
      ShipSprite: a ship sails in its tier's band, moves out by time at sea
-     against the longest voyage, and looks smaller nearer the horizon. */
+     against its tier's longest voyage, and looks smaller nearer the horizon. */
   position: absolute;
   transform: translateY(-50%);
   transition:

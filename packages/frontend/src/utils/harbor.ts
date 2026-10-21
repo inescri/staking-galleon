@@ -56,21 +56,22 @@ export function lanePerspective(tier: Tier): LanePerspective {
   };
 }
 
-/** Longest voyage the config offers; that ship reaches the far edge. */
-export function maxVoyageMs(rules: GameRules | null): number {
-  if (!rules) return 0;
-  let max = 0;
-  for (const tier of Object.values(rules.tiers)) {
-    for (const option of tier.durations) {
-      if (option.durationMs > max) max = option.durationMs;
-    }
+/** Longest voyage each tier offers; that ship reaches its band's far edge. */
+export function maxVoyageMsByTier(
+  rules: GameRules | null,
+): Partial<Record<Tier, number>> {
+  const out: Partial<Record<Tier, number>> = {};
+  if (!rules) return out;
+  for (const tier of HARBOR_LANES) {
+    const durations = rules.tiers[tier]?.durations ?? [];
+    out[tier] = Math.max(0, ...durations.map((o) => o.durationMs));
   }
-  return max;
+  return out;
 }
 
 /**
  * How far across the harbor a ship is, 0 (dock) to 1 (far edge), measured
- * against the longest voyage. A ship stops at its own duration, so shorter
+ * against its tier's longest voyage. A ship stops at its own duration, so shorter
  * voyages end proportionally closer to the dock.
  */
 export function harborReach(

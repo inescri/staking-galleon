@@ -10,7 +10,7 @@ interface ShipSpriteProps {
   elapsedMs: number;
   /** The ship's own voyage length; it stops there. */
   durationMs: number;
-  /** Longest voyage in the config; maps to the far edge. */
+  /** Longest voyage of the ship's tier; maps to its band's far edge. */
   maxDurationMs: number;
   size?: number;
 }

@@ -6,7 +6,7 @@ import {
   HARBOR_LANES,
   HARBOR_LANE_WEIGHTS,
   lanePerspective,
-  maxVoyageMs,
+  maxVoyageMsByTier,
 } from "../utils/harbor";
 import { TIER_CONFIGS } from "../utils/rewards";
 import type { Expedition } from "../contexts/GameContext";
@@ -36,7 +36,7 @@ function HarborShip({
 
 export function Harbor() {
   const { activeExpeditions, rules } = useGameState();
-  const maxDurationMs = useMemo(() => maxVoyageMs(rules), [rules]);
+  const maxByTier = useMemo(() => maxVoyageMsByTier(rules), [rules]);
 
   return (
     <div className="harbor">
@@ -69,7 +69,7 @@ export function Harbor() {
           <HarborShip
             key={exp.id}
             expedition={exp}
-            maxDurationMs={maxDurationMs}
+            maxDurationMs={maxByTier[exp.tier] ?? 0}
           />
         ))}
         {activeExpeditions.length === 0 && (
