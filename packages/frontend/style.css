@@ -740,7 +740,8 @@ body {
   left: 0;
   width: 200%;
   /* Flat foam dashes: much wider than they are tall. */
-  height: calc(3px * var(--wave-scale, 1));
+  /* At least 1px so far-band dashes don't blur out below a pixel. */
+  height: max(1px, calc(3px * var(--wave-scale, 1)));
   z-index: 1;
 }
 
