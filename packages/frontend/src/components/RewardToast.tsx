@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useGameDispatch } from "../contexts/useGame";
 import type { CompletedExpedition } from "../contexts/GameContext";
 import { useWallet } from "../contexts/useWallet";
-import { formatUnits } from "../utils/rewards";
+import { formatTl } from "../utils/rewards";
 import { TierIcon } from "./TierIcon";
 
 export function RewardToast({
@@ -43,8 +43,8 @@ export function RewardToast({
         </span>
         <span className="toast-result">
           {won
-            ? `+${formatUnits(profit, token)} dbl bounty (${formatUnits(expedition.payout, token)} returned)`
-            : `−${formatUnits(expedition.stake, token)} dbl went down with the ship`}
+            ? `${formatTl(profit, token, "+")} bounty (${formatTl(expedition.payout, token)} returned)`
+            : `${formatTl(expedition.stake, token, "\u2212")} went down with the ship`}
         </span>
       </div>
     </div>
