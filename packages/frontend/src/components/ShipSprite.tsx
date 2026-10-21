@@ -1,4 +1,4 @@
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactElement } from "react";
 import { ShipImage } from "./ShipImage";
 import { harborReach, lanePerspective, shipTopPct } from "../utils/harbor";
 import type { Tier } from "../utils/rewards";
@@ -28,7 +28,7 @@ export function ShipSprite({
   maxDurationMs,
   slot,
   size = 32,
-}: ShipSpriteProps) {
+}: ShipSpriteProps): ReactElement {
   const reach = harborReach(elapsedMs, durationMs, maxDurationMs);
   const lane = lanePerspective(tier);
   const top = shipTopPct(tier, slot);

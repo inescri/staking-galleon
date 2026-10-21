@@ -1,7 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
   HARBOR_LANES,
-  HARBOR_LANE_WEIGHTS,
   harborReach,
   lanePerspective,
   shipTopPct,
@@ -31,11 +30,25 @@ describe("HARBOR_LANES", () => {
   it("has every tier exactly once", () => {
     expect([...HARBOR_LANES].sort()).toEqual([...TIERS].sort());
   });
+
+  it("runs from the horizon (kraken) down to the dock (coastal)", () => {
+    expect(HARBOR_LANES[0]).toBe("kraken_waters");
+    expect(HARBOR_LANES[HARBOR_LANES.length - 1]).toBe("coastal");
+  });
 });
 
 describe("lanePerspective", () => {
-  it("has a weight per lane", () => {
-    expect(HARBOR_LANE_WEIGHTS).toHaveLength(HARBOR_LANES.length);
+  it("thins bands toward the horizon and fills the ocean", () => {
+    const lanes = HARBOR_LANES.map(lanePerspective);
+    for (let i = 1; i < lanes.length; i++) {
+      expect(lanes[i].weight).toBeGreaterThan(lanes[i - 1].weight);
+    }
+    const total = lanes.reduce((sum, l) => sum + l.heightPct, 0);
+    expect(total).toBeCloseTo(100);
+  });
+
+  it("returns the same object on every call", () => {
+    expect(lanePerspective("open_sea")).toBe(lanePerspective("open_sea"));
   });
 
   it("shrinks and hazes ships toward the horizon", () => {

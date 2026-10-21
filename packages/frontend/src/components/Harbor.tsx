@@ -1,10 +1,9 @@
-import { useMemo, type CSSProperties } from "react";
+import { useMemo, type CSSProperties, type ReactElement } from "react";
 import { useGameState } from "../contexts/useGame";
 import { useCountdown } from "../hooks/useCountdown";
 import { ShipSprite } from "./ShipSprite";
 import {
   HARBOR_LANES,
-  HARBOR_LANE_WEIGHTS,
   lanePerspective,
   maxVoyageMsByTier,
 } from "../utils/harbor";
@@ -19,7 +18,7 @@ function HarborShip({
   expedition: Expedition;
   maxDurationMs: number;
   slot: number;
-}) {
+}): ReactElement {
   const { elapsedMs } = useCountdown(
     expedition.startedAt,
     expedition.durationMs,
@@ -37,7 +36,7 @@ function HarborShip({
   );
 }
 
-export function Harbor() {
+export function Harbor(): ReactElement {
   const { activeExpeditions, rules } = useGameState();
   const maxByTier = useMemo(() => maxVoyageMsByTier(rules), [rules]);
 
@@ -61,25 +60,29 @@ export function Harbor() {
         <div className="cloud cloud-2" />
       </div>
       <div className="harbor-ocean">
-        {HARBOR_LANES.map((tier, i) => (
-          <div
-            key={tier}
-            className={`sea-band sea-band-${tier}`}
-            style={
-              {
-                flexGrow: HARBOR_LANE_WEIGHTS[i],
-                // Farther bands get smaller, slower waves.
-                "--wave-scale": lanePerspective(tier).waveScale,
-                "--wave-speed": lanePerspective(tier).waveSpeed,
-              } as CSSProperties
-            }
-          >
-            <div className="wave wave-1" />
-            <div className="wave wave-2" />
-            <div className="wave wave-3" />
-            <span className="sea-band-label">{TIER_CONFIGS[tier].name}</span>
-          </div>
-        ))}
+        {HARBOR_LANES.map((tier) => {
+          const lane = lanePerspective(tier);
+          return (
+            <div
+              key={tier}
+              className={`sea-band sea-band-${tier}`}
+              style={
+                {
+                  // Height share of the ocean; thinner toward the horizon.
+                  flex: `${lane.weight} 1 0`,
+                  // Farther bands get smaller, slower waves.
+                  "--wave-scale": lane.waveScale,
+                  "--wave-speed": lane.waveSpeed,
+                } as CSSProperties
+              }
+            >
+              <div className="wave wave-1" />
+              <div className="wave wave-2" />
+              <div className="wave wave-3" />
+              <span className="sea-band-label">{TIER_CONFIGS[tier].name}</span>
+            </div>
+          );
+        })}
         {/* Positions need each tier's longest voyage from the config; hold
             ships back until it loads so they don't slide on arrival. */}
         {rules !== null &&

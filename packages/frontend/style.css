@@ -627,7 +627,7 @@ body {
 }
 
 .sea-band {
-  flex: 1 1 0;
+  /* `flex` (height share per tier) comes from Harbor via utils/harbor.ts. */
   position: relative;
   /* Each band runs its own waves; clip them to the band. */
   overflow: hidden;
@@ -686,7 +686,8 @@ body {
 .ship-sprite {
   /* `left`, `top`, `opacity`, `z-index` and `--ship-scale` come from
      ShipSprite: a ship sails in its tier's band, moves out by time at sea
-     against its tier's longest voyage, and looks smaller nearer the horizon. */
+     against its tier's longest voyage, and looks smaller nearer the horizon.
+     `top` eases when a ship changes row after an earlier one returns. */
   position: absolute;
   transform: translateY(-50%);
   transition:

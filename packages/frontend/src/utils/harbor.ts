@@ -1,22 +1,23 @@
 import type { GameRules } from "./game";
-import type { Tier } from "./rewards";
+import { TIERS, type Tier } from "./rewards";
+
+/**
+ * Relative band heights. Bands thin out toward the horizon so the sea reads
+ * as receding. A `Record` so a new tier fails to compile until it gets one.
+ */
+const BAND_WEIGHTS: Record<Tier, number> = {
+  coastal: 1.3,
+  open_sea: 1.1,
+  deep_ocean: 0.9,
+  kraken_waters: 0.7,
+};
 
 /**
  * Harbor bands from top to bottom: the farthest waters sit on the horizon,
  * coastal trade runs along the dock. Each ship sails in its tier's band.
+ * `TIERS` runs from easiest to hardest, so the bands are its reverse.
  */
-export const HARBOR_LANES: readonly Tier[] = [
-  "kraken_waters",
-  "deep_ocean",
-  "open_sea",
-  "coastal",
-];
-
-/**
- * Relative band heights, horizon first. Bands thin out toward the horizon
- * so the sea reads as receding.
- */
-export const HARBOR_LANE_WEIGHTS: readonly number[] = [0.7, 0.9, 1.1, 1.3];
+export const HARBOR_LANES: readonly Tier[] = [...TIERS].reverse();
 
 /** Sprite scale and opacity on the horizon band; the dock band is 1. */
 const FAR_SCALE = 0.5;
@@ -35,6 +36,8 @@ const ROW_OFFSETS: readonly number[] = [0, -0.3, 0.3, -0.15, 0.15];
 const HOUR_MS = 60 * 60 * 1000;
 
 export interface LanePerspective {
+  /** Relative band height (flex-grow). */
+  weight: number;
   /** Band centre, % of the ocean height from the top. */
   topPct: number;
   /** Band height, % of the ocean height. */
@@ -49,23 +52,32 @@ export interface LanePerspective {
   waveSpeed: number;
 }
 
+/** Every band's layout and look, computed once. */
+const LANE_PERSPECTIVES: Record<Tier, LanePerspective> = (() => {
+  const total = HARBOR_LANES.reduce((sum, t) => sum + BAND_WEIGHTS[t], 0);
+  const out = {} as Record<Tier, LanePerspective>;
+  let above = 0;
+  HARBOR_LANES.forEach((tier, lane) => {
+    const weight = BAND_WEIGHTS[tier];
+    const depth = 1 - lane / (HARBOR_LANES.length - 1);
+    out[tier] = {
+      weight,
+      topPct: ((above + weight / 2) / total) * 100,
+      heightPct: (weight / total) * 100,
+      depth,
+      scale: 1 - (1 - FAR_SCALE) * depth,
+      opacity: 1 - (1 - FAR_OPACITY) * depth,
+      waveScale: 1 - (1 - FAR_WAVE_SCALE) * depth,
+      waveSpeed: 1 - (1 - FAR_WAVE_SPEED) * depth,
+    };
+    above += weight;
+  });
+  return out;
+})();
+
 /** Where a tier's band sits and how far away its ships look. */
 export function lanePerspective(tier: Tier): LanePerspective {
-  const lane = Math.max(HARBOR_LANES.indexOf(tier), 0);
-  const total = HARBOR_LANE_WEIGHTS.reduce((a, b) => a + b, 0);
-  const above = HARBOR_LANE_WEIGHTS.slice(0, lane).reduce((a, b) => a + b, 0);
-  const topPct = ((above + HARBOR_LANE_WEIGHTS[lane] / 2) / total) * 100;
-  const heightPct = (HARBOR_LANE_WEIGHTS[lane] / total) * 100;
-  const depth = 1 - lane / (HARBOR_LANES.length - 1);
-  return {
-    topPct,
-    heightPct,
-    depth,
-    scale: 1 - (1 - FAR_SCALE) * depth,
-    opacity: 1 - (1 - FAR_OPACITY) * depth,
-    waveScale: 1 - (1 - FAR_WAVE_SCALE) * depth,
-    waveSpeed: 1 - (1 - FAR_WAVE_SPEED) * depth,
-  };
+  return LANE_PERSPECTIVES[tier];
 }
 
 /** Longest voyage each tier offers; that ship reaches its band's far edge. */
