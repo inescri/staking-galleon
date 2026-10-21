@@ -1042,7 +1042,7 @@ body::before {
 /* ======== EXPEDITION CARD ======== */
 
 .expedition-card {
-  padding: 12px 14px;
+  padding: 8px 10px;
   /* `--tier-art` (the difficulty's pixel art) and `--tier-color` are set
      inline by ExpeditionCard so each card is colour-coded by tier. */
   --tier-color: var(--panel-border);
@@ -1065,7 +1065,7 @@ body::before {
 .expedition-header {
   display: flex;
   align-items: center;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .expedition-tier {
@@ -1103,7 +1103,8 @@ body::before {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 8px;
+  gap: 8px;
+  margin-top: 4px;
   font-size: 0.85rem;
   color: var(--text-dim);
 }
@@ -1112,6 +1113,12 @@ body::before {
   font-size: 0.8rem;
   font-weight: 700;
   color: var(--teal);
+}
+
+.expedition-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .expedition-actions {
