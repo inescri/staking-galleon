@@ -31,7 +31,7 @@
   --sea-ocean: #0f3460;
   --sea-open: #174c7a;
   --sea-coastal: #1e5f8e;
-  --sea-foam: #9bd1ff;
+  --sea-foam: #79c9d7;
 
   /* Dock */
   --wood-dark: #4a3a2e;
@@ -772,7 +772,7 @@ body::before {
     transparent calc(28px * var(--wave-scale, 1)),
     transparent calc(40px * var(--wave-scale, 1))
   );
-  opacity: 0.5;
+  opacity: 0.35;
   animation: wave-scroll calc(3s / var(--wave-speed, 1)) linear infinite;
 }
 
@@ -787,7 +787,7 @@ body::before {
     transparent calc(38px * var(--wave-scale, 1)),
     transparent calc(54px * var(--wave-scale, 1))
   );
-  opacity: 0.35;
+  opacity: 0.25;
   animation: wave-scroll calc(5s / var(--wave-speed, 1)) linear infinite reverse;
 }
 
@@ -802,7 +802,7 @@ body::before {
     transparent calc(44px * var(--wave-scale, 1)),
     transparent calc(68px * var(--wave-scale, 1))
   );
-  opacity: 0.25;
+  opacity: 0.18;
   animation: wave-scroll calc(7s / var(--wave-speed, 1)) linear infinite;
 }
 
