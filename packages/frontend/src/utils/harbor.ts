@@ -26,9 +26,19 @@ const FAR_WAVE_SCALE = 0.3;
 /** Wave scroll speed on the horizon band; the dock band is 1. */
 const FAR_WAVE_SPEED = 0.25;
 
+/**
+ * Vertical offsets for ships sharing a band, as a fraction of the band's
+ * height from its centre, in launch order. Repeats after the last row.
+ */
+const ROW_OFFSETS: readonly number[] = [0, -0.3, 0.3, -0.15, 0.15];
+
+const HOUR_MS = 60 * 60 * 1000;
+
 export interface LanePerspective {
   /** Band centre, % of the ocean height from the top. */
   topPct: number;
+  /** Band height, % of the ocean height. */
+  heightPct: number;
   /** 0 on the dock band, 1 on the horizon band. */
   depth: number;
   scale: number;
@@ -45,9 +55,11 @@ export function lanePerspective(tier: Tier): LanePerspective {
   const total = HARBOR_LANE_WEIGHTS.reduce((a, b) => a + b, 0);
   const above = HARBOR_LANE_WEIGHTS.slice(0, lane).reduce((a, b) => a + b, 0);
   const topPct = ((above + HARBOR_LANE_WEIGHTS[lane] / 2) / total) * 100;
+  const heightPct = (HARBOR_LANE_WEIGHTS[lane] / total) * 100;
   const depth = 1 - lane / (HARBOR_LANES.length - 1);
   return {
     topPct,
+    heightPct,
     depth,
     scale: 1 - (1 - FAR_SCALE) * depth,
     opacity: 1 - (1 - FAR_OPACITY) * depth,
@@ -70,9 +82,20 @@ export function maxVoyageMsByTier(
 }
 
 /**
- * How far across the harbor a ship is, 0 (dock) to 1 (far edge), measured
- * against its tier's longest voyage. A ship stops at its own duration, so shorter
- * voyages end proportionally closer to the dock.
+ * Vertical position (% of the ocean height) of the `slot`-th ship in a
+ * tier's band, so ships of the same tier launched together don't stack.
+ */
+export function shipTopPct(tier: Tier, slot: number): number {
+  const lane = lanePerspective(tier);
+  const row = ROW_OFFSETS[Math.max(slot, 0) % ROW_OFFSETS.length];
+  return lane.topPct + row * lane.heightPct;
+}
+
+/**
+ * How far across its band a ship is, 0 (dock) to 1 (far edge), measured
+ * against its tier's longest voyage. Logarithmic in hours at sea, so short
+ * voyages visibly leave the dock while long ones keep creeping out. A ship
+ * stops at its own duration, so shorter voyages end closer to the dock.
  */
 export function harborReach(
   elapsedMs: number,
@@ -82,5 +105,6 @@ export function harborReach(
   const scale = maxMs > 0 ? maxMs : durationMs;
   if (scale <= 0) return 0;
   const sailed = Math.min(Math.max(elapsedMs, 0), durationMs);
-  return Math.min(sailed / scale, 1);
+  const reach = Math.log1p(sailed / HOUR_MS) / Math.log1p(scale / HOUR_MS);
+  return Math.min(reach, 1);
 }

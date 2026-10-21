@@ -1,6 +1,6 @@
 import type { CSSProperties } from "react";
 import { ShipImage } from "./ShipImage";
-import { harborReach, lanePerspective } from "../utils/harbor";
+import { harborReach, lanePerspective, shipTopPct } from "../utils/harbor";
 import type { Tier } from "../utils/rewards";
 
 interface ShipSpriteProps {
@@ -12,6 +12,8 @@ interface ShipSpriteProps {
   durationMs: number;
   /** Longest voyage of the ship's tier; maps to its band's far edge. */
   maxDurationMs: number;
+  /** Launch order among ships in the same band; picks its row. */
+  slot: number;
   size?: number;
 }
 
@@ -24,10 +26,12 @@ export function ShipSprite({
   elapsedMs,
   durationMs,
   maxDurationMs,
+  slot,
   size = 32,
 }: ShipSpriteProps) {
   const reach = harborReach(elapsedMs, durationMs, maxDurationMs);
   const lane = lanePerspective(tier);
+  const top = shipTopPct(tier, slot);
 
   return (
     <div
@@ -35,11 +39,11 @@ export function ShipSprite({
       style={
         {
           left: `${DOCK_LEFT + reach * RANGE}%`,
-          top: `${lane.topPct}%`,
+          top: `${top}%`,
           opacity: lane.opacity,
-          // Far ships look smaller; nearer bands draw over farther ones.
+          // Far ships look smaller; lower (nearer) ships draw over higher ones.
           "--ship-scale": lane.scale,
-          zIndex: 2 + Math.round((1 - lane.depth) * 10),
+          zIndex: 2 + Math.round(top),
           animationDelay: `${reach * 500}ms`,
         } as CSSProperties
       }

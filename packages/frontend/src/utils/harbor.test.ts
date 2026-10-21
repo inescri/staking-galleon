@@ -4,6 +4,7 @@ import {
   HARBOR_LANE_WEIGHTS,
   harborReach,
   lanePerspective,
+  shipTopPct,
   maxVoyageMsByTier,
 } from "./harbor";
 import { TIERS } from "./rewards";
@@ -92,18 +93,51 @@ describe("harborReach", () => {
     expect(harborReach(-5, DAY, 7 * DAY)).toBe(0);
   });
 
-  it("moves linearly against the longest voyage", () => {
-    expect(harborReach(DAY, 7 * DAY, 7 * DAY)).toBeCloseTo(1 / 7);
+  it("moves short voyages visibly away from the dock", () => {
+    // 1h of a 1d tier max: well past the linear 1/24.
+    expect(harborReach(HOUR, HOUR, DAY)).toBeGreaterThan(0.2);
+    expect(harborReach(6 * HOUR, 6 * HOUR, DAY)).toBeCloseTo(
+      Math.log(7) / Math.log(25),
+    );
+  });
+
+  it("moves out monotonically, fast early and slower later", () => {
+    const r1h = harborReach(HOUR, 7 * DAY, 7 * DAY);
+    const r1d = harborReach(DAY, 7 * DAY, 7 * DAY);
+    const r3d = harborReach(3 * DAY, 7 * DAY, 7 * DAY);
+    expect(r1d).toBeGreaterThan(r1h);
+    expect(r3d).toBeGreaterThan(r1d);
+    expect(r1d - r1h).toBeGreaterThan(r3d - r1d);
   });
 
   it("stops at the ship's own duration", () => {
-    expect(harborReach(DAY, DAY, 7 * DAY)).toBeCloseTo(1 / 7);
-    expect(harborReach(30 * DAY, DAY, 7 * DAY)).toBeCloseTo(1 / 7);
+    const end = harborReach(DAY, DAY, 7 * DAY);
+    expect(end).toBeLessThan(1);
+    expect(harborReach(30 * DAY, DAY, 7 * DAY)).toBe(end);
     expect(harborReach(30 * DAY, 7 * DAY, 7 * DAY)).toBe(1);
   });
 
   it("falls back to the ship's duration without a max", () => {
-    expect(harborReach(HOUR, 2 * HOUR, 0)).toBe(0.5);
+    expect(harborReach(2 * HOUR, 2 * HOUR, 0)).toBe(1);
     expect(harborReach(HOUR, 0, 0)).toBe(0);
+  });
+});
+
+describe("shipTopPct", () => {
+  it("puts the first ship on the band centre", () => {
+    expect(shipTopPct("coastal", 0)).toBe(lanePerspective("coastal").topPct);
+  });
+
+  it("gives ships of one band distinct rows inside the band", () => {
+    const lane = lanePerspective("open_sea");
+    const tops = [0, 1, 2, 3, 4].map((s) => shipTopPct("open_sea", s));
+    expect(new Set(tops).size).toBe(tops.length);
+    for (const top of tops) {
+      expect(Math.abs(top - lane.topPct)).toBeLessThan(lane.heightPct / 2);
+    }
+  });
+
+  it("repeats rows after the last one", () => {
+    expect(shipTopPct("coastal", 5)).toBe(shipTopPct("coastal", 0));
   });
 });

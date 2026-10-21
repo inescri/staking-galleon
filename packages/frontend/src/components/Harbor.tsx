@@ -14,9 +14,11 @@ import type { Expedition } from "../contexts/GameContext";
 function HarborShip({
   expedition,
   maxDurationMs,
+  slot,
 }: {
   expedition: Expedition;
   maxDurationMs: number;
+  slot: number;
 }) {
   const { elapsedMs } = useCountdown(
     expedition.startedAt,
@@ -29,6 +31,7 @@ function HarborShip({
       elapsedMs={elapsedMs}
       durationMs={expedition.durationMs}
       maxDurationMs={maxDurationMs}
+      slot={slot}
       size={36}
     />
   );
@@ -37,6 +40,18 @@ function HarborShip({
 export function Harbor() {
   const { activeExpeditions, rules } = useGameState();
   const maxByTier = useMemo(() => maxVoyageMsByTier(rules), [rules]);
+
+  // Each ship's launch order within its band (fleet is sorted by startedAt).
+  const slots = useMemo(() => {
+    const seen = new Map<string, number>();
+    const out = new Map<string, number>();
+    for (const exp of activeExpeditions) {
+      const slot = seen.get(exp.tier) ?? 0;
+      out.set(exp.id, slot);
+      seen.set(exp.tier, slot + 1);
+    }
+    return out;
+  }, [activeExpeditions]);
 
   return (
     <div className="harbor">
@@ -70,6 +85,7 @@ export function Harbor() {
             key={exp.id}
             expedition={exp}
             maxDurationMs={maxByTier[exp.tier] ?? 0}
+            slot={slots.get(exp.id) ?? 0}
           />
         ))}
         {activeExpeditions.length === 0 && (
