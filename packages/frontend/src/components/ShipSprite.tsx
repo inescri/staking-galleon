@@ -6,8 +6,10 @@ import type { Tier } from "../utils/rewards";
 interface ShipSpriteProps {
   /** Picks the harbor band the ship sails in. */
   tier: Tier;
-  /** How long the ship has been at sea. Drives position and wear. */
+  /** How long the ship has been at sea. Drives wear. */
   elapsedMs: number;
+  /** Share of its own voyage done, 0..1, from useCountdown. */
+  progress: number;
   /** The ship's own voyage length; it stops there. */
   durationMs: number;
   /** Longest voyage of the ship's tier; maps to its band's far edge. */
@@ -24,12 +26,13 @@ const RANGE = 85;
 export function ShipSprite({
   tier,
   elapsedMs,
+  progress,
   durationMs,
   maxDurationMs,
   slot,
   size = 32,
 }: ShipSpriteProps): ReactElement {
-  const reach = harborReach(elapsedMs, durationMs, maxDurationMs);
+  const reach = harborReach(progress * durationMs, maxDurationMs);
   const lane = lanePerspective(tier);
   const top = shipTopPct(tier, slot);
 

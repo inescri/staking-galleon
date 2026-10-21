@@ -105,18 +105,15 @@ export function shipTopPct(tier: Tier, slot: number): number {
 
 /**
  * How far across its band a ship is, 0 (dock) to 1 (far edge), measured
- * against its tier's longest voyage. Logarithmic in hours at sea, so short
- * voyages visibly leave the dock while long ones keep creeping out. A ship
- * stops at its own duration, so shorter voyages end closer to the dock.
+ * against its tier's longest voyage. Logarithmic in hours, so short voyages
+ * visibly leave the dock while long ones keep creeping out.
+ *
+ * `sailedMs` is the part of its own voyage the ship has covered
+ * (`progress * durationMs` from useCountdown), so a ship stops at its own
+ * duration and the clamping to it lives in one place.
  */
-export function harborReach(
-  elapsedMs: number,
-  durationMs: number,
-  maxMs: number,
-): number {
-  const scale = maxMs > 0 ? maxMs : durationMs;
-  if (scale <= 0) return 0;
-  const sailed = Math.min(Math.max(elapsedMs, 0), durationMs);
-  const reach = Math.log1p(sailed / HOUR_MS) / Math.log1p(scale / HOUR_MS);
-  return Math.min(reach, 1);
+export function harborReach(sailedMs: number, maxMs: number): number {
+  if (maxMs <= 0) return 0;
+  const sailed = Math.min(Math.max(sailedMs, 0), maxMs);
+  return Math.log1p(sailed / HOUR_MS) / Math.log1p(maxMs / HOUR_MS);
 }

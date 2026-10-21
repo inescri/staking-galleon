@@ -19,7 +19,7 @@ function HarborShip({
   maxDurationMs: number;
   slot: number;
 }): ReactElement {
-  const { elapsedMs } = useCountdown(
+  const { elapsedMs, progress } = useCountdown(
     expedition.startedAt,
     expedition.durationMs,
   );
@@ -28,6 +28,7 @@ function HarborShip({
     <ShipSprite
       tier={expedition.tier}
       elapsedMs={elapsedMs}
+      progress={progress}
       durationMs={expedition.durationMs}
       maxDurationMs={maxDurationMs}
       slot={slot}

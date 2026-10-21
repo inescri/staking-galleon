@@ -102,37 +102,32 @@ describe("maxVoyageMsByTier", () => {
 
 describe("harborReach", () => {
   it("starts at the dock", () => {
-    expect(harborReach(0, DAY, 7 * DAY)).toBe(0);
-    expect(harborReach(-5, DAY, 7 * DAY)).toBe(0);
+    expect(harborReach(0, 7 * DAY)).toBe(0);
+    expect(harborReach(-5, 7 * DAY)).toBe(0);
   });
 
   it("moves short voyages visibly away from the dock", () => {
     // 1h of a 1d tier max: well past the linear 1/24.
-    expect(harborReach(HOUR, HOUR, DAY)).toBeGreaterThan(0.2);
-    expect(harborReach(6 * HOUR, 6 * HOUR, DAY)).toBeCloseTo(
-      Math.log(7) / Math.log(25),
-    );
+    expect(harborReach(HOUR, DAY)).toBeGreaterThan(0.2);
+    expect(harborReach(6 * HOUR, DAY)).toBeCloseTo(Math.log(7) / Math.log(25));
   });
 
   it("moves out monotonically, fast early and slower later", () => {
-    const r1h = harborReach(HOUR, 7 * DAY, 7 * DAY);
-    const r1d = harborReach(DAY, 7 * DAY, 7 * DAY);
-    const r3d = harborReach(3 * DAY, 7 * DAY, 7 * DAY);
+    const r1h = harborReach(HOUR, 7 * DAY);
+    const r1d = harborReach(DAY, 7 * DAY);
+    const r3d = harborReach(3 * DAY, 7 * DAY);
     expect(r1d).toBeGreaterThan(r1h);
     expect(r3d).toBeGreaterThan(r1d);
     expect(r1d - r1h).toBeGreaterThan(r3d - r1d);
   });
 
-  it("stops at the ship's own duration", () => {
-    const end = harborReach(DAY, DAY, 7 * DAY);
-    expect(end).toBeLessThan(1);
-    expect(harborReach(30 * DAY, DAY, 7 * DAY)).toBe(end);
-    expect(harborReach(30 * DAY, 7 * DAY, 7 * DAY)).toBe(1);
+  it("reaches the far edge at the tier's longest voyage and caps there", () => {
+    expect(harborReach(7 * DAY, 7 * DAY)).toBe(1);
+    expect(harborReach(30 * DAY, 7 * DAY)).toBe(1);
   });
 
-  it("falls back to the ship's duration without a max", () => {
-    expect(harborReach(2 * HOUR, 2 * HOUR, 0)).toBe(1);
-    expect(harborReach(HOUR, 0, 0)).toBe(0);
+  it("stays at the dock without a max", () => {
+    expect(harborReach(HOUR, 0)).toBe(0);
   });
 });
 
