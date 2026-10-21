@@ -110,7 +110,7 @@ export function FundTreasury() {
       try {
         const available = await fundPool(input.amount);
         setMessage(
-          `Deposited ${formatUnits(input.amount, token)} dbl. Pool now has ${formatUnits(available, token)} dbl available.`,
+          `Deposited ${formatUnits(input.amount, token)} tl. Pool now has ${formatUnits(available, token)} tl available.`,
         );
         setAmount("");
         await Promise.all([loadStats(), refreshBalances()]);
@@ -139,17 +139,17 @@ export function FundTreasury() {
         {stats ? (
           <>
             <span>
-              Available: <b>{formatUnits(stats.available, token)}</b> dbl
+              Available: <b>{formatUnits(stats.available, token)}</b> tl
             </span>
             <span>
-              Reserved: <b>{formatUnits(stats.reserved, token)}</b> dbl
+              Reserved: <b>{formatUnits(stats.reserved, token)}</b> tl
             </span>
             <span>
-              At sea: <b>{formatUnits(stats.activeStakes, token)}</b> dbl
+              At sea: <b>{formatUnits(stats.activeStakes, token)}</b> tl
             </span>
             {stats.pendingPayouts > 0n && (
               <span>
-                Owed: <b>{formatUnits(stats.pendingPayouts, token)}</b> dbl
+                Owed: <b>{formatUnits(stats.pendingPayouts, token)}</b> tl
               </span>
             )}
           </>
@@ -167,7 +167,7 @@ export function FundTreasury() {
             <input
               type="number"
               className="pixel-input"
-              placeholder="Amount in dbl"
+              placeholder="Amount in tl"
               min={0}
               value={amount}
               onChange={(e) => setAmount(e.target.value)}

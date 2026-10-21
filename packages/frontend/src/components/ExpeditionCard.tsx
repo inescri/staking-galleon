@@ -217,7 +217,7 @@ export function ExpeditionCard({ expedition }: { expedition: Expedition }) {
           {config.name}
         </span>
         <span className="expedition-stake">
-          &nbsp;{formatUnits(expedition.stake, token)} dbl
+          &nbsp;{formatUnits(expedition.stake, token)} tl
         </span>
         <span className="expedition-odds">
           {formatBps(expedition.failBps)} risk · +

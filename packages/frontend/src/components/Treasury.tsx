@@ -3,7 +3,7 @@ import { useGameState } from "../contexts/useGame";
 import { useWallet } from "../contexts/useWallet";
 import { BUY_BTC_AMOUNT, TOKEN_ID, TOKEN_URL } from "../canister/config";
 import { claimRequest } from "../odin/approvalFlow";
-import { formatDoubloons } from "../utils/rewards";
+import { formatTaels } from "../utils/rewards";
 import { FundTreasury } from "./FundTreasury";
 import { Icon } from "./Icon";
 
@@ -68,7 +68,7 @@ export function Treasury() {
         </span>
         <span className="balance-amount">
           <span className="coin-icon">&#x1FA99;</span>
-          {formatDoubloons(balance)} Doubloons
+          {formatTaels(balance)} Taels
           <button
             className="refresh-balance-btn"
             onClick={handleRefresh}
@@ -84,7 +84,7 @@ export function Treasury() {
         </span>
         {connectedUser ? (
           <button
-            className="buy-doubloons-link"
+            className="buy-taels-link"
             onClick={handleBuy}
             disabled={isBuying}
           >
@@ -95,7 +95,7 @@ export function Treasury() {
             href={TOKEN_URL}
             target="_blank"
             rel="noopener noreferrer"
-            className="buy-doubloons-link"
+            className="buy-taels-link"
           >
             Buy
           </a>

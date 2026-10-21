@@ -166,7 +166,7 @@ export function SendShipForm() {
           : fleetFull
             ? "Fleet Full"
             : insufficient
-              ? "Insufficient Doubloons"
+              ? "Insufficient Taels"
               : "⚓ Launch Expedition";
 
   return (
@@ -199,7 +199,7 @@ export function SendShipForm() {
           Stake · {TIER_CONFIGS[selectedTier].name}
         </label>
         <div className="stake-fixed">
-          {tierRules ? `${formatUnits(tierRules.stake, token)} dbl` : "…"}
+          {tierRules ? `${formatUnits(tierRules.stake, token)} tl` : "…"}
         </div>
       </div>
 
@@ -229,7 +229,7 @@ export function SendShipForm() {
                   10_000n,
               token,
             )}{" "}
-            dbl on success; the whole stake is lost otherwise.
+            tl on success; the whole stake is lost otherwise.
           </p>
         )}
       </div>
@@ -238,7 +238,7 @@ export function SendShipForm() {
         <span>
           Fleet: {atSea}/{rules?.maxShips ?? "…"}
         </span>
-        <span>Balance: {formatUnits(balanceUnits, token)} dbl</span>
+        <span>Balance: {formatUnits(balanceUnits, token)} tl</span>
       </div>
 
       {approveError && <span className="wallet-error">{approveError}</span>}

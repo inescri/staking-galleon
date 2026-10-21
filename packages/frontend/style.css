@@ -482,7 +482,7 @@ body::before {
   }
 }
 
-.buy-doubloons-link {
+.buy-taels-link {
   font-size: 0.85rem;
   font-weight: 700;
   color: var(--gold);
@@ -498,12 +498,12 @@ body::before {
     color 0.2s;
 }
 
-.buy-doubloons-link:hover:not(:disabled) {
+.buy-taels-link:hover:not(:disabled) {
   background: var(--gold);
   color: var(--bg);
 }
 
-.buy-doubloons-link:disabled {
+.buy-taels-link:disabled {
   opacity: 0.6;
   cursor: wait;
 }

@@ -43,8 +43,8 @@ export function RewardToast({
         </span>
         <span className="toast-result">
           {won
-            ? `+${formatUnits(profit, token)} dbl bounty (${formatUnits(expedition.payout, token)} returned)`
-            : `−${formatUnits(expedition.stake, token)} dbl went down with the ship`}
+            ? `+${formatUnits(profit, token)} tl bounty (${formatUnits(expedition.payout, token)} returned)`
+            : `−${formatUnits(expedition.stake, token)} tl went down with the ship`}
         </span>
       </div>
     </div>

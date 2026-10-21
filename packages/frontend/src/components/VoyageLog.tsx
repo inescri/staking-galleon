@@ -46,7 +46,7 @@ export function VoyageLog(): ReactElement | null {
           >
             <TierIcon tier={exp.tier} className="tier-icon-log" />
             <span className="log-stake">
-              {formatUnits(exp.stake, token)} dbl
+              {formatUnits(exp.stake, token)} tl
             </span>
             <span className="log-outcome">
               {exp.succeeded

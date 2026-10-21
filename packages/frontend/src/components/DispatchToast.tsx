@@ -33,7 +33,7 @@ export function DispatchToast({
       <div className="toast-content">
         <span className="toast-title">Ship Dispatched!</span>
         <span className="toast-result">
-          {formatUnits(expedition.stake, token)} doubloons staked
+          {formatUnits(expedition.stake, token)} taels staked
         </span>
       </div>
     </div>

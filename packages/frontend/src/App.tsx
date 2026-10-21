@@ -41,7 +41,7 @@ export function App() {
           </span>
         </h1>
         <p className="game-subtitle">
-          Send ships. Stake doubloons. Reap the bounty.
+          Send ships. Stake taels. Reap the bounty.
         </p>
       </header>
 
