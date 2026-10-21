@@ -137,17 +137,38 @@ body::before {
   align-items: center;
   justify-content: center;
   gap: 14px;
-  font-size: 2.4rem;
   font-weight: 700;
-  color: var(--gold);
-  letter-spacing: 1px;
   text-shadow:
     0 2px 0 rgba(0, 0, 0, 0.6),
     0 0 18px rgba(0, 0, 0, 0.45);
 }
 
-.game-title .icon {
-  filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.6));
+.title-ship {
+  width: 64px;
+  height: 64px;
+  image-rendering: pixelated;
+  filter: drop-shadow(0 3px 4px rgba(0, 0, 0, 0.6));
+}
+
+.title-text {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  line-height: 1;
+}
+
+.title-main {
+  font-size: 2.4rem;
+  color: var(--gold);
+  letter-spacing: 1px;
+}
+
+.title-sub {
+  margin-top: 4px;
+  font-size: 1rem;
+  color: var(--text-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.6em;
 }
 
 .game-subtitle {
@@ -1198,13 +1219,20 @@ body::before {
 
 @media (max-width: 500px) {
   .game-title {
-    font-size: 1.6rem;
     gap: 10px;
   }
 
-  .game-title .icon {
-    width: 26px;
-    height: 26px;
+  .title-main {
+    font-size: 1.8rem;
+  }
+
+  .title-sub {
+    font-size: 0.8rem;
+  }
+
+  .title-ship {
+    width: 48px;
+    height: 48px;
   }
 
   .game-subtitle {

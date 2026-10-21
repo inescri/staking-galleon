@@ -8,7 +8,7 @@ import { FleetStatus } from "./components/FleetStatus";
 import { VoyageLog } from "./components/VoyageLog";
 import { RewardToast } from "./components/RewardToast";
 import { DispatchToast } from "./components/DispatchToast";
-import { Icon } from "./components/Icon";
+import shipImage from "./assets/ships/ship.png";
 
 export function App() {
   const { pendingReturns, pendingDispatches } = useGameState();
@@ -27,8 +27,18 @@ export function App() {
 
       <header className="app-header">
         <h1 className="game-title">
-          <Icon name="anchor" size={40} />
-          Galleon Stakes
+          <img
+            className="title-ship"
+            src={shipImage}
+            alt=""
+            width={64}
+            height={64}
+            draggable={false}
+          />
+          <span className="title-text">
+            <span className="title-main">Red Sail</span>
+            <span className="title-sub">Stakes</span>
+          </span>
         </h1>
         <p className="game-subtitle">
           Send ships. Stake doubloons. Reap the bounty.
