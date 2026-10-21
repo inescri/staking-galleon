@@ -80,7 +80,16 @@ body::before {
   width: 100vw;
   height: 130vh;
   z-index: -1;
-  background: url("/harbor-bg.jpg") center top / cover no-repeat;
+  /* Darken the top of the art so the title and subtitle stand out. */
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(6, 10, 28, 0.75) 0%,
+      rgba(6, 10, 28, 0.45) 12%,
+      rgba(6, 10, 28, 0.15) 26%,
+      rgba(6, 10, 28, 0) 40%
+    ),
+    url("/harbor-bg.jpg") center top / cover no-repeat;
   image-rendering: pixelated;
   pointer-events: none;
   /* Parallax: `--scroll-y` is set by useParallax; the art climbs at 30% of
