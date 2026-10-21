@@ -63,6 +63,19 @@ export function formatDurationMs(ms: number): string {
   return `${Math.round(hours / 24)}d`;
 }
 
+/** Live countdown: "4:05", "3:04:05", "2d 3:04:05". Rounds up to the second. */
+export function formatRemainingMs(ms: number): string {
+  const totalSeconds = Math.max(0, Math.ceil(ms / 1000));
+  const days = Math.floor(totalSeconds / 86_400);
+  const hours = Math.floor((totalSeconds % 86_400) / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  const ss = seconds.toString().padStart(2, "0");
+  if (days === 0 && hours === 0) return `${minutes}:${ss}`;
+  const hms = `${hours}:${minutes.toString().padStart(2, "0")}:${ss}`;
+  return days === 0 ? hms : `${days}d ${hms}`;
+}
+
 /** Basis points → "5%", "12.5%". */
 export function formatBps(bps: number): string {
   const pct = bps / 100;
