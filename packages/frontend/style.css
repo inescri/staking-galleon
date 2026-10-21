@@ -9,7 +9,7 @@
   --sea-mid: #0f3460;
   --sea-light: #53a8b6;
   --sea-foam: #79c9d7;
-  /* Harbor bands, lightest by the dock, darkest on the horizon. */
+  /* Harbor columns, lightest near shore, darkest in kraken waters. */
   --sea-coastal: #1e5f8e;
   --sea-open: #174c7a;
   --sea-ocean: #0f3460;
@@ -618,10 +618,9 @@ body {
 }
 
 .harbor-ocean {
-  /* Four tier bands, each tall enough for a 36px sprite. */
+  /* Four tier columns, left (coastal) to right (kraken). */
   height: 180px;
   display: flex;
-  flex-direction: column;
   position: relative;
   overflow: hidden;
 }
@@ -632,7 +631,7 @@ body {
 }
 
 .sea-band + .sea-band {
-  border-top: 1px solid rgba(0, 0, 0, 0.25);
+  border-left: 1px solid rgba(0, 0, 0, 0.25);
 }
 
 .sea-band-kraken_waters {
@@ -653,9 +652,10 @@ body {
 
 .sea-band-label {
   position: absolute;
-  top: 50%;
-  right: 6px;
-  transform: translateY(-50%);
+  top: 6px;
+  left: 50%;
+  transform: translateX(-50%);
+  text-align: center;
   font-family: "Press Start 2P", monospace;
   font-size: 0.4rem;
   color: var(--text-dim);
@@ -680,8 +680,8 @@ body {
 /* Ships */
 
 .ship-sprite {
-  /* `left`, `top` and `z-index` come from ShipSprite: a ship sails in its
-     tier's band and moves out by time at sea against the longest voyage. */
+  /* `left`, `top` and `z-index` come from ShipSprite: a ship sails across
+     its tier's column by time at sea against that tier's longest voyage. */
   position: absolute;
   transform: translateY(-50%);
   transition:

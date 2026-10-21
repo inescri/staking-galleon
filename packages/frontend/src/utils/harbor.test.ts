@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { HARBOR_LANES, harborReach, maxVoyageMs } from "./harbor";
+import { HARBOR_LANES, harborReach, maxVoyageMsByTier } from "./harbor";
 import { TIERS } from "./rewards";
 import type { GameRules, TierRules } from "./game";
 
@@ -26,12 +26,12 @@ describe("HARBOR_LANES", () => {
   });
 });
 
-describe("maxVoyageMs", () => {
-  it("is 0 without rules", () => {
-    expect(maxVoyageMs(null)).toBe(0);
+describe("maxVoyageMsByTier", () => {
+  it("is empty without rules", () => {
+    expect(maxVoyageMsByTier(null)).toEqual({});
   });
 
-  it("picks the longest duration across tiers", () => {
+  it("picks the longest duration of each tier", () => {
     const rules: GameRules = {
       maxShips: 5,
       tiers: {
@@ -41,7 +41,12 @@ describe("maxVoyageMs", () => {
         kraken_waters: tier(3 * DAY),
       },
     };
-    expect(maxVoyageMs(rules)).toBe(7 * DAY);
+    expect(maxVoyageMsByTier(rules)).toEqual({
+      coastal: DAY,
+      open_sea: 3 * DAY,
+      deep_ocean: 7 * DAY,
+      kraken_waters: 3 * DAY,
+    });
   });
 });
 
@@ -51,7 +56,7 @@ describe("harborReach", () => {
     expect(harborReach(-5, DAY, 7 * DAY)).toBe(0);
   });
 
-  it("moves linearly against the longest voyage", () => {
+  it("moves linearly against the tier's longest voyage", () => {
     expect(harborReach(DAY, 7 * DAY, 7 * DAY)).toBeCloseTo(1 / 7);
   });
 
