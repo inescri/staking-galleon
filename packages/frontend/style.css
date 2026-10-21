@@ -731,14 +731,15 @@ body {
   }
 }
 
-/* Waves */
+/* Waves: each sea band sets --wave-scale (1 by the dock, smaller toward the
+   horizon), shrinking the waves and slowing their scroll for perspective. */
 
 .wave {
   position: absolute;
   bottom: 0;
   left: 0;
   width: 200%;
-  height: 12px;
+  height: calc(12px * var(--wave-scale, 1));
   z-index: 1;
 }
 
@@ -747,44 +748,44 @@ body {
   background: repeating-linear-gradient(
     90deg,
     transparent 0px,
-    transparent 20px,
-    var(--sea-foam) 20px,
-    var(--sea-foam) 24px,
-    transparent 24px,
-    transparent 36px
+    transparent calc(20px * var(--wave-scale, 1)),
+    var(--sea-foam) calc(20px * var(--wave-scale, 1)),
+    var(--sea-foam) calc(24px * var(--wave-scale, 1)),
+    transparent calc(24px * var(--wave-scale, 1)),
+    transparent calc(36px * var(--wave-scale, 1))
   );
   opacity: 0.25;
-  animation: wave-scroll 3s linear infinite;
+  animation: wave-scroll calc(3s / var(--wave-scale, 1)) linear infinite;
 }
 
 .wave-2 {
-  bottom: 10px;
+  bottom: calc(10px * var(--wave-scale, 1));
   background: repeating-linear-gradient(
     90deg,
     transparent 0px,
-    transparent 28px,
-    var(--sea-light) 28px,
-    var(--sea-light) 32px,
-    transparent 32px,
-    transparent 48px
+    transparent calc(28px * var(--wave-scale, 1)),
+    var(--sea-light) calc(28px * var(--wave-scale, 1)),
+    var(--sea-light) calc(32px * var(--wave-scale, 1)),
+    transparent calc(32px * var(--wave-scale, 1)),
+    transparent calc(48px * var(--wave-scale, 1))
   );
   opacity: 0.15;
-  animation: wave-scroll 5s linear infinite reverse;
+  animation: wave-scroll calc(5s / var(--wave-scale, 1)) linear infinite reverse;
 }
 
 .wave-3 {
-  bottom: 22px;
+  bottom: calc(22px * var(--wave-scale, 1));
   background: repeating-linear-gradient(
     90deg,
     transparent 0px,
-    transparent 32px,
-    var(--sea-foam) 32px,
-    var(--sea-foam) 36px,
-    transparent 36px,
-    transparent 56px
+    transparent calc(32px * var(--wave-scale, 1)),
+    var(--sea-foam) calc(32px * var(--wave-scale, 1)),
+    var(--sea-foam) calc(36px * var(--wave-scale, 1)),
+    transparent calc(36px * var(--wave-scale, 1)),
+    transparent calc(56px * var(--wave-scale, 1))
   );
   opacity: 0.1;
-  animation: wave-scroll 7s linear infinite;
+  animation: wave-scroll calc(7s / var(--wave-scale, 1)) linear infinite;
 }
 
 @keyframes wave-scroll {

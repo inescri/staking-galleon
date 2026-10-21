@@ -1,10 +1,11 @@
-import { useMemo } from "react";
+import { useMemo, type CSSProperties } from "react";
 import { useGameState } from "../contexts/useGame";
 import { useCountdown } from "../hooks/useCountdown";
 import { ShipSprite } from "./ShipSprite";
 import {
   HARBOR_LANES,
   HARBOR_LANE_WEIGHTS,
+  lanePerspective,
   maxVoyageMs,
 } from "../utils/harbor";
 import { TIER_CONFIGS } from "../utils/rewards";
@@ -49,7 +50,13 @@ export function Harbor() {
           <div
             key={tier}
             className={`sea-band sea-band-${tier}`}
-            style={{ flexGrow: HARBOR_LANE_WEIGHTS[i] }}
+            style={
+              {
+                flexGrow: HARBOR_LANE_WEIGHTS[i],
+                // Farther bands get smaller, slower waves.
+                "--wave-scale": lanePerspective(tier).scale,
+              } as CSSProperties
+            }
           >
             <div className="wave wave-1" />
             <div className="wave wave-2" />
