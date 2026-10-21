@@ -80,14 +80,20 @@ export function Harbor() {
             <span className="sea-band-label">{TIER_CONFIGS[tier].name}</span>
           </div>
         ))}
-        {activeExpeditions.map((exp) => (
-          <HarborShip
-            key={exp.id}
-            expedition={exp}
-            maxDurationMs={maxByTier[exp.tier] ?? 0}
-            slot={slots.get(exp.id) ?? 0}
-          />
-        ))}
+        {/* Positions need each tier's longest voyage from the config; hold
+            ships back until it loads so they don't slide on arrival. */}
+        {rules !== null &&
+          activeExpeditions.map((exp) => (
+            <HarborShip
+              key={exp.id}
+              expedition={exp}
+              maxDurationMs={maxByTier[exp.tier] ?? 0}
+              slot={slots.get(exp.id) ?? 0}
+            />
+          ))}
+        {rules === null && activeExpeditions.length > 0 && (
+          <div className="harbor-empty">Charting the seas...</div>
+        )}
         {activeExpeditions.length === 0 && (
           <div className="harbor-empty">
             No ships at sea... Launch an expedition!
