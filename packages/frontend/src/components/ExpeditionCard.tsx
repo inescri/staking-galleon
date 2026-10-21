@@ -9,7 +9,12 @@ import {
   BTC_TOKEN_ID,
   PAYOUT_FEE_APPROVAL,
 } from "../canister/config";
-import { TIER_CONFIGS, formatBps, formatUnits } from "../utils/rewards";
+import {
+  TIER_CONFIGS,
+  formatBps,
+  formatRemainingMs,
+  formatUnits,
+} from "../utils/rewards";
 import { TIER_ICONS } from "../utils/tierIcons";
 import { ShipImage } from "./ShipImage";
 import {
@@ -33,7 +38,7 @@ export function ExpeditionCard({ expedition }: { expedition: Expedition }) {
   const [returnError, setReturnError] = useState<string | null>(null);
   const config = TIER_CONFIGS[expedition.tier];
 
-  const { minutes, seconds, progress, elapsedMs, isComplete } = useCountdown(
+  const { remainingMs, progress, elapsedMs, isComplete } = useCountdown(
     expedition.startedAt,
     expedition.durationMs,
   );
@@ -250,7 +255,7 @@ export function ExpeditionCard({ expedition }: { expedition: Expedition }) {
           </>
         ) : (
           <span className="expedition-time">
-            {minutes}:{seconds.toString().padStart(2, "0")} remaining
+            {formatRemainingMs(remainingMs)} remaining
           </span>
         )}
       </div>

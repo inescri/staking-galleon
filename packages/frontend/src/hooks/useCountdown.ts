@@ -4,8 +4,6 @@ interface CountdownResult {
   remainingMs: number;
   /** Real time at sea since `startedAt`; keeps growing after the voyage ends. */
   elapsedMs: number;
-  minutes: number;
-  seconds: number;
   progress: number; // 0 to 1
   isComplete: boolean;
 }
@@ -56,9 +54,6 @@ export function useCountdown(
   const remainingMs = Math.max(0, durationMs - elapsedMs);
   const isComplete = !notStarted && remainingMs <= 0;
   const progress = isComplete ? 1 : 1 - remainingMs / durationMs;
-  const totalSeconds = Math.ceil(remainingMs / 1000);
-  const minutes = Math.floor(totalSeconds / 60);
-  const seconds = totalSeconds % 60;
 
-  return { remainingMs, elapsedMs, minutes, seconds, progress, isComplete };
+  return { remainingMs, elapsedMs, progress, isComplete };
 }
