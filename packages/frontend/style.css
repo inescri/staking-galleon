@@ -694,19 +694,6 @@ body::before {
   background: var(--sea-coastal);
 }
 
-.sea-band-label {
-  position: absolute;
-  top: 50%;
-  right: 12px;
-  transform: translateY(-50%);
-  font-size: 0.72rem;
-  font-weight: 700;
-  color: rgba(241, 234, 214, 0.85);
-  pointer-events: none;
-  /* Above the band's waves, below ships. */
-  z-index: 1;
-}
-
 .harbor-empty {
   position: absolute;
   top: 50%;

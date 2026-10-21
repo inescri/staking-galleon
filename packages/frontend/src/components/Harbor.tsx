@@ -7,7 +7,6 @@ import {
   lanePerspective,
   maxVoyageMsByTier,
 } from "../utils/harbor";
-import { TIER_CONFIGS } from "../utils/rewards";
 import type { Expedition } from "../contexts/GameContext";
 
 function HarborShip({
@@ -79,9 +78,6 @@ export function Harbor(): ReactElement {
                 <div className="wave wave-1" />
                 <div className="wave wave-2" />
                 <div className="wave wave-3" />
-                <span className="sea-band-label">
-                  {TIER_CONFIGS[tier].name}
-                </span>
               </div>
             );
           })}
