@@ -195,17 +195,23 @@ export function SendShipForm() {
       </div>
 
       <div className="form-group">
-        <label className="form-label">
+        <span className="form-label">
           Stake · {TIER_CONFIGS[selectedTier].name}
-        </label>
+        </span>
         <div className="stake-fixed">
           {tierRules ? formatTl(tierRules.stake, token) : "…"}
         </div>
       </div>
 
       <div className="form-group">
-        <label className="form-label">Voyage</label>
-        <div className="duration-menu">
+        <span className="form-label" id="voyage-label">
+          Voyage
+        </span>
+        <div
+          className="duration-menu"
+          role="group"
+          aria-labelledby="voyage-label"
+        >
           {tierRules?.durations.map((d) => (
             <button
               key={d.index}

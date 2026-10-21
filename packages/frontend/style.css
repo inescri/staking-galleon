@@ -256,6 +256,14 @@ body::before {
   color: var(--text-primary);
 }
 
+.view-all-chevron {
+  transition: transform 0.15s ease;
+}
+
+.view-all-chevron.open {
+  transform: rotate(-90deg);
+}
+
 /* ======== BUTTONS ======== */
 
 .pixel-btn {
@@ -570,7 +578,7 @@ body::before {
 
 .log-entry {
   display: grid;
-  grid-template-columns: 32px minmax(90px, 1fr) minmax(70px, auto) auto 16px;
+  grid-template-columns: 32px minmax(90px, 1fr) minmax(70px, auto) auto;
   align-items: center;
   gap: 14px;
   padding: 6px 10px;
@@ -600,11 +608,6 @@ body::before {
 .log-date {
   color: var(--text-primary);
   white-space: nowrap;
-}
-
-.log-chevron {
-  color: var(--teal);
-  justify-self: end;
 }
 
 /* ======== HARBOR ======== */
@@ -1252,7 +1255,7 @@ body::before {
   }
 
   .log-entry {
-    grid-template-columns: 28px 1fr auto 14px;
+    grid-template-columns: 28px 1fr auto;
     gap: 10px;
     font-size: 0.8rem;
   }

@@ -33,7 +33,11 @@ export function VoyageLog(): ReactElement | null {
             onClick={() => setShowAllLog((v) => !v)}
             aria-expanded={showAllLog}
           >
-            <Icon name="chevron-right" size={12} />
+            <Icon
+              name="chevron-right"
+              size={12}
+              className={`view-all-chevron${showAllLog ? " open" : ""}`}
+            />
             {showAllLog ? "Show Less" : "View All"}
           </button>
         )}
@@ -59,7 +63,6 @@ export function VoyageLog(): ReactElement | null {
                 minute: "2-digit",
               })}
             </span>
-            <Icon name="chevron-right" className="log-chevron" />
           </div>
         ))}
       </div>
