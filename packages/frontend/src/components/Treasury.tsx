@@ -3,18 +3,19 @@ import { useGameState } from "../contexts/useGame";
 import { useWallet } from "../contexts/useWallet";
 import { BUY_BTC_AMOUNT, TOKEN_ID, TOKEN_URL } from "../canister/config";
 import { claimRequest } from "../odin/approvalFlow";
-import { formatTaels } from "../utils/rewards";
+import { COIN, formatUnits } from "../utils/rewards";
 import { FundTreasury } from "./FundTreasury";
 import { Icon } from "./Icon";
 
 export function Treasury() {
-  const { balance } = useGameState();
+  const { balanceUnits } = useGameState();
   const {
     connectedUser,
     request,
     refreshBalances,
     refreshBalanceUntilChanged,
     isSettling,
+    token,
   } = useWallet();
   const [refreshing, setRefreshing] = useState(false);
   const [buyError, setBuyError] = useState<string | null>(null);
@@ -67,8 +68,8 @@ export function Treasury() {
           Treasury
         </span>
         <span className="balance-amount">
-          <span className="coin-icon">&#x1FA99;</span>
-          {formatTaels(balance)} Taels
+          <span className="coin-icon">{COIN}</span>
+          {formatUnits(balanceUnits, token)} tl
           <button
             className="refresh-balance-btn"
             onClick={handleRefresh}

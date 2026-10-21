@@ -34,7 +34,7 @@ export const FALLBACK_TOKEN_UNITS: TokenUnits = {
   divisibility: 8,
 };
 
-export function formatTaels(n: number): string {
+function formatAmount(n: number): string {
   return n.toLocaleString("en-US", {
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
@@ -51,7 +51,7 @@ export function unitsToNumber(
 }
 
 export function formatUnits(amount: bigint, units: TokenUnits | null): string {
-  return formatTaels(unitsToNumber(amount, units));
+  return formatAmount(unitsToNumber(amount, units));
 }
 
 /** Coin shown before every short-form "tl" amount. */

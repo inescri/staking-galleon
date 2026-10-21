@@ -1,7 +1,7 @@
 import { useState, type ReactElement } from "react";
 import { useGameState } from "../contexts/useGame";
 import { useWallet } from "../contexts/useWallet";
-import { formatTl, formatUnits } from "../utils/rewards";
+import { formatTl } from "../utils/rewards";
 import { Icon } from "./Icon";
 import { TierIcon } from "./TierIcon";
 
@@ -48,8 +48,8 @@ export function VoyageLog(): ReactElement | null {
             <span className="log-stake">{formatTl(exp.stake, token)}</span>
             <span className="log-outcome">
               {exp.succeeded
-                ? `+${formatUnits(exp.payout - exp.stake, token)}`
-                : `\u2212${formatUnits(exp.stake, token)}`}
+                ? formatTl(exp.payout - exp.stake, token, "+")
+                : formatTl(exp.stake, token, "\u2212")}
             </span>
             <span className="log-date">
               {new Date(exp.completedAt).toLocaleDateString(undefined, {

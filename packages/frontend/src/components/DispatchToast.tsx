@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { useGameDispatch } from "../contexts/useGame";
 import type { DispatchedExpedition } from "../contexts/GameContext";
 import { useWallet } from "../contexts/useWallet";
-import { formatUnits } from "../utils/rewards";
+import { formatTl } from "../utils/rewards";
 import { TierIcon } from "./TierIcon";
 
 export function DispatchToast({
@@ -33,7 +33,7 @@ export function DispatchToast({
       <div className="toast-content">
         <span className="toast-title">Ship Dispatched!</span>
         <span className="toast-result">
-          {formatUnits(expedition.stake, token)} taels staked
+          {formatTl(expedition.stake, token)} staked
         </span>
       </div>
     </div>
