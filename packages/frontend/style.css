@@ -474,7 +474,8 @@ body::before {
 }
 
 .refresh-balance-btn:hover::after,
-.sea-band:hover::after {
+.sea-band:hover::after,
+.sea-band:focus::after {
   opacity: 1;
 }
 
@@ -684,7 +685,12 @@ body::before {
   overflow: hidden;
 }
 
-/* Tier name on hover. Bands clip, so it sits inside the band, under ships. */
+/* Tap focuses the band; the tooltip marks it, so skip the focus ring. */
+.sea-band:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Tier name on hover or tap. Bands clip, so it sits inside the band, under ships. */
 .sea-band::after {
   content: attr(aria-label);
   top: 50%;

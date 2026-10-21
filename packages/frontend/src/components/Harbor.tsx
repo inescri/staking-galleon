@@ -67,6 +67,9 @@ export function Harbor(): ReactElement {
                 key={tier}
                 className={`sea-band sea-band-${tier}`}
                 data-tier={tier}
+                // Focusable so a tap (or Tab) shows the tier tooltip too.
+                tabIndex={0}
+                role="img"
                 aria-label={TIER_CONFIGS[tier].name}
                 style={
                   {
