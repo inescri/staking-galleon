@@ -9,6 +9,11 @@
   --sea-mid: #0f3460;
   --sea-light: #53a8b6;
   --sea-foam: #79c9d7;
+  /* Harbor bands, lightest by the dock, darkest on the horizon. */
+  --sea-coastal: #1e5f8e;
+  --sea-open: #174c7a;
+  --sea-ocean: #0f3460;
+  --sea-kraken: #0a2342;
 
   /* Wood / Ship */
   --wood-dark: #5c3d2e;
@@ -613,15 +618,55 @@ body {
 }
 
 .harbor-ocean {
-  height: 140px;
-  background: linear-gradient(
-    180deg,
-    var(--sea-mid) 0%,
-    var(--sea-dark) 60%,
-    var(--sea-deep) 100%
-  );
+  /* Four tier bands, thinner toward the horizon (weights in utils/harbor.ts). */
+  height: 180px;
+  display: flex;
+  flex-direction: column;
   position: relative;
   overflow: hidden;
+}
+
+.sea-band {
+  /* `flex` (height share per tier) comes from Harbor via utils/harbor.ts. */
+  position: relative;
+  /* Each band runs its own waves; clip them to the band. */
+  overflow: hidden;
+}
+
+/* Separator drawn as an inset shadow so it takes no layout space and band
+   centres stay where utils/harbor.ts computes them. */
+.sea-band + .sea-band {
+  box-shadow: inset 0 1px 0 rgba(0, 0, 0, 0.25);
+}
+
+.sea-band-kraken_waters {
+  background: var(--sea-kraken);
+}
+
+.sea-band-deep_ocean {
+  background: var(--sea-ocean);
+}
+
+.sea-band-open_sea {
+  background: var(--sea-open);
+}
+
+.sea-band-coastal {
+  background: var(--sea-coastal);
+}
+
+.sea-band-label {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+  font-family: "Press Start 2P", monospace;
+  font-size: 0.4rem;
+  color: var(--text-dim);
+  opacity: 0.6;
+  pointer-events: none;
+  /* Above the band's waves, below ships. */
+  z-index: 1;
 }
 
 .harbor-empty {
@@ -635,19 +680,21 @@ body {
   text-align: center;
   line-height: 1.8;
   white-space: nowrap;
+  z-index: 2;
 }
 
 /* Ships */
 
 .ship-sprite {
-  /* `top`, `opacity`, `z-index` and `--ship-scale` come from ShipSprite:
-     ships drift toward the horizon the longer they are at sea. */
+  /* `left`, `top`, `opacity`, `z-index` and `--ship-scale` come from
+     ShipSprite: a ship sails in its tier's band, moves out by time at sea
+     against its tier's longest voyage, and looks smaller nearer the horizon.
+     `top` eases when a ship changes row after an earlier one returns. */
   position: absolute;
   transform: translateY(-50%);
   transition:
     left 1s linear,
-    top 1s linear,
-    opacity 1s linear;
+    top 1s linear;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
 }
 
@@ -660,11 +707,9 @@ body {
 .ship-image {
   display: block;
   image-rendering: pixelated;
-  /* Scaled rather than resized so the shrink eases like `top`/`opacity`. */
+  /* Perspective: ShipSprite sets --ship-scale smaller on farther bands. */
   transform: scale(var(--ship-scale, 1));
-  transition:
-    filter 1s linear,
-    transform 1s linear;
+  transition: filter 1s linear;
 }
 
 .ship-wear-weathered {
@@ -689,14 +734,17 @@ body {
   }
 }
 
-/* Waves */
+/* Waves: each sea band sets --wave-scale (1 by the dock, smaller toward the
+   horizon) to shrink the waves, and --wave-speed to slow their scroll. */
 
 .wave {
   position: absolute;
   bottom: 0;
   left: 0;
   width: 200%;
-  height: 12px;
+  /* Flat foam dashes: much wider than they are tall. */
+  /* At least 1px so far-band dashes don't blur out below a pixel. */
+  height: max(1px, calc(3px * var(--wave-scale, 1)));
   z-index: 1;
 }
 
@@ -705,44 +753,44 @@ body {
   background: repeating-linear-gradient(
     90deg,
     transparent 0px,
-    transparent 20px,
-    var(--sea-foam) 20px,
-    var(--sea-foam) 24px,
-    transparent 24px,
-    transparent 36px
+    transparent calc(20px * var(--wave-scale, 1)),
+    var(--sea-foam) calc(20px * var(--wave-scale, 1)),
+    var(--sea-foam) calc(28px * var(--wave-scale, 1)),
+    transparent calc(28px * var(--wave-scale, 1)),
+    transparent calc(40px * var(--wave-scale, 1))
   );
-  opacity: 0.25;
-  animation: wave-scroll 3s linear infinite;
+  opacity: 0.35;
+  animation: wave-scroll calc(3s / var(--wave-speed, 1)) linear infinite;
 }
 
 .wave-2 {
-  bottom: 10px;
+  bottom: calc(10px * var(--wave-scale, 1));
   background: repeating-linear-gradient(
     90deg,
     transparent 0px,
-    transparent 28px,
-    var(--sea-light) 28px,
-    var(--sea-light) 32px,
-    transparent 32px,
-    transparent 48px
+    transparent calc(28px * var(--wave-scale, 1)),
+    var(--sea-light) calc(28px * var(--wave-scale, 1)),
+    var(--sea-light) calc(38px * var(--wave-scale, 1)),
+    transparent calc(38px * var(--wave-scale, 1)),
+    transparent calc(54px * var(--wave-scale, 1))
   );
-  opacity: 0.15;
-  animation: wave-scroll 5s linear infinite reverse;
+  opacity: 0.25;
+  animation: wave-scroll calc(5s / var(--wave-speed, 1)) linear infinite reverse;
 }
 
 .wave-3 {
-  bottom: 22px;
+  bottom: calc(22px * var(--wave-scale, 1));
   background: repeating-linear-gradient(
     90deg,
     transparent 0px,
-    transparent 32px,
-    var(--sea-foam) 32px,
-    var(--sea-foam) 36px,
-    transparent 36px,
-    transparent 56px
+    transparent calc(32px * var(--wave-scale, 1)),
+    var(--sea-foam) calc(32px * var(--wave-scale, 1)),
+    var(--sea-foam) calc(44px * var(--wave-scale, 1)),
+    transparent calc(44px * var(--wave-scale, 1)),
+    transparent calc(68px * var(--wave-scale, 1))
   );
-  opacity: 0.1;
-  animation: wave-scroll 7s linear infinite;
+  opacity: 0.18;
+  animation: wave-scroll calc(7s / var(--wave-speed, 1)) linear infinite;
 }
 
 @keyframes wave-scroll {

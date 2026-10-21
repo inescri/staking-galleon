@@ -1,43 +1,53 @@
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactElement } from "react";
 import { ShipImage } from "./ShipImage";
-import { seaDepth } from "../utils/wear";
+import { harborReach, lanePerspective, shipTopPct } from "../utils/harbor";
+import type { Tier } from "../utils/rewards";
 
 interface ShipSpriteProps {
-  /** How far along the voyage the ship is, 0..1. Drives horizontal position. */
-  progress: number;
-  /** How long the ship has been at sea. Drives wear and distance. */
+  /** Picks the harbor band the ship sails in. */
+  tier: Tier;
+  /** How long the ship has been at sea. Drives wear. */
   elapsedMs: number;
-  /** Sprite size when the ship has just left the dock. */
+  /** Share of its own voyage done, 0..1, from useCountdown. */
+  progress: number;
+  /** The ship's own voyage length; it stops there. */
+  durationMs: number;
+  /** Longest voyage of the ship's tier; maps to its band's far edge. */
+  maxDurationMs: number;
+  /** Launch order among ships in the same band; picks its row. */
+  slot: number;
   size?: number;
 }
 
-/** Vertical position (% of the ocean) at the dock and on the horizon. */
-const NEAR_TOP = 34;
-const FAR_TOP = 8;
-/** Sprite scale on the horizon, relative to `size`. */
-const FAR_SCALE = 0.45;
-/** Haze on the horizon. */
-const FAR_OPACITY = 0.7;
+/** Horizontal span (% of the ocean) from the dock to the far edge. */
+const DOCK_LEFT = 5;
+const RANGE = 85;
 
 export function ShipSprite({
-  progress,
+  tier,
   elapsedMs,
+  progress,
+  durationMs,
+  maxDurationMs,
+  slot,
   size = 32,
-}: ShipSpriteProps) {
-  const depth = seaDepth(elapsedMs);
+}: ShipSpriteProps): ReactElement {
+  const reach = harborReach(progress * durationMs, maxDurationMs);
+  const lane = lanePerspective(tier);
+  const top = shipTopPct(tier, slot);
 
   return (
     <div
       className="ship-sprite ship-sailing"
       style={
         {
-          left: `${5 + progress * 85}%`,
-          top: `${NEAR_TOP - (NEAR_TOP - FAR_TOP) * depth}%`,
-          opacity: 1 - (1 - FAR_OPACITY) * depth,
-          "--ship-scale": 1 - (1 - FAR_SCALE) * depth,
-          // Nearer ships draw over farther ones.
-          zIndex: 2 + Math.round((1 - depth) * 10),
-          animationDelay: `${progress * 500}ms`,
+          left: `${DOCK_LEFT + reach * RANGE}%`,
+          top: `${top}%`,
+          opacity: lane.opacity,
+          // Far ships look smaller; lower (nearer) ships draw over higher ones.
+          "--ship-scale": lane.scale,
+          zIndex: 2 + Math.round(top),
+          animationDelay: `${reach * 500}ms`,
         } as CSSProperties
       }
     >
