@@ -65,6 +65,38 @@ body {
   overflow-x: hidden;
 }
 
+/* Harbor cover art behind the whole page. A fixed pseudo-element instead of
+   `background-attachment: fixed`, which mobile Safari ignores. The box is
+   sized to the image's own aspect ratio (1600x893) so the mask fades the
+   picture's real edges into the page color, whatever the viewport shape. */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 55.8125vw;
+  z-index: -1;
+  background:
+    linear-gradient(
+      to bottom,
+      rgba(26, 26, 46, 0.5) 0%,
+      rgba(26, 26, 46, 0.8) 60%,
+      rgba(26, 26, 46, 0.9) 100%
+    ),
+    url("/harbor-bg.jpg") center top / 100% auto no-repeat;
+  image-rendering: pixelated;
+  pointer-events: none;
+  -webkit-mask-image:
+    linear-gradient(to bottom, #000 55%, transparent 100%),
+    linear-gradient(to right, transparent, #000 15%, #000 85%, transparent);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to bottom, #000 55%, transparent 100%),
+    linear-gradient(to right, transparent, #000 15%, #000 85%, transparent);
+  mask-composite: intersect;
+}
+
 /* ======== APP LAYOUT ======== */
 
 .app {
@@ -108,7 +140,8 @@ body {
 
 .game-subtitle {
   font-size: 1.1rem;
-  color: var(--text-dim);
+  color: var(--sail);
+  text-shadow: 2px 2px 0 var(--sea-deep);
   margin-top: 8px;
   letter-spacing: 1px;
 }
