@@ -1,5 +1,11 @@
 import { describe, it, expect } from "vitest";
-import { HARBOR_LANES, harborReach, maxVoyageMs } from "./harbor";
+import {
+  HARBOR_LANES,
+  HARBOR_LANE_WEIGHTS,
+  harborReach,
+  lanePerspective,
+  maxVoyageMs,
+} from "./harbor";
 import { TIERS } from "./rewards";
 import type { GameRules, TierRules } from "./game";
 
@@ -23,6 +29,32 @@ function tier(...durations: number[]): TierRules {
 describe("HARBOR_LANES", () => {
   it("has every tier exactly once", () => {
     expect([...HARBOR_LANES].sort()).toEqual([...TIERS].sort());
+  });
+});
+
+describe("lanePerspective", () => {
+  it("has a weight per lane", () => {
+    expect(HARBOR_LANE_WEIGHTS).toHaveLength(HARBOR_LANES.length);
+  });
+
+  it("shrinks and hazes ships toward the horizon", () => {
+    const far = lanePerspective("kraken_waters");
+    const near = lanePerspective("coastal");
+    expect(far.depth).toBe(1);
+    expect(near.depth).toBe(0);
+    expect(near.scale).toBe(1);
+    expect(near.opacity).toBe(1);
+    expect(far.scale).toBeLessThan(lanePerspective("deep_ocean").scale);
+    expect(far.opacity).toBeLessThan(near.opacity);
+  });
+
+  it("centres ships in their band, top to bottom", () => {
+    const tops = HARBOR_LANES.map((t) => lanePerspective(t).topPct);
+    expect(tops[0]).toBeGreaterThan(0);
+    expect(tops[tops.length - 1]).toBeLessThan(100);
+    for (let i = 1; i < tops.length; i++) {
+      expect(tops[i]).toBeGreaterThan(tops[i - 1]);
+    }
   });
 });
 

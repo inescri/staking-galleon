@@ -12,6 +12,40 @@ export const HARBOR_LANES: readonly Tier[] = [
   "coastal",
 ];
 
+/**
+ * Relative band heights, horizon first. Bands thin out toward the horizon
+ * so the sea reads as receding.
+ */
+export const HARBOR_LANE_WEIGHTS: readonly number[] = [0.7, 0.9, 1.1, 1.3];
+
+/** Sprite scale and opacity on the horizon band; the dock band is 1. */
+const FAR_SCALE = 0.5;
+const FAR_OPACITY = 0.75;
+
+export interface LanePerspective {
+  /** Band centre, % of the ocean height from the top. */
+  topPct: number;
+  /** 0 on the dock band, 1 on the horizon band. */
+  depth: number;
+  scale: number;
+  opacity: number;
+}
+
+/** Where a tier's band sits and how far away its ships look. */
+export function lanePerspective(tier: Tier): LanePerspective {
+  const lane = Math.max(HARBOR_LANES.indexOf(tier), 0);
+  const total = HARBOR_LANE_WEIGHTS.reduce((a, b) => a + b, 0);
+  const above = HARBOR_LANE_WEIGHTS.slice(0, lane).reduce((a, b) => a + b, 0);
+  const topPct = ((above + HARBOR_LANE_WEIGHTS[lane] / 2) / total) * 100;
+  const depth = 1 - lane / (HARBOR_LANES.length - 1);
+  return {
+    topPct,
+    depth,
+    scale: 1 - (1 - FAR_SCALE) * depth,
+    opacity: 1 - (1 - FAR_OPACITY) * depth,
+  };
+}
+
 /** Longest voyage the config offers; that ship reaches the far edge. */
 export function maxVoyageMs(rules: GameRules | null): number {
   if (!rules) return 0;

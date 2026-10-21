@@ -618,7 +618,7 @@ body {
 }
 
 .harbor-ocean {
-  /* Four tier bands, each tall enough for a 36px sprite. */
+  /* Four tier bands, thinner toward the horizon (weights in utils/harbor.ts). */
   height: 180px;
   display: flex;
   flex-direction: column;
@@ -627,7 +627,7 @@ body {
 }
 
 .sea-band {
-  flex: 1;
+  flex: 1 1 0;
   position: relative;
 }
 
@@ -680,8 +680,9 @@ body {
 /* Ships */
 
 .ship-sprite {
-  /* `left`, `top` and `z-index` come from ShipSprite: a ship sails in its
-     tier's band and moves out by time at sea against the longest voyage. */
+  /* `left`, `top`, `opacity`, `z-index` and `--ship-scale` come from
+     ShipSprite: a ship sails in its tier's band, moves out by time at sea
+     against the longest voyage, and looks smaller nearer the horizon. */
   position: absolute;
   transform: translateY(-50%);
   transition:
@@ -699,6 +700,8 @@ body {
 .ship-image {
   display: block;
   image-rendering: pixelated;
+  /* Perspective: ShipSprite sets --ship-scale smaller on farther bands. */
+  transform: scale(var(--ship-scale, 1));
   transition: filter 1s linear;
 }
 

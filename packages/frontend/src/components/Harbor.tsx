@@ -2,7 +2,11 @@ import { useMemo } from "react";
 import { useGameState } from "../contexts/useGame";
 import { useCountdown } from "../hooks/useCountdown";
 import { ShipSprite } from "./ShipSprite";
-import { HARBOR_LANES, maxVoyageMs } from "../utils/harbor";
+import {
+  HARBOR_LANES,
+  HARBOR_LANE_WEIGHTS,
+  maxVoyageMs,
+} from "../utils/harbor";
 import { TIER_CONFIGS } from "../utils/rewards";
 import type { Expedition } from "../contexts/GameContext";
 
@@ -41,8 +45,12 @@ export function Harbor() {
         <div className="cloud cloud-2" />
       </div>
       <div className="harbor-ocean">
-        {HARBOR_LANES.map((tier) => (
-          <div key={tier} className={`sea-band sea-band-${tier}`}>
+        {HARBOR_LANES.map((tier, i) => (
+          <div
+            key={tier}
+            className={`sea-band sea-band-${tier}`}
+            style={{ flexGrow: HARBOR_LANE_WEIGHTS[i] }}
+          >
             <span className="sea-band-label">{TIER_CONFIGS[tier].name}</span>
           </div>
         ))}
