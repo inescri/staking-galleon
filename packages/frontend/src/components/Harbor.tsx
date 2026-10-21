@@ -2,20 +2,16 @@ import { useMemo } from "react";
 import { useGameState } from "../contexts/useGame";
 import { useCountdown } from "../hooks/useCountdown";
 import { ShipSprite } from "./ShipSprite";
-import { HARBOR_LANES, maxVoyageMsByTier } from "../utils/harbor";
+import { HARBOR_LANES, maxVoyageMs } from "../utils/harbor";
 import { TIER_CONFIGS } from "../utils/rewards";
 import type { Expedition } from "../contexts/GameContext";
 
 function HarborShip({
   expedition,
   maxDurationMs,
-  slot,
-  slotCount,
 }: {
   expedition: Expedition;
   maxDurationMs: number;
-  slot: number;
-  slotCount: number;
 }) {
   const { elapsedMs } = useCountdown(
     expedition.startedAt,
@@ -28,8 +24,6 @@ function HarborShip({
       elapsedMs={elapsedMs}
       durationMs={expedition.durationMs}
       maxDurationMs={maxDurationMs}
-      slot={slot}
-      slotCount={slotCount}
       size={36}
     />
   );
@@ -37,19 +31,7 @@ function HarborShip({
 
 export function Harbor() {
   const { activeExpeditions, rules } = useGameState();
-  const maxByTier = useMemo(() => maxVoyageMsByTier(rules), [rules]);
-
-  // Row of each ship within its tier's column, in launch order.
-  const slots = useMemo(() => {
-    const counts = new Map<string, number>();
-    const rows = new Map<string, number>();
-    for (const exp of activeExpeditions) {
-      const row = counts.get(exp.tier) ?? 0;
-      rows.set(exp.id, row);
-      counts.set(exp.tier, row + 1);
-    }
-    return { counts, rows };
-  }, [activeExpeditions]);
+  const maxDurationMs = useMemo(() => maxVoyageMs(rules), [rules]);
 
   return (
     <div className="harbor">
@@ -68,9 +50,7 @@ export function Harbor() {
           <HarborShip
             key={exp.id}
             expedition={exp}
-            maxDurationMs={maxByTier[exp.tier] ?? 0}
-            slot={slots.rows.get(exp.id) ?? 0}
-            slotCount={slots.counts.get(exp.tier) ?? 1}
+            maxDurationMs={maxDurationMs}
           />
         ))}
         {activeExpeditions.length === 0 && (

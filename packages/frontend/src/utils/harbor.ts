@@ -2,35 +2,32 @@ import type { GameRules } from "./game";
 import type { Tier } from "./rewards";
 
 /**
- * Harbor columns from left to right: coastal trade nearest shore, kraken
- * waters farthest out. Each ship sails across its tier's column.
+ * Harbor bands from top to bottom: the farthest waters sit on the horizon,
+ * coastal trade runs along the dock. Each ship sails in its tier's band.
  */
 export const HARBOR_LANES: readonly Tier[] = [
-  "coastal",
-  "open_sea",
-  "deep_ocean",
   "kraken_waters",
+  "deep_ocean",
+  "open_sea",
+  "coastal",
 ];
 
-/** Longest voyage each tier offers; that ship reaches its column's far edge. */
-export function maxVoyageMsByTier(
-  rules: GameRules | null,
-): Partial<Record<Tier, number>> {
-  const out: Partial<Record<Tier, number>> = {};
-  if (!rules) return out;
-  for (const [tier, tierRules] of Object.entries(rules.tiers) as [
-    Tier,
-    GameRules["tiers"][Tier],
-  ][]) {
-    out[tier] = Math.max(0, ...tierRules.durations.map((o) => o.durationMs));
+/** Longest voyage the config offers; that ship reaches the far edge. */
+export function maxVoyageMs(rules: GameRules | null): number {
+  if (!rules) return 0;
+  let max = 0;
+  for (const tier of Object.values(rules.tiers)) {
+    for (const option of tier.durations) {
+      if (option.durationMs > max) max = option.durationMs;
+    }
   }
-  return out;
+  return max;
 }
 
 /**
- * How far across its column a ship is, 0 (near edge) to 1 (far edge),
- * measured against its tier's longest voyage. A ship stops at its own
- * duration, so shorter voyages end proportionally earlier.
+ * How far across the harbor a ship is, 0 (dock) to 1 (far edge), measured
+ * against the longest voyage. A ship stops at its own duration, so shorter
+ * voyages end proportionally closer to the dock.
  */
 export function harborReach(
   elapsedMs: number,
