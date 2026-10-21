@@ -751,9 +751,9 @@ body {
     transparent 0px,
     transparent calc(20px * var(--wave-scale, 1)),
     var(--sea-foam) calc(20px * var(--wave-scale, 1)),
-    var(--sea-foam) calc(36px * var(--wave-scale, 1)),
-    transparent calc(36px * var(--wave-scale, 1)),
-    transparent calc(48px * var(--wave-scale, 1))
+    var(--sea-foam) calc(28px * var(--wave-scale, 1)),
+    transparent calc(28px * var(--wave-scale, 1)),
+    transparent calc(40px * var(--wave-scale, 1))
   );
   opacity: 0.35;
   animation: wave-scroll calc(3s / var(--wave-speed, 1)) linear infinite;
@@ -766,9 +766,9 @@ body {
     transparent 0px,
     transparent calc(28px * var(--wave-scale, 1)),
     var(--sea-light) calc(28px * var(--wave-scale, 1)),
-    var(--sea-light) calc(48px * var(--wave-scale, 1)),
-    transparent calc(48px * var(--wave-scale, 1)),
-    transparent calc(64px * var(--wave-scale, 1))
+    var(--sea-light) calc(38px * var(--wave-scale, 1)),
+    transparent calc(38px * var(--wave-scale, 1)),
+    transparent calc(54px * var(--wave-scale, 1))
   );
   opacity: 0.25;
   animation: wave-scroll calc(5s / var(--wave-speed, 1)) linear infinite reverse;
@@ -781,9 +781,9 @@ body {
     transparent 0px,
     transparent calc(32px * var(--wave-scale, 1)),
     var(--sea-foam) calc(32px * var(--wave-scale, 1)),
-    var(--sea-foam) calc(56px * var(--wave-scale, 1)),
-    transparent calc(56px * var(--wave-scale, 1)),
-    transparent calc(80px * var(--wave-scale, 1))
+    var(--sea-foam) calc(44px * var(--wave-scale, 1)),
+    transparent calc(44px * var(--wave-scale, 1)),
+    transparent calc(68px * var(--wave-scale, 1))
   );
   opacity: 0.18;
   animation: wave-scroll calc(7s / var(--wave-speed, 1)) linear infinite;
