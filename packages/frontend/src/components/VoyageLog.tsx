@@ -1,0 +1,70 @@
+import { useState, type ReactElement } from "react";
+import { useGameState } from "../contexts/useGame";
+import { useWallet } from "../contexts/useWallet";
+import { formatUnits } from "../utils/rewards";
+import { Icon } from "./Icon";
+import { TierIcon } from "./TierIcon";
+
+/** Voyage Log rows shown before "View All". */
+const LOG_PREVIEW = 4;
+
+/** Completed voyages, newest first. Renders nothing before the first return. */
+export function VoyageLog(): ReactElement | null {
+  const { completedExpeditions } = useGameState();
+  const { token } = useWallet();
+  const [showAllLog, setShowAllLog] = useState(false);
+
+  if (completedExpeditions.length === 0) return null;
+
+  const logEntries = showAllLog
+    ? completedExpeditions
+    : completedExpeditions.slice(0, LOG_PREVIEW);
+
+  return (
+    <div className="voyage-log pixel-panel">
+      <div className="section-head">
+        <h3 className="section-title">
+          <Icon name="ship" />
+          Voyage Log
+        </h3>
+        {completedExpeditions.length > LOG_PREVIEW && (
+          <button
+            className="view-all"
+            onClick={() => setShowAllLog((v) => !v)}
+            aria-expanded={showAllLog}
+          >
+            <Icon name="chevron-right" size={12} />
+            {showAllLog ? "Show Less" : "View All"}
+          </button>
+        )}
+      </div>
+      <div className="log-entries">
+        {logEntries.map((exp) => (
+          <div
+            key={exp.id}
+            className={`log-entry ${exp.succeeded ? "log-win" : "log-loss"}`}
+          >
+            <TierIcon tier={exp.tier} className="tier-icon-log" />
+            <span className="log-stake">
+              {formatUnits(exp.stake, token)} dbl
+            </span>
+            <span className="log-outcome">
+              {exp.succeeded
+                ? `+${formatUnits(exp.payout - exp.stake, token)}`
+                : `\u2212${formatUnits(exp.stake, token)}`}
+            </span>
+            <span className="log-date">
+              {new Date(exp.completedAt).toLocaleDateString(undefined, {
+                month: "short",
+                day: "numeric",
+                hour: "numeric",
+                minute: "2-digit",
+              })}
+            </span>
+            <Icon name="chevron-right" className="log-chevron" />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}

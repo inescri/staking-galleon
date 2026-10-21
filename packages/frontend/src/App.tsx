@@ -5,6 +5,7 @@ import { Treasury } from "./components/Treasury";
 import { Harbor } from "./components/Harbor";
 import { SendShipForm } from "./components/SendShipForm";
 import { FleetStatus } from "./components/FleetStatus";
+import { VoyageLog } from "./components/VoyageLog";
 import { RewardToast } from "./components/RewardToast";
 import { DispatchToast } from "./components/DispatchToast";
 import { Icon } from "./components/Icon";
@@ -40,6 +41,7 @@ export function App() {
         <Harbor />
         <SendShipForm />
         <FleetStatus />
+        <VoyageLog />
       </main>
 
       <footer className="app-footer">
