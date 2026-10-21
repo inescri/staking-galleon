@@ -1,7 +1,7 @@
 import { useState, type ReactElement } from "react";
 import { useGameState } from "../contexts/useGame";
 import { useWallet } from "../contexts/useWallet";
-import { formatUnits } from "../utils/rewards";
+import { formatTl, formatUnits } from "../utils/rewards";
 import { Icon } from "./Icon";
 import { TierIcon } from "./TierIcon";
 
@@ -45,9 +45,7 @@ export function VoyageLog(): ReactElement | null {
             className={`log-entry ${exp.succeeded ? "log-win" : "log-loss"}`}
           >
             <TierIcon tier={exp.tier} className="tier-icon-log" />
-            <span className="log-stake">
-              {formatUnits(exp.stake, token)} tl
-            </span>
+            <span className="log-stake">{formatTl(exp.stake, token)}</span>
             <span className="log-outcome">
               {exp.succeeded
                 ? `+${formatUnits(exp.payout - exp.stake, token)}`

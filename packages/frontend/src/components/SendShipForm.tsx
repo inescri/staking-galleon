@@ -5,7 +5,7 @@ import {
   TIER_CONFIGS,
   TIERS,
   formatBps,
-  formatUnits,
+  formatTl,
   type Tier,
 } from "../utils/rewards";
 import { useGameCanister } from "../hooks/useGameCanister";
@@ -199,7 +199,7 @@ export function SendShipForm() {
           Stake · {TIER_CONFIGS[selectedTier].name}
         </label>
         <div className="stake-fixed">
-          {tierRules ? `${formatUnits(tierRules.stake, token)} tl` : "…"}
+          {tierRules ? formatTl(tierRules.stake, token) : "…"}
         </div>
       </div>
 
@@ -223,13 +223,13 @@ export function SendShipForm() {
         {tierRules && option && (
           <p className="duration-summary">
             Returns{" "}
-            {formatUnits(
+            {formatTl(
               tierRules.stake +
                 (tierRules.stake * BigInt(option.multiplierBps - 10_000)) /
                   10_000n,
               token,
             )}{" "}
-            tl on success; the whole stake is lost otherwise.
+            on success; the whole stake is lost otherwise.
           </p>
         )}
       </div>
@@ -238,7 +238,7 @@ export function SendShipForm() {
         <span>
           Fleet: {atSea}/{rules?.maxShips ?? "…"}
         </span>
-        <span>Balance: {formatUnits(balanceUnits, token)} tl</span>
+        <span>Balance: {formatTl(balanceUnits, token)}</span>
       </div>
 
       {approveError && <span className="wallet-error">{approveError}</span>}

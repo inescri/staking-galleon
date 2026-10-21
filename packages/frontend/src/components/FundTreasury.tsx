@@ -8,7 +8,7 @@ import {
 } from "../canister/config";
 import type { PoolStats } from "../canister/idl";
 import { parseTokenAmount } from "../utils/game";
-import { formatUnits } from "../utils/rewards";
+import { formatTl } from "../utils/rewards";
 import {
   approvalFor,
   claimRequest,
@@ -110,7 +110,7 @@ export function FundTreasury() {
       try {
         const available = await fundPool(input.amount);
         setMessage(
-          `Deposited ${formatUnits(input.amount, token)} tl. Pool now has ${formatUnits(available, token)} tl available.`,
+          `Deposited ${formatTl(input.amount, token)}. Pool now has ${formatTl(available, token)} available.`,
         );
         setAmount("");
         await Promise.all([loadStats(), refreshBalances()]);
@@ -139,17 +139,17 @@ export function FundTreasury() {
         {stats ? (
           <>
             <span>
-              Available: <b>{formatUnits(stats.available, token)}</b> tl
+              Available: <b>{formatTl(stats.available, token)}</b>
             </span>
             <span>
-              Reserved: <b>{formatUnits(stats.reserved, token)}</b> tl
+              Reserved: <b>{formatTl(stats.reserved, token)}</b>
             </span>
             <span>
-              At sea: <b>{formatUnits(stats.activeStakes, token)}</b> tl
+              At sea: <b>{formatTl(stats.activeStakes, token)}</b>
             </span>
             {stats.pendingPayouts > 0n && (
               <span>
-                Owed: <b>{formatUnits(stats.pendingPayouts, token)}</b> tl
+                Owed: <b>{formatTl(stats.pendingPayouts, token)}</b>
               </span>
             )}
           </>

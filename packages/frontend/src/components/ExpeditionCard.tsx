@@ -13,7 +13,7 @@ import {
   TIER_CONFIGS,
   formatBps,
   formatRemainingMs,
-  formatUnits,
+  formatTl,
 } from "../utils/rewards";
 import { TIER_ICONS } from "../utils/tierIcons";
 import { ShipImage } from "./ShipImage";
@@ -217,7 +217,7 @@ export function ExpeditionCard({ expedition }: { expedition: Expedition }) {
           {config.name}
         </span>
         <span className="expedition-stake">
-          &nbsp;{formatUnits(expedition.stake, token)} tl
+          &nbsp;{formatTl(expedition.stake, token)}
         </span>
         <span className="expedition-odds">
           {formatBps(expedition.failBps)} risk · +

@@ -54,6 +54,18 @@ export function formatUnits(amount: bigint, units: TokenUnits | null): string {
   return formatTaels(unitsToNumber(amount, units));
 }
 
+/** Coin shown before every short-form "tl" amount. */
+export const COIN = "\u{1FA99}";
+
+/** Base units → "🪙1,234.5 tl", with an optional leading "+" or "−". */
+export function formatTl(
+  amount: bigint,
+  units: TokenUnits | null,
+  sign: "" | "+" | "\u2212" = "",
+): string {
+  return `${COIN}${sign}${formatUnits(amount, units)} tl`;
+}
+
 /** "45m", "1h", "36h", "3d". */
 export function formatDurationMs(ms: number): string {
   const minutes = Math.round(ms / 60_000);
