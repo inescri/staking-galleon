@@ -1,19 +1,37 @@
+import { useMemo } from "react";
 import { useGameState } from "../contexts/useGame";
 import { useCountdown } from "../hooks/useCountdown";
 import { ShipSprite } from "./ShipSprite";
+import { HARBOR_LANES, maxVoyageMs } from "../utils/harbor";
+import { TIER_CONFIGS } from "../utils/rewards";
 import type { Expedition } from "../contexts/GameContext";
 
-function HarborShip({ expedition }: { expedition: Expedition }) {
-  const { progress, elapsedMs } = useCountdown(
+function HarborShip({
+  expedition,
+  maxDurationMs,
+}: {
+  expedition: Expedition;
+  maxDurationMs: number;
+}) {
+  const { elapsedMs } = useCountdown(
     expedition.startedAt,
     expedition.durationMs,
   );
 
-  return <ShipSprite progress={progress} elapsedMs={elapsedMs} size={36} />;
+  return (
+    <ShipSprite
+      tier={expedition.tier}
+      elapsedMs={elapsedMs}
+      durationMs={expedition.durationMs}
+      maxDurationMs={maxDurationMs}
+      size={36}
+    />
+  );
 }
 
 export function Harbor() {
-  const { activeExpeditions } = useGameState();
+  const { activeExpeditions, rules } = useGameState();
+  const maxDurationMs = useMemo(() => maxVoyageMs(rules), [rules]);
 
   return (
     <div className="harbor">
@@ -23,8 +41,17 @@ export function Harbor() {
         <div className="cloud cloud-2" />
       </div>
       <div className="harbor-ocean">
+        {HARBOR_LANES.map((tier) => (
+          <div key={tier} className={`sea-band sea-band-${tier}`}>
+            <span className="sea-band-label">{TIER_CONFIGS[tier].name}</span>
+          </div>
+        ))}
         {activeExpeditions.map((exp) => (
-          <HarborShip key={exp.id} expedition={exp} />
+          <HarborShip
+            key={exp.id}
+            expedition={exp}
+            maxDurationMs={maxDurationMs}
+          />
         ))}
         {activeExpeditions.length === 0 && (
           <div className="harbor-empty">

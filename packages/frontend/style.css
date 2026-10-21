@@ -9,6 +9,11 @@
   --sea-mid: #0f3460;
   --sea-light: #53a8b6;
   --sea-foam: #79c9d7;
+  /* Harbor bands, lightest by the dock, darkest on the horizon. */
+  --sea-coastal: #1e5f8e;
+  --sea-open: #174c7a;
+  --sea-ocean: #0f3460;
+  --sea-kraken: #0a2342;
 
   /* Wood / Ship */
   --wood-dark: #5c3d2e;
@@ -613,15 +618,49 @@ body {
 }
 
 .harbor-ocean {
-  height: 140px;
-  background: linear-gradient(
-    180deg,
-    var(--sea-mid) 0%,
-    var(--sea-dark) 60%,
-    var(--sea-deep) 100%
-  );
+  /* Four tier bands, each tall enough for a 36px sprite. */
+  height: 180px;
+  display: flex;
+  flex-direction: column;
   position: relative;
   overflow: hidden;
+}
+
+.sea-band {
+  flex: 1;
+  position: relative;
+}
+
+.sea-band + .sea-band {
+  border-top: 1px solid rgba(0, 0, 0, 0.25);
+}
+
+.sea-band-kraken_waters {
+  background: var(--sea-kraken);
+}
+
+.sea-band-deep_ocean {
+  background: var(--sea-ocean);
+}
+
+.sea-band-open_sea {
+  background: var(--sea-open);
+}
+
+.sea-band-coastal {
+  background: var(--sea-coastal);
+}
+
+.sea-band-label {
+  position: absolute;
+  top: 50%;
+  right: 6px;
+  transform: translateY(-50%);
+  font-family: "Press Start 2P", monospace;
+  font-size: 0.4rem;
+  color: var(--text-dim);
+  opacity: 0.6;
+  pointer-events: none;
 }
 
 .harbor-empty {
@@ -635,19 +674,19 @@ body {
   text-align: center;
   line-height: 1.8;
   white-space: nowrap;
+  z-index: 2;
 }
 
 /* Ships */
 
 .ship-sprite {
-  /* `top`, `opacity`, `z-index` and `--ship-scale` come from ShipSprite:
-     ships drift toward the horizon the longer they are at sea. */
+  /* `left`, `top` and `z-index` come from ShipSprite: a ship sails in its
+     tier's band and moves out by time at sea against the longest voyage. */
   position: absolute;
   transform: translateY(-50%);
   transition:
     left 1s linear,
-    top 1s linear,
-    opacity 1s linear;
+    top 1s linear;
   filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.5));
 }
 
@@ -660,11 +699,7 @@ body {
 .ship-image {
   display: block;
   image-rendering: pixelated;
-  /* Scaled rather than resized so the shrink eases like `top`/`opacity`. */
-  transform: scale(var(--ship-scale, 1));
-  transition:
-    filter 1s linear,
-    transform 1s linear;
+  transition: filter 1s linear;
 }
 
 .ship-wear-weathered {
