@@ -29,11 +29,11 @@ describe("formatTl", () => {
   const units = { decimals: 0, divisibility: 0 };
 
   it("prefixes the coin and appends the short unit", () => {
-    expect(formatTl(1234n, units)).toBe("\u{1FA99}1,234 tl");
+    expect(formatTl(1234n, units)).toBe("\u{1FA99} 1,234 tl");
   });
 
   it("puts the sign after the coin", () => {
-    expect(formatTl(75n, units, "+")).toBe("\u{1FA99}+75 tl");
-    expect(formatTl(100n, units, "−")).toBe("\u{1FA99}−100 tl");
+    expect(formatTl(75n, units, "+")).toBe("\u{1FA99} +75 tl");
+    expect(formatTl(100n, units, "−")).toBe("\u{1FA99} −100 tl");
   });
 });
