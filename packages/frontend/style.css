@@ -901,11 +901,12 @@ body::before {
 }
 
 .tier-btn.active {
+  /* `--tier-color` is set inline per tier so the selection reads at a glance. */
   filter: none;
-  border-color: var(--teal);
+  border-color: var(--tier-color, var(--teal));
   box-shadow:
-    0 0 0 1px var(--teal),
-    0 0 14px rgba(111, 195, 214, 0.55);
+    0 0 0 1px var(--tier-color, var(--teal)),
+    0 0 14px color-mix(in srgb, var(--tier-color, var(--teal)) 55%, transparent);
 }
 
 .tier-icon {

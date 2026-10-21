@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type CSSProperties } from "react";
 import { useGameState, useGameDispatch } from "../contexts/useGame";
 import { useWallet } from "../contexts/useWallet";
 import {
@@ -183,7 +183,12 @@ export function SendShipForm() {
             <button
               key={tier}
               className={`tier-btn ${selectedTier === tier ? "active" : ""}`}
-              style={{ backgroundImage: `url(${TIER_ICONS[tier]})` }}
+              style={
+                {
+                  backgroundImage: `url(${TIER_ICONS[tier]})`,
+                  "--tier-color": c.color,
+                } as CSSProperties
+              }
               title={c.name}
               aria-pressed={selectedTier === tier}
               onClick={() => handleTierChange(tier)}
