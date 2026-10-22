@@ -6,6 +6,7 @@ import {
   TIERS,
   computePayout,
   formatBps,
+  formatDurationMs,
   formatTl,
   rewardBps,
   type Tier,
@@ -13,6 +14,9 @@ import {
 import { useGameCanister } from "../hooks/useGameCanister";
 import { APP_CANISTER_ID, TOKEN_ID } from "../canister/config";
 import { TIER_ICONS } from "../utils/tierIcons";
+import { launchErrorText } from "../utils/errors";
+import { useLocale, useT } from "../i18n/useLocale";
+import { resolveText, type UiText } from "../i18n/translate";
 import { Icon } from "./Icon";
 import {
   approvalFor,
@@ -32,11 +36,13 @@ export function SendShipForm() {
     refreshBalances,
   } = useWallet();
   const { launch } = useGameCanister();
+  const { locale } = useLocale();
+  const t = useT();
 
   const [selectedTier, setSelectedTier] = useState<Tier>("coastal");
   const [durationIndex, setDurationIndex] = useState(0);
   const [isLaunching, setIsLaunching] = useState(false);
-  const [approveError, setApproveError] = useState<string | null>(null);
+  const [approveError, setApproveError] = useState<UiText | null>(null);
 
   // This flow's ICRC-2 approval, if it is the SDK's latest request.
   // 'approving' is derived from the SDK state, so it is right in both popup
@@ -104,12 +110,18 @@ export function SendShipForm() {
     const { id, status, input } = current.request;
 
     if (status === "rejected") {
-      if (claimRequest(id)) setApproveError("Approval was rejected.");
+      if (claimRequest(id)) {
+        setApproveError({ key: "approval.rejected" });
+      }
       return;
     }
     if (status === "failed") {
       if (claimRequest(id)) {
-        setApproveError(current.request.error ?? "Approval failed.");
+        setApproveError(
+          current.request.error
+            ? { raw: current.request.error }
+            : { key: "approval.failed" },
+        );
       }
       return;
     }
@@ -122,10 +134,7 @@ export function SendShipForm() {
     // of leaving the button enabled to grant a second, dangling allowance.
     if (identity === null) {
       if (claimRequest(id)) {
-        setApproveError(
-          "Approved, but the wallet session has no delegation to launch " +
-            "with. Reconnect and launch again.",
-        );
+        setApproveError({ key: "send.error.noDelegation" });
       }
       return;
     }
@@ -145,12 +154,8 @@ export function SendShipForm() {
         });
         await refreshBalances();
       } catch (err) {
-        const message =
-          err instanceof Error
-            ? err.message
-            : "Launch failed. Please try again.";
         console.error("Launch failed:", err);
-        setApproveError(describeLaunchError(message));
+        setApproveError(launchErrorText(err));
       } finally {
         setIsLaunching(false);
       }
@@ -158,29 +163,30 @@ export function SendShipForm() {
   }, [request, identity, isRestoring, launch, dispatch, refreshBalances]);
 
   const buttonLabel = isApproving
-    ? "Approving..."
+    ? t("approval.pending")
     : isLaunching
-      ? "Dispatching..."
+      ? t("send.dispatching")
       : APP_CANISTER_ID === ""
-        ? "Canister not configured"
+        ? t("send.notConfigured")
         : rules === null
-          ? "Loading charts..."
+          ? t("send.loadingCharts")
           : fleetFull
-            ? "Fleet Full"
+            ? t("send.fleetFull")
             : insufficient
-              ? "Insufficient Taels"
-              : "⚓ Launch Expedition";
+              ? t("send.insufficient")
+              : t("send.launch");
 
   return (
     <div className="send-ship-form pixel-panel">
       <h2 className="section-title">
         <Icon name="ship" />
-        Send a Ship
+        {t("send.title")}
       </h2>
 
       <div className="tier-selector">
         {TIERS.map((tier) => {
           const c = TIER_CONFIGS[tier];
+          const name = t(`tier.${tier}`);
           return (
             <button
               key={tier}
@@ -191,11 +197,11 @@ export function SendShipForm() {
                   "--tier-color": c.color,
                 } as CSSProperties
               }
-              title={c.name}
+              title={name}
               aria-pressed={selectedTier === tier}
               onClick={() => handleTierChange(tier)}
             >
-              <span className="sr-only">{c.name}</span>
+              <span className="sr-only">{name}</span>
             </button>
           );
         })}
@@ -203,16 +209,16 @@ export function SendShipForm() {
 
       <div className="form-group">
         <span className="form-label">
-          Stake · {TIER_CONFIGS[selectedTier].name}
+          {t("send.stake", { tier: t(`tier.${selectedTier}`) })}
         </span>
         <div className="stake-fixed">
-          {tierRules ? formatTl(tierRules.stake, token) : "…"}
+          {tierRules ? formatTl(tierRules.stake, token, locale) : "…"}
         </div>
       </div>
 
       <div className="form-group">
         <span className="form-label" id="voyage-label">
-          Voyage
+          {t("send.voyage")}
         </span>
         <div
           className="duration-menu"
@@ -225,8 +231,12 @@ export function SendShipForm() {
               className={`duration-btn ${durationIndex === d.index ? "active" : ""}`}
               onClick={() => setDurationIndex(d.index)}
             >
-              <span className="duration-label">{d.label}</span>
-              <span className="duration-risk">{formatBps(d.failBps)} risk</span>
+              <span className="duration-label">
+                {formatDurationMs(d.durationMs, locale)}
+              </span>
+              <span className="duration-risk">
+                {t("send.risk", { pct: formatBps(d.failBps) })}
+              </span>
               <span className="duration-reward">
                 +{formatBps(rewardBps(d.multiplierBps))}
               </span>
@@ -235,24 +245,31 @@ export function SendShipForm() {
         </div>
         {tierRules && option && (
           <p className="duration-summary">
-            Returns{" "}
-            {formatTl(
-              computePayout(tierRules.stake, option.multiplierBps),
-              token,
-            )}{" "}
-            on success; the whole stake is lost otherwise.
+            {t("send.summary", {
+              payout: formatTl(
+                computePayout(tierRules.stake, option.multiplierBps),
+                token,
+                locale,
+              ),
+            })}
           </p>
         )}
       </div>
 
       <div className="launch-info">
         <span>
-          Fleet: {atSea}/{rules?.maxShips ?? "…"}
+          {t("send.fleet", { count: atSea, max: rules?.maxShips ?? "…" })}
         </span>
-        <span>Balance: {formatTl(balanceUnits, token)}</span>
+        <span>
+          {t("send.balance", {
+            amount: formatTl(balanceUnits, token, locale),
+          })}
+        </span>
       </div>
 
-      {approveError && <span className="wallet-error">{approveError}</span>}
+      {approveError && (
+        <span className="wallet-error">{resolveText(t, approveError)}</span>
+      )}
 
       <button
         className="pixel-btn launch-btn"
@@ -263,17 +280,4 @@ export function SendShipForm() {
       </button>
     </div>
   );
-}
-
-/** Map the canister's stable error codes to player-facing text. */
-function describeLaunchError(message: string): string {
-  if (message.startsWith("POOL_INSUFFICIENT")) {
-    return "The treasury cannot cover this voyage's reward yet. Try a smaller voyage or come back later.";
-  }
-  if (message.startsWith("FLEET_FULL")) return "Your fleet is full.";
-  if (message.startsWith("PAUSED")) return "Launches are paused right now.";
-  if (message.startsWith("PULL_FAILED")) {
-    return "The stake could not be collected from your wallet. Check your balance and approval, then try again.";
-  }
-  return message;
 }

@@ -17,7 +17,7 @@ import { createGameActor } from "../canister/actor";
 import { APP_CANISTER_ID, TOKEN_ID } from "../canister/config";
 import { odin } from "../odin/client";
 import { useOdinState } from "../odin/useOdinState";
-import { connectErrorMessage, deriveAuthStatus } from "../odin/authStatus";
+import { connectErrorText, deriveAuthStatus } from "../odin/authStatus";
 import { parseGameConfig } from "../utils/game";
 
 function computeTokenBalance(token: OdinBalance): number {
@@ -225,8 +225,10 @@ export function WalletProvider({ children }: { children: ReactNode }) {
 
   const isHydrating = connectedUser !== null && hydratedUser !== connectedUser;
 
-  const connectionError =
-    status === "error" ? connectErrorMessage(request) : null;
+  const connectionError = useMemo(
+    () => (status === "error" ? connectErrorText(request) : null),
+    [status, request],
+  );
 
   const value = useMemo<WalletContextValue>(
     () => ({

@@ -1,10 +1,12 @@
 /* ==============================
-   GALLEON STAKES — Harbor UI
+   RED SAIL STAKES — Harbor UI
    ============================== */
 
 :root {
   /* Type */
-  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-mono:
+    "JetBrains Mono", ui-monospace, monospace, "PingFang SC", "Microsoft YaHei",
+    sans-serif;
 
   /* Page and panels */
   --bg: #0b1230;
@@ -128,8 +130,42 @@ body::before {
 }
 
 .app-header {
+  position: relative;
   text-align: center;
   padding: 20px 0 8px;
+}
+
+.language-toggle {
+  position: absolute;
+  top: 8px;
+  right: 0;
+  display: inline-flex;
+  gap: 4px;
+}
+
+.language-btn {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  background: transparent;
+  color: var(--text-primary);
+  border: 2px solid var(--panel-border-light);
+  border-radius: 8px;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    color 0.15s;
+}
+
+.language-btn:hover {
+  background: rgba(111, 195, 214, 0.1);
+  border-color: var(--teal);
+}
+
+.language-btn[aria-pressed="true"] {
+  color: var(--gold);
+  border-color: var(--gold-dark);
 }
 
 .game-title {
@@ -169,6 +205,10 @@ body::before {
   color: var(--text-primary);
   text-transform: uppercase;
   letter-spacing: 0.6em;
+}
+
+.title-sub:lang(zh-CN) {
+  letter-spacing: 0.3em;
 }
 
 .game-subtitle {
@@ -466,7 +506,7 @@ body::before {
 }
 
 .refresh-balance-btn::after {
-  content: "Refresh balance";
+  content: attr(aria-label);
   bottom: 100%;
   left: 50%;
   transform: translateX(-50%);
@@ -1237,6 +1277,11 @@ body::before {
 /* ======== RESPONSIVE ======== */
 
 @media (max-width: 500px) {
+  .language-toggle {
+    position: static;
+    margin-bottom: 8px;
+  }
+
   .game-title {
     gap: 10px;
   }

@@ -1,6 +1,8 @@
 import { useState, type ReactElement } from "react";
 import { useGameState } from "../contexts/useGame";
 import { useWallet } from "../contexts/useWallet";
+import { useLocale, useT } from "../i18n/useLocale";
+import { LOCALE_TAGS } from "../i18n/translate";
 import { formatTl } from "../utils/rewards";
 import { Icon } from "./Icon";
 import { TierIcon } from "./TierIcon";
@@ -12,6 +14,8 @@ const LOG_PREVIEW = 4;
 export function VoyageLog(): ReactElement | null {
   const { completedExpeditions } = useGameState();
   const { token } = useWallet();
+  const { locale } = useLocale();
+  const t = useT();
   const [showAllLog, setShowAllLog] = useState(false);
 
   if (completedExpeditions.length === 0) return null;
@@ -25,7 +29,7 @@ export function VoyageLog(): ReactElement | null {
       <div className="section-head">
         <h3 className="section-title">
           <Icon name="ship" />
-          Voyage Log
+          {t("log.title")}
         </h3>
         {completedExpeditions.length > LOG_PREVIEW && (
           <button
@@ -38,7 +42,7 @@ export function VoyageLog(): ReactElement | null {
               size={12}
               className={`view-all-chevron${showAllLog ? " open" : ""}`}
             />
-            {showAllLog ? "Show Less" : "View All"}
+            {showAllLog ? t("log.showLess") : t("log.viewAll")}
           </button>
         )}
       </div>
@@ -49,19 +53,24 @@ export function VoyageLog(): ReactElement | null {
             className={`log-entry ${exp.succeeded ? "log-win" : "log-loss"}`}
           >
             <TierIcon tier={exp.tier} className="tier-icon-log" />
-            <span className="log-stake">{formatTl(exp.stake, token)}</span>
+            <span className="log-stake">
+              {formatTl(exp.stake, token, locale)}
+            </span>
             <span className="log-outcome">
               {exp.succeeded
-                ? formatTl(exp.payout - exp.stake, token, "+")
-                : formatTl(exp.stake, token, "\u2212")}
+                ? formatTl(exp.payout - exp.stake, token, locale, "+")
+                : formatTl(exp.stake, token, locale, "\u2212")}
             </span>
             <span className="log-date">
-              {new Date(exp.completedAt).toLocaleDateString(undefined, {
-                month: "short",
-                day: "numeric",
-                hour: "numeric",
-                minute: "2-digit",
-              })}
+              {new Date(exp.completedAt).toLocaleDateString(
+                LOCALE_TAGS[locale],
+                {
+                  month: "short",
+                  day: "numeric",
+                  hour: "numeric",
+                  minute: "2-digit",
+                },
+              )}
             </span>
           </div>
         ))}

@@ -12,14 +12,12 @@ import type { Tier } from "./rewards";
 /** One duration option as the UI uses it. */
 export interface DurationChoice {
   index: number;
-  label: string;
   durationMs: number;
   failBps: number;
   multiplierBps: number;
 }
 
 export interface TierRules {
-  name: string;
   /** Fixed stake in base units. */
   stake: bigint;
   durations: DurationChoice[];
@@ -35,11 +33,9 @@ export function parseGameConfig(config: GameConfig): GameRules {
   const tiers = {} as Record<Tier, TierRules>;
   for (const d of config.difficulties) {
     tiers[fromCandidDifficulty(d.difficulty)] = {
-      name: d.name,
       stake: d.stake,
       durations: d.durations.map((o, index) => ({
         index,
-        label: o.label,
         durationMs: Number(o.durationMs),
         failBps: o.failBps,
         multiplierBps: o.multiplierBps,

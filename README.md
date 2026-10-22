@@ -1,4 +1,4 @@
-# Galleon Stakes
+# Red Sail Stakes
 
 A pirate-themed voyage staking game on [Odin Fun](https://odin.fun), running on
 the Internet Computer. Stake taels (tl) on a voyage, pick how long and how risky,

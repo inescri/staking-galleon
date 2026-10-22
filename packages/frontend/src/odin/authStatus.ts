@@ -1,4 +1,5 @@
 import type { OdinRequestState } from "odin-connect";
+import type { UiText } from "../i18n/translate";
 
 /**
  * Auth lifecycle, derived from the odin-connect state store:
@@ -52,26 +53,31 @@ export function deriveAuthStatus(state: AuthStateInput): OdinAuthStatus {
   return "disconnected";
 }
 
-/** User-facing message for a connect that did not succeed, else null. */
-export function connectErrorMessage(
+/**
+ * User-facing message for a connect that did not succeed, else null. An SDK
+ * error on `failed` is passed through untranslated.
+ */
+export function connectErrorText(
   request: Pick<OdinRequestState, "action" | "status" | "error"> | null,
-): string | null {
+): UiText | null {
   if (request?.action !== "connect") {
     return null;
   }
   switch (request.status) {
     case "rejected":
       if (request.error === "untrusted_origin") {
-        return "This app's origin is not trusted by the game canister.";
+        return { key: "wallet.error.untrustedOrigin" };
       }
       if (request.error === "popup_closed") {
-        return "The Odin window was closed before signing in.";
+        return { key: "wallet.error.popupClosed" };
       }
-      return "Sign-in was cancelled.";
+      return { key: "wallet.error.cancelled" };
     case "unverified":
-      return "Could not verify the sign-in. Please try again.";
+      return { key: "wallet.error.unverified" };
     case "failed":
-      return request.error ?? "Wallet connection failed";
+      return request.error
+        ? { raw: request.error }
+        : { key: "wallet.error.failed" };
     default:
       return null;
   }

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { deriveAuthStatus } from "./authStatus";
+import { connectErrorText, deriveAuthStatus } from "./authStatus";
 
 const connectRequest = (
   status: "pending" | "success" | "rejected" | "failed" | "unverified",
@@ -60,5 +60,37 @@ describe("deriveAuthStatus", () => {
     expect(
       deriveAuthStatus({ status: "ready", user: {}, request: approve }),
     ).toBe("connected");
+  });
+});
+
+describe("connectErrorText", () => {
+  const connect = (
+    status: "pending" | "success" | "rejected" | "failed" | "unverified",
+    error?: string,
+  ) => ({ action: "connect", status, error }) as const;
+
+  it.each([
+    [connect("rejected", "untrusted_origin"), "wallet.error.untrustedOrigin"],
+    [connect("rejected", "popup_closed"), "wallet.error.popupClosed"],
+    [connect("rejected"), "wallet.error.cancelled"],
+    [connect("unverified"), "wallet.error.unverified"],
+    [connect("failed"), "wallet.error.failed"],
+  ])("%o → %s", (request, key) => {
+    expect(connectErrorText(request)).toEqual({ key });
+  });
+
+  it("passes a failed connect's SDK error through raw", () => {
+    expect(connectErrorText(connect("failed", "network down"))).toEqual({
+      raw: "network down",
+    });
+  });
+
+  it("is null for pending, success, non-connect and no request", () => {
+    expect(connectErrorText(connect("pending"))).toBeNull();
+    expect(connectErrorText(connect("success"))).toBeNull();
+    expect(
+      connectErrorText({ action: "icrc_approve", status: "rejected" }),
+    ).toBeNull();
+    expect(connectErrorText(null)).toBeNull();
   });
 });

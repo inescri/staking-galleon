@@ -14,11 +14,9 @@ const DAY = 24 * HOUR;
 
 function tier(...durations: number[]): TierRules {
   return {
-    name: "t",
     stake: 1n,
     durations: durations.map((durationMs, index) => ({
       index,
-      label: `${index}`,
       durationMs,
       failBps: 0,
       multiplierBps: 10_000,

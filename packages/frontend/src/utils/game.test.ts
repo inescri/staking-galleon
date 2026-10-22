@@ -64,7 +64,6 @@ describe("parseGameConfig", () => {
     expect(rules.tiers.coastal.stake).toBe(10n);
     expect(rules.tiers.coastal.durations[1]).toEqual({
       index: 1,
-      label: "1d",
       durationMs: 86_400_000,
       failBps: 1_500,
       multiplierBps: 11_500,

@@ -1,5 +1,7 @@
 import { useGameState } from "./contexts/useGame";
 import { useParallax } from "./hooks/useParallax";
+import { useT } from "./i18n/useLocale";
+import { LanguageToggle } from "./components/LanguageToggle";
 import { ConnectOdin } from "./components/ConnectOdin";
 import { Treasury } from "./components/Treasury";
 import { Harbor } from "./components/Harbor";
@@ -13,6 +15,7 @@ import shipImage from "./assets/ships/ship.png";
 export function App() {
   const { pendingReturns, pendingDispatches } = useGameState();
   useParallax();
+  const t = useT();
 
   return (
     <div className="app">
@@ -26,6 +29,7 @@ export function App() {
       </div>
 
       <header className="app-header">
+        <LanguageToggle />
         <h1 className="game-title">
           <img
             className="title-ship"
@@ -36,13 +40,11 @@ export function App() {
             draggable={false}
           />
           <span className="title-text">
-            <span className="title-main">Red Sail</span>
-            <span className="title-sub">Stakes</span>
+            <span className="title-main">{t("app.titleMain")}</span>
+            <span className="title-sub">{t("app.titleSub")}</span>
           </span>
         </h1>
-        <p className="game-subtitle">
-          Send ships. Stake taels. Reap the bounty.
-        </p>
+        <p className="game-subtitle">{t("app.subtitle")}</p>
       </header>
 
       <main className="app-main">
@@ -55,10 +57,7 @@ export function App() {
       </main>
 
       <footer className="app-footer">
-        <p>
-          Every voyage risks its whole stake. Lost stakes feed the treasury that
-          pays the winners.
-        </p>
+        <p>{t("app.footer")}</p>
       </footer>
     </div>
   );
