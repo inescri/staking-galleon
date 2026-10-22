@@ -2,6 +2,7 @@ import type { Messages } from "./translate";
 
 /** Simplified Chinese. Typed against `en`, so a missing or extra key fails tsc. */
 export const zh = {
+  "app.documentTitle": "红帆赌注",
   "app.titleMain": "红帆",
   "app.titleSub": "赌注",
   "app.subtitle": "扬帆出海，押注银两，收获赏金。",

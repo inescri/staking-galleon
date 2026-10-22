@@ -4,6 +4,7 @@
  * Callers pre-format numbers and amounts before passing them in.
  */
 export const en = {
+  "app.documentTitle": "Red Sail Stakes",
   "app.titleMain": "Red Sail",
   "app.titleSub": "Stakes",
   "app.subtitle": "Send ships. Stake taels. Reap the bounty.",

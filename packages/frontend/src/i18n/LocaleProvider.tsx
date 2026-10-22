@@ -1,13 +1,13 @@
 import {
   useCallback,
-  useEffect,
+  useLayoutEffect,
   useMemo,
   useState,
   type ReactNode,
 } from "react";
 import { LocaleContext } from "./useLocale";
 import { browserStorage, loadInitialLocale, writeStoredLocale } from "./locale";
-import { LOCALE_TAGS, type Locale } from "./translate";
+import { LOCALE_TAGS, translate, type Locale } from "./translate";
 import { ODIN_LANGS, odin } from "../odin/client";
 
 export function LocaleProvider({ children }: { children: ReactNode }) {
@@ -20,10 +20,13 @@ export function LocaleProvider({ children }: { children: ReactNode }) {
     setLocaleState(next);
   }, []);
 
-  // Idempotent, so a StrictMode double run is harmless. The Odin popups
-  // follow too; the new language applies to the next popup opened.
-  useEffect(() => {
+  // A layout effect, so <html lang> and the tab title match the locale before
+  // the first paint (index.html ships lang="en"). Idempotent, so a StrictMode
+  // double run is harmless. The Odin popups follow too; the new language
+  // applies to the next popup opened.
+  useLayoutEffect(() => {
     document.documentElement.lang = LOCALE_TAGS[locale];
+    document.title = translate(locale, "app.documentTitle");
     odin.lang = ODIN_LANGS[locale];
   }, [locale]);
 
