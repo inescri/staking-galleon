@@ -43,13 +43,8 @@ export const en = {
     "Rewards are reserved from the available pool at launch; bigger voyages need a bigger pool.",
   "pool.amountPlaceholder": "Amount in tl",
   "pool.fund": "Fund",
-  "pool.approving": "Approving...",
   "pool.depositing": "Depositing...",
   "pool.deposited": "Deposited {amount}. Pool now has {available} available.",
-  "pool.error.approvalRejected": "Approval was rejected.",
-  "pool.error.approvalFailed": "Approval failed.",
-  "pool.error.noDelegation":
-    "Approved, but the wallet session has no delegation. Reconnect and try again.",
   "pool.error.depositFailed": "Deposit failed",
   "pool.error.pullFailed":
     "The deposit could not be collected from your wallet. Check your balance and approval, then try again.",
@@ -63,15 +58,12 @@ export const en = {
     "Returns {payout} on success; the whole stake is lost otherwise.",
   "send.fleet": "Fleet: {count}/{max}",
   "send.balance": "Balance: {amount}",
-  "send.approving": "Approving...",
   "send.dispatching": "Dispatching...",
   "send.notConfigured": "Canister not configured",
   "send.loadingCharts": "Loading charts...",
   "send.fleetFull": "Fleet Full",
   "send.insufficient": "Insufficient Taels",
   "send.launch": "⚓ Launch Expedition",
-  "send.error.approvalRejected": "Approval was rejected.",
-  "send.error.approvalFailed": "Approval failed.",
   "send.error.noDelegation":
     "Approved, but the wallet session has no delegation to launch with. Reconnect and launch again.",
 
@@ -88,8 +80,6 @@ export const en = {
   "card.return": "Return Ship",
   "card.error.feeRejected": "Fee approval was rejected.",
   "card.error.feeFailed": "Fee approval failed.",
-  "card.error.noDelegation":
-    "Approved, but the wallet session has no delegation. Reconnect and try again.",
   "card.error.transferFailed":
     "The ship made it back but the payout transfer failed. Press Claim Payout to retry.",
 
@@ -127,6 +117,12 @@ export const en = {
   "duration.days": "{n}d",
   "countdown.withDays": "{days}d {time}",
 
+  "approval.pending": "Approving...",
+  "approval.rejected": "Approval was rejected.",
+  "approval.failed": "Approval failed.",
+
+  "error.noDelegation":
+    "Approved, but the wallet session has no delegation. Reconnect and try again.",
   "error.poolInsufficient":
     "The treasury cannot cover this voyage's reward yet. Try a smaller voyage or come back later.",
   "error.fleetFull": "Your fleet is full.",

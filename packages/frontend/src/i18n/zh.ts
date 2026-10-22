@@ -37,12 +37,8 @@ export const zh = {
   "pool.hint": "奖励在启航时从可用资金池中预留；航程越大，所需资金池越大。",
   "pool.amountPlaceholder": "金额（两）",
   "pool.fund": "注资",
-  "pool.approving": "授权中...",
   "pool.depositing": "存入中...",
   "pool.deposited": "已存入 {amount}。资金池现有 {available} 可用。",
-  "pool.error.approvalRejected": "授权被拒绝。",
-  "pool.error.approvalFailed": "授权失败。",
-  "pool.error.noDelegation": "已授权，但钱包会话没有委托。请重新连接后再试。",
   "pool.error.depositFailed": "存入失败",
   "pool.error.pullFailed": "无法从你的钱包收取存款。请检查余额和授权后重试。",
   "pool.error.invalidAmount": "请输入有效的存入金额。",
@@ -54,15 +50,12 @@ export const zh = {
   "send.summary": "成功时返还 {payout}；失败则损失全部赌注。",
   "send.fleet": "舰队：{count}/{max}",
   "send.balance": "余额：{amount}",
-  "send.approving": "授权中...",
   "send.dispatching": "派遣中...",
   "send.notConfigured": "未配置容器",
   "send.loadingCharts": "加载海图中...",
   "send.fleetFull": "舰队已满",
   "send.insufficient": "银两不足",
   "send.launch": "⚓ 启航远征",
-  "send.error.approvalRejected": "授权被拒绝。",
-  "send.error.approvalFailed": "授权失败。",
   "send.error.noDelegation":
     "已授权，但钱包会话没有可用于启航的委托。请重新连接后再次启航。",
 
@@ -79,7 +72,6 @@ export const zh = {
   "card.return": "召回船只",
   "card.error.feeRejected": "手续费授权被拒绝。",
   "card.error.feeFailed": "手续费授权失败。",
-  "card.error.noDelegation": "已授权，但钱包会话没有委托。请重新连接后再试。",
   "card.error.transferFailed":
     "船只已归航，但赏金转账失败。请点击“领取赏金”重试。",
 
@@ -117,6 +109,11 @@ export const zh = {
   "duration.days": "{n}天",
   "countdown.withDays": "{days}天 {time}",
 
+  "approval.pending": "授权中...",
+  "approval.rejected": "授权被拒绝。",
+  "approval.failed": "授权失败。",
+
+  "error.noDelegation": "已授权，但钱包会话没有委托。请重新连接后再试。",
   "error.poolInsufficient":
     "金库暂时无法支付此航程的奖励。请尝试较小的航程或稍后再来。",
   "error.fleetFull": "你的舰队已满。",

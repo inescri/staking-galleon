@@ -110,7 +110,7 @@ export function ExpeditionCard({ expedition }: { expedition: Expedition }) {
     if (isRestoring) return;
     if (identity === null) {
       if (claimRequest(id)) {
-        setReturnError({ key: "card.error.noDelegation" });
+        setReturnError({ key: "error.noDelegation" });
       }
       return;
     }

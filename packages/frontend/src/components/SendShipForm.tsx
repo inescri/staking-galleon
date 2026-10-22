@@ -111,7 +111,7 @@ export function SendShipForm() {
 
     if (status === "rejected") {
       if (claimRequest(id)) {
-        setApproveError({ key: "send.error.approvalRejected" });
+        setApproveError({ key: "approval.rejected" });
       }
       return;
     }
@@ -120,7 +120,7 @@ export function SendShipForm() {
         setApproveError(
           current.request.error
             ? { raw: current.request.error }
-            : { key: "send.error.approvalFailed" },
+            : { key: "approval.failed" },
         );
       }
       return;
@@ -163,7 +163,7 @@ export function SendShipForm() {
   }, [request, identity, isRestoring, launch, dispatch, refreshBalances]);
 
   const buttonLabel = isApproving
-    ? t("send.approving")
+    ? t("approval.pending")
     : isLaunching
       ? t("send.dispatching")
       : APP_CANISTER_ID === ""

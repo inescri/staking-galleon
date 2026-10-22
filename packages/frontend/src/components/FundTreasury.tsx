@@ -91,7 +91,7 @@ export function FundTreasury() {
     const { id, status, input } = current.request;
 
     if (status === "rejected") {
-      if (claimRequest(id)) setError({ key: "pool.error.approvalRejected" });
+      if (claimRequest(id)) setError({ key: "approval.rejected" });
       return;
     }
     if (status === "failed") {
@@ -99,7 +99,7 @@ export function FundTreasury() {
         setError(
           current.request.error
             ? { raw: current.request.error }
-            : { key: "pool.error.approvalFailed" },
+            : { key: "approval.failed" },
         );
       }
       return;
@@ -108,7 +108,7 @@ export function FundTreasury() {
     if (isRestoring) return;
     if (identity === null) {
       if (claimRequest(id)) {
-        setError({ key: "pool.error.noDelegation" });
+        setError({ key: "error.noDelegation" });
       }
       return;
     }
@@ -178,7 +178,7 @@ export function FundTreasury() {
               onClick={handleFund}
             >
               {isApproving
-                ? t("pool.approving")
+                ? t("approval.pending")
                 : isFunding
                   ? t("pool.depositing")
                   : t("pool.fund")}
