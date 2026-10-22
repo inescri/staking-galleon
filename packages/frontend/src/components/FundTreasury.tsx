@@ -9,6 +9,7 @@ import {
 import type { PoolStats } from "../canister/idl";
 import { parseTokenAmount } from "../utils/game";
 import { formatTl } from "../utils/rewards";
+import { fundErrorText } from "../utils/errors";
 import { useLocale, useT } from "../i18n/useLocale";
 import { resolveText, type UiText } from "../i18n/translate";
 import {
@@ -123,11 +124,7 @@ export function FundTreasury() {
         await Promise.all([loadStats(), refreshBalances()]);
       } catch (err) {
         console.error("Fund pool failed:", err);
-        setError(
-          err instanceof Error
-            ? { raw: err.message }
-            : { key: "pool.error.depositFailed" },
-        );
+        setError(fundErrorText(err));
       } finally {
         setIsFunding(false);
       }

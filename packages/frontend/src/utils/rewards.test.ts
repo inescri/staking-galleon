@@ -42,9 +42,12 @@ describe("formatRemainingMs", () => {
 describe("formatDurationMs", () => {
   it.each([
     [45 * M, "45m", "45分钟"],
+    [90 * M, "90m", "90分钟"],
     [H, "1h", "1小时"],
     [6 * H, "6h", "6小时"],
     [36 * H, "36h", "36小时"],
+    [60 * H, "60h", "60小时"],
+    [D, "1d", "1天"],
     [3 * D, "3d", "3天"],
   ])("%i ms → %s / %s", (ms, en, zh) => {
     expect(formatDurationMs(ms, "en")).toBe(en);

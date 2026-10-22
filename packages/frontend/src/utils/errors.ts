@@ -24,6 +24,11 @@ const RETURN_CODES = [
   ["PAYOUT_FAILED", "error.payoutFailed"],
 ] as const;
 
+const FUND_CODES = [
+  ["PULL_FAILED", "pool.error.pullFailed"],
+  ["INVALID_AMOUNT", "pool.error.invalidAmount"],
+] as const;
+
 function describeError(
   err: unknown,
   codes: readonly (readonly [string, MessageKey])[],
@@ -42,4 +47,9 @@ export function launchErrorText(err: unknown): UiText {
 /** Map the canister's stable settle/claim error codes to player-facing text. */
 export function returnErrorText(err: unknown): UiText {
   return describeError(err, RETURN_CODES, "error.returnFailed");
+}
+
+/** Map the canister's stable fund_pool error codes to player-facing text. */
+export function fundErrorText(err: unknown): UiText {
+  return describeError(err, FUND_CODES, "pool.error.depositFailed");
 }

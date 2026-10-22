@@ -43,6 +43,8 @@ export const zh = {
   "pool.error.approvalFailed": "授权失败。",
   "pool.error.noDelegation": "已授权，但钱包会话没有委托。请重新连接后再试。",
   "pool.error.depositFailed": "存入失败",
+  "pool.error.pullFailed": "无法从你的钱包收取存款。请检查余额和授权后重试。",
+  "pool.error.invalidAmount": "请输入有效的存入金额。",
 
   "send.title": "派出船只",
   "send.stake": "赌注 · {tier}",

@@ -92,14 +92,18 @@ export function rewardBps(multiplierBps: number): number {
   return multiplierBps - BPS;
 }
 
-/** "45m", "1h", "36h", "3d" (en) / "45分钟", "3天" (zh). */
+/**
+ * "45m", "90m", "1h", "36h", "1d", "3d" (en) / "45分钟", "3天" (zh). Uses the
+ * largest unit that divides the duration exactly, so the lock-up shown is
+ * never rounded away from what the canister enforces.
+ */
 export function formatDurationMs(ms: number, locale: Locale): string {
   const minutes = Math.round(ms / 60_000);
-  if (minutes < 60)
-    return translate(locale, "duration.minutes", { n: minutes });
-  const hours = Math.round(minutes / 60);
-  if (hours < 48) return translate(locale, "duration.hours", { n: hours });
-  return translate(locale, "duration.days", { n: Math.round(hours / 24) });
+  if (minutes > 0 && minutes % 1440 === 0)
+    return translate(locale, "duration.days", { n: minutes / 1440 });
+  if (minutes > 0 && minutes % 60 === 0)
+    return translate(locale, "duration.hours", { n: minutes / 60 });
+  return translate(locale, "duration.minutes", { n: minutes });
 }
 
 /** Live countdown: "4:05", "3:04:05", "2d 3:04:05". Rounds up to the second. */

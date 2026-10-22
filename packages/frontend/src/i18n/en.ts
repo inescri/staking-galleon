@@ -50,6 +50,9 @@ export const en = {
   "pool.error.noDelegation":
     "Approved, but the wallet session has no delegation. Reconnect and try again.",
   "pool.error.depositFailed": "Deposit failed",
+  "pool.error.pullFailed":
+    "The deposit could not be collected from your wallet. Check your balance and approval, then try again.",
+  "pool.error.invalidAmount": "Enter a valid deposit amount.",
 
   "send.title": "Send a Ship",
   "send.stake": "Stake · {tier}",

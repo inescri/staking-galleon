@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { launchErrorText, returnErrorText } from "./errors";
+import { fundErrorText, launchErrorText, returnErrorText } from "./errors";
 
 describe("launchErrorText", () => {
   it.each([
@@ -38,5 +38,18 @@ describe("returnErrorText", () => {
 
   it("falls back for a non-Error", () => {
     expect(returnErrorText(undefined)).toEqual({ key: "error.returnFailed" });
+  });
+});
+
+describe("fundErrorText", () => {
+  it.each([
+    ["PULL_FAILED:InsufficientAllowance", "pool.error.pullFailed"],
+    ["INVALID_AMOUNT: must be positive", "pool.error.invalidAmount"],
+  ])("%s → %s", (message, key) => {
+    expect(fundErrorText(new Error(message))).toEqual({ key });
+  });
+
+  it("falls back for a non-Error", () => {
+    expect(fundErrorText("nope")).toEqual({ key: "pool.error.depositFailed" });
   });
 });
