@@ -45,6 +45,9 @@ odin-connect 2.x · Azle 0.33 (stable mode) · dfx 0.31+.
   (`packages/frontend/.env.example`), read in `src/canister/config.ts` and
   `src/odin/client.ts`. `dfx deploy` writes the id to the root `.env`, which
   `vite.config.ts` bridges. Do not scatter string literals.
+- UI text is localized (English + Simplified Chinese) through
+  `packages/frontend/src/i18n/`; never inline user-facing strings. See the
+  Localization section of `packages/frontend/AI_INSTRUCTIONS.md`.
 - **odin-connect 2.x: render from state, never from an awaited call.** One
   `OdinConnect` instance lives in `src/odin/client.ts`; read it through
   `useOdinState()` / `useWallet()`. Start `connect()` and `user.<action>()`

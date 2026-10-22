@@ -8,7 +8,7 @@ import {
   maxVoyageMsByTier,
 } from "../utils/harbor";
 import type { Expedition } from "../contexts/GameContext";
-import { TIER_CONFIGS } from "../utils/rewards";
+import { useT } from "../i18n/useLocale";
 
 function HarborShip({
   expedition,
@@ -39,6 +39,7 @@ function HarborShip({
 
 export function Harbor(): ReactElement {
   const { activeExpeditions, rules } = useGameState();
+  const t = useT();
   const maxByTier = useMemo(() => maxVoyageMsByTier(rules), [rules]);
 
   // Each ship's launch order within its band (fleet is sorted by startedAt).
@@ -70,7 +71,7 @@ export function Harbor(): ReactElement {
                 // Focusable so a tap (or Tab) shows the tier tooltip too.
                 tabIndex={0}
                 role="img"
-                aria-label={TIER_CONFIGS[tier].name}
+                aria-label={t(`tier.${tier}`)}
                 style={
                   {
                     // Height share of the ocean; thinner toward the horizon.
@@ -99,12 +100,10 @@ export function Harbor(): ReactElement {
               />
             ))}
           {rules === null && activeExpeditions.length > 0 && (
-            <div className="harbor-empty">Charting the seas...</div>
+            <div className="harbor-empty">{t("harbor.charting")}</div>
           )}
           {activeExpeditions.length === 0 && (
-            <div className="harbor-empty">
-              No ships at sea... Launch an expedition!
-            </div>
+            <div className="harbor-empty">{t("harbor.empty")}</div>
           )}
         </div>
         <div className="harbor-dock">

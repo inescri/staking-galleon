@@ -9,6 +9,8 @@ import {
 import type { PoolStats } from "../canister/idl";
 import { parseTokenAmount } from "../utils/game";
 import { formatTl } from "../utils/rewards";
+import { useLocale, useT } from "../i18n/useLocale";
+import { resolveText, type UiText } from "../i18n/translate";
 import {
   approvalFor,
   claimRequest,
@@ -35,8 +37,13 @@ export function FundTreasury() {
   const [stats, setStats] = useState<PoolStats | null>(null);
   const [amount, setAmount] = useState("");
   const [isFunding, setIsFunding] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [deposited, setDeposited] = useState<{
+    amount: bigint;
+    available: bigint;
+  } | null>(null);
+  const [error, setError] = useState<UiText | null>(null);
+  const { locale } = useLocale();
+  const t = useT();
 
   const loadStats = useCallback(async () => {
     try {
@@ -66,7 +73,7 @@ export function FundTreasury() {
   const handleFund = () => {
     if (!canFund || !connectedUser || parsed === null) return;
     setError(null);
-    setMessage(null);
+    setDeposited(null);
     const returnState: ApprovalReturnState = { flow: "fund" };
     void connectedUser.icrcApprove({
       token: TOKEN_ID,
@@ -83,12 +90,16 @@ export function FundTreasury() {
     const { id, status, input } = current.request;
 
     if (status === "rejected") {
-      if (claimRequest(id)) setError("Approval was rejected.");
+      if (claimRequest(id)) setError({ key: "pool.error.approvalRejected" });
       return;
     }
     if (status === "failed") {
       if (claimRequest(id)) {
-        setError(current.request.error ?? "Approval failed.");
+        setError(
+          current.request.error
+            ? { raw: current.request.error }
+            : { key: "pool.error.approvalFailed" },
+        );
       }
       return;
     }
@@ -96,9 +107,7 @@ export function FundTreasury() {
     if (isRestoring) return;
     if (identity === null) {
       if (claimRequest(id)) {
-        setError(
-          "Approved, but the wallet session has no delegation. Reconnect and try again.",
-        );
+        setError({ key: "pool.error.noDelegation" });
       }
       return;
     }
@@ -109,65 +118,59 @@ export function FundTreasury() {
       setError(null);
       try {
         const available = await fundPool(input.amount);
-        setMessage(
-          `Deposited ${formatTl(input.amount, token)}. Pool now has ${formatTl(available, token)} available.`,
-        );
+        setDeposited({ amount: input.amount, available });
         setAmount("");
         await Promise.all([loadStats(), refreshBalances()]);
       } catch (err) {
-        const msg = err instanceof Error ? err.message : "Deposit failed";
         console.error("Fund pool failed:", err);
-        setError(msg);
+        setError(
+          err instanceof Error
+            ? { raw: err.message }
+            : { key: "pool.error.depositFailed" },
+        );
       } finally {
         setIsFunding(false);
       }
     })();
-  }, [
-    request,
-    identity,
-    isRestoring,
-    token,
-    fundPool,
-    loadStats,
-    refreshBalances,
-  ]);
+  }, [request, identity, isRestoring, fundPool, loadStats, refreshBalances]);
 
   return (
     <details className="fund-treasury">
-      <summary>House pool</summary>
+      <summary>{t("pool.title")}</summary>
       <div className="pool-stats">
         {stats ? (
           <>
             <span>
-              Available: <b>{formatTl(stats.available, token)}</b>
+              {t("pool.available")}{" "}
+              <b>{formatTl(stats.available, token, locale)}</b>
             </span>
             <span>
-              Reserved: <b>{formatTl(stats.reserved, token)}</b>
+              {t("pool.reserved")}{" "}
+              <b>{formatTl(stats.reserved, token, locale)}</b>
             </span>
             <span>
-              At sea: <b>{formatTl(stats.activeStakes, token)}</b>
+              {t("pool.atSea")}{" "}
+              <b>{formatTl(stats.activeStakes, token, locale)}</b>
             </span>
             {stats.pendingPayouts > 0n && (
               <span>
-                Owed: <b>{formatTl(stats.pendingPayouts, token)}</b>
+                {t("pool.owed")}{" "}
+                <b>{formatTl(stats.pendingPayouts, token, locale)}</b>
               </span>
             )}
           </>
         ) : (
-          <span>Loading…</span>
+          <span>{t("pool.loading")}</span>
         )}
       </div>
-      <p className="fund-hint">
-        Rewards are reserved from the available pool at launch; bigger voyages
-        need a bigger pool.
-      </p>
+      <p className="fund-hint">{t("pool.hint")}</p>
       {isAdmin && (
         <>
           <div className="fund-row">
             <input
               type="number"
               className="pixel-input"
-              placeholder="Amount in tl"
+              placeholder={t("pool.amountPlaceholder")}
               min={0}
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
@@ -178,14 +181,23 @@ export function FundTreasury() {
               onClick={handleFund}
             >
               {isApproving
-                ? "Approving..."
+                ? t("pool.approving")
                 : isFunding
-                  ? "Depositing..."
-                  : "Fund"}
+                  ? t("pool.depositing")
+                  : t("pool.fund")}
             </button>
           </div>
-          {message && <span className="toast-result">{message}</span>}
-          {error && <span className="wallet-error">{error}</span>}
+          {deposited && (
+            <span className="toast-result">
+              {t("pool.deposited", {
+                amount: formatTl(deposited.amount, token, locale),
+                available: formatTl(deposited.available, token, locale),
+              })}
+            </span>
+          )}
+          {error && (
+            <span className="wallet-error">{resolveText(t, error)}</span>
+          )}
         </>
       )}
     </details>

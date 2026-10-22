@@ -14,8 +14,12 @@ import {
   formatBps,
   formatRemainingMs,
   formatTl,
+  rewardBps,
 } from "../utils/rewards";
 import { TIER_ICONS } from "../utils/tierIcons";
+import { returnErrorText } from "../utils/errors";
+import { useLocale, useT } from "../i18n/useLocale";
+import { resolveText, type UiText } from "../i18n/translate";
 import { ShipImage } from "./ShipImage";
 import {
   approvalFor,
@@ -35,7 +39,9 @@ export function ExpeditionCard({ expedition }: { expedition: Expedition }) {
     refreshBalances,
   } = useWallet();
   const [isReturning, setIsReturning] = useState(false);
-  const [returnError, setReturnError] = useState<string | null>(null);
+  const [returnError, setReturnError] = useState<UiText | null>(null);
+  const { locale } = useLocale();
+  const t = useT();
   const config = TIER_CONFIGS[expedition.tier];
 
   const { remainingMs, progress, elapsedMs, isComplete } = useCountdown(
@@ -87,12 +93,16 @@ export function ExpeditionCard({ expedition }: { expedition: Expedition }) {
     const { id, status } = current.request;
 
     if (status === "rejected") {
-      if (claimRequest(id)) setReturnError("Fee approval was rejected.");
+      if (claimRequest(id)) setReturnError({ key: "card.error.feeRejected" });
       return;
     }
     if (status === "failed") {
       if (claimRequest(id)) {
-        setReturnError(current.request.error ?? "Fee approval failed.");
+        setReturnError(
+          current.request.error
+            ? { raw: current.request.error }
+            : { key: "card.error.feeFailed" },
+        );
       }
       return;
     }
@@ -100,9 +110,7 @@ export function ExpeditionCard({ expedition }: { expedition: Expedition }) {
     if (isRestoring) return;
     if (identity === null) {
       if (claimRequest(id)) {
-        setReturnError(
-          "Approved, but the wallet session has no delegation. Reconnect and try again.",
-        );
+        setReturnError({ key: "card.error.noDelegation" });
       }
       return;
     }
@@ -154,16 +162,13 @@ export function ExpeditionCard({ expedition }: { expedition: Expedition }) {
               },
             });
           } else {
-            setReturnError(
-              "The ship made it back but the payout transfer failed. Press Claim Payout to retry.",
-            );
+            setReturnError({ key: "card.error.transferFailed" });
           }
         }
         await refreshBalances();
       } catch (err) {
-        const message = err instanceof Error ? err.message : "Return failed";
         console.error("Return failed:", err);
-        setReturnError(describeReturnError(message));
+        setReturnError(returnErrorText(err));
       } finally {
         setIsReturning(false);
       }
@@ -184,18 +189,18 @@ export function ExpeditionCard({ expedition }: { expedition: Expedition }) {
   ]);
 
   const actionLabel = isApproving
-    ? "Approving fee..."
+    ? t("card.approvingFee")
     : isReturning
-      ? "Returning..."
+      ? t("card.returning")
       : isLaunching
-        ? "Launching..."
+        ? t("card.launching")
         : expedition.status === "settling"
-          ? "Rolling the dice..."
+          ? t("card.rolling")
           : expedition.status === "paying"
-            ? "Paying out..."
+            ? t("card.paying")
             : awaitingPayout
-              ? "Claim Payout"
-              : "Return Ship";
+              ? t("card.claim")
+              : t("card.return");
 
   return (
     <div
@@ -214,11 +219,13 @@ export function ExpeditionCard({ expedition }: { expedition: Expedition }) {
             size={22}
             className="ship-image-card"
           />{" "}
-          {config.name}
+          {t(`tier.${expedition.tier}`)}
         </span>
         <span className="expedition-odds">
-          {formatBps(expedition.failBps)} risk · +
-          {formatBps(expedition.multiplierBps - 10_000)}
+          {t("card.risk", {
+            pct: formatBps(expedition.failBps),
+            reward: formatBps(rewardBps(expedition.multiplierBps)),
+          })}
         </span>
       </div>
       <div className="progress-bar-container">
@@ -232,16 +239,14 @@ export function ExpeditionCard({ expedition }: { expedition: Expedition }) {
       </div>
       <div className="expedition-footer">
         <span className="expedition-stake">
-          {formatTl(expedition.stake, token)}
+          {formatTl(expedition.stake, token, locale)}
         </span>
         {isLaunching ? (
-          <span className="expedition-time">Setting sail…</span>
+          <span className="expedition-time">{t("card.settingSail")}</span>
         ) : isComplete || awaitingPayout ? (
           <div className="expedition-status">
             <span className="expedition-time">
-              {awaitingPayout
-                ? "Returned — payout pending"
-                : "Voyage complete!"}
+              {awaitingPayout ? t("card.payoutPending") : t("card.complete")}
             </span>
             <div className="expedition-actions">
               <button
@@ -255,24 +260,13 @@ export function ExpeditionCard({ expedition }: { expedition: Expedition }) {
           </div>
         ) : (
           <span className="expedition-time">
-            {formatRemainingMs(remainingMs)}
+            {formatRemainingMs(remainingMs, locale)}
           </span>
         )}
       </div>
-      {returnError && <span className="wallet-error">{returnError}</span>}
+      {returnError && (
+        <span className="wallet-error">{resolveText(t, returnError)}</span>
+      )}
     </div>
   );
-}
-
-function describeReturnError(message: string): string {
-  if (message.startsWith("SHIP_STILL_AT_SEA")) {
-    return "The ship is not back yet — the chain's clock runs a few seconds behind. Try again shortly.";
-  }
-  if (message.startsWith("BAD_STATUS:settling")) {
-    return "The outcome is still being rolled. Refresh in a moment.";
-  }
-  if (message.startsWith("PAYOUT_FAILED")) {
-    return "Payout transfer failed. Check your BTC balance for the fee and press Claim Payout.";
-  }
-  return message;
 }

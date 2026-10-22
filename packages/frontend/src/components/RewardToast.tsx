@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useGameDispatch } from "../contexts/useGame";
 import type { CompletedExpedition } from "../contexts/GameContext";
 import { useWallet } from "../contexts/useWallet";
+import { useLocale, useT } from "../i18n/useLocale";
 import { formatTl } from "../utils/rewards";
 import { TierIcon } from "./TierIcon";
 
@@ -12,6 +13,8 @@ export function RewardToast({
 }) {
   const dispatch = useGameDispatch();
   const { token } = useWallet();
+  const { locale } = useLocale();
+  const t = useT();
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -39,12 +42,17 @@ export function RewardToast({
       </span>
       <div className="toast-content">
         <span className="toast-title">
-          {won ? "Ship Returned!" : "Lost at Sea!"}
+          {won ? t("toast.returned") : t("toast.lost")}
         </span>
         <span className="toast-result">
           {won
-            ? `${formatTl(profit, token, "+")} bounty (${formatTl(expedition.payout, token)} returned)`
-            : `${formatTl(expedition.stake, token, "\u2212")} went down with the ship`}
+            ? t("toast.bounty", {
+                profit: formatTl(profit, token, locale, "+"),
+                payout: formatTl(expedition.payout, token, locale),
+              })
+            : t("toast.sunk", {
+                stake: formatTl(expedition.stake, token, locale, "\u2212"),
+              })}
         </span>
       </div>
     </div>

@@ -5,6 +5,7 @@ import type {
   OdinConnectedUser,
   OdinRequestState,
 } from "odin-connect";
+import type { UiText } from "../i18n/translate";
 
 /** The staked token's on-chain units, from the fetched balance. */
 export type TokenUnits = Pick<OdinBalance, "decimals" | "divisibility">;
@@ -22,7 +23,7 @@ export interface WalletContextValue {
   isRestoring: boolean;
   /** Units of the staked token; null until a balance has been fetched. */
   token: TokenUnits | null;
-  connectionError: string | null;
+  connectionError: UiText | null;
   /**
    * The latest `connect()` or action (`user.icrcApprove()`, …) and its
    * outcome, straight from the SDK state. Flows react to it instead of

@@ -40,6 +40,8 @@ export function useGameCanister() {
     }
   }, []);
 
+  // Thrown messages here are developer-facing (not localized): the UI gates
+  // every call on a connected wallet, so players never see them.
   const callUpdate = useCallback(
     async <T>(fn: () => Promise<T>): Promise<T> => {
       if (!authenticatedActor) throw new Error("Wallet not connected");

@@ -1,5 +1,6 @@
 import { DIFFICULTIES, type Difficulty } from "../canister/idl";
 import type { TokenUnits } from "../contexts/useWallet";
+import { LOCALE_TAGS, translate, type Locale } from "../i18n/translate";
 
 /**
  * UI name for a canister difficulty. Aliasing the Candid union means adding a
@@ -11,18 +12,18 @@ export const TIERS = DIFFICULTIES;
 
 /**
  * Display meta only — stakes, durations, risk and reward come from the
- * canister. Icons live in `components/TierIcon.tsx`.
+ * canister. Names are the `tier.*` message keys; icons live in
+ * `components/TierIcon.tsx`.
  */
 export interface TierConfig {
-  name: string;
   color: string;
 }
 
 export const TIER_CONFIGS: Record<Tier, TierConfig> = {
-  coastal: { name: "Coastal Trade", color: "#53a8b6" },
-  open_sea: { name: "Open Sea", color: "#FFB347" },
-  deep_ocean: { name: "Deep Ocean", color: "#E67E22" },
-  kraken_waters: { name: "Kraken Waters", color: "#c0392b" },
+  coastal: { color: "#53a8b6" },
+  open_sea: { color: "#FFB347" },
+  deep_ocean: { color: "#E67E22" },
+  kraken_waters: { color: "#c0392b" },
 };
 
 /**
@@ -34,8 +35,8 @@ export const FALLBACK_TOKEN_UNITS: TokenUnits = {
   divisibility: 8,
 };
 
-function formatAmount(n: number): string {
-  return n.toLocaleString("en-US", {
+function formatAmount(n: number, locale: Locale): string {
+  return n.toLocaleString(LOCALE_TAGS[locale], {
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
   });
@@ -50,20 +51,28 @@ export function unitsToNumber(
   return Number(amount) / Math.pow(10, u.divisibility + u.decimals);
 }
 
-export function formatUnits(amount: bigint, units: TokenUnits | null): string {
-  return formatAmount(unitsToNumber(amount, units));
+export function formatUnits(
+  amount: bigint,
+  units: TokenUnits | null,
+  locale: Locale,
+): string {
+  return formatAmount(unitsToNumber(amount, units), locale);
 }
 
-/** Coin shown before every short-form "tl" amount. */
+/** Coin shown before every short-form "tl" amount (also inlined in `amount.tl`). */
 export const COIN = "\u{1FA99}";
 
 /** Base units → "🪙 1,234.5 tl", with an optional leading "+" or "−". */
 export function formatTl(
   amount: bigint,
   units: TokenUnits | null,
+  locale: Locale,
   sign: "" | "+" | "\u2212" = "",
 ): string {
-  return `${COIN} ${sign}${formatUnits(amount, units)} tl`;
+  return translate(locale, "amount.tl", {
+    sign,
+    amount: formatUnits(amount, units, locale),
+  });
 }
 
 /** Basis points of a whole (10 000 = 100%); a 10 000 multiplier is stake back. */
@@ -83,17 +92,18 @@ export function rewardBps(multiplierBps: number): number {
   return multiplierBps - BPS;
 }
 
-/** "45m", "1h", "36h", "3d". */
-export function formatDurationMs(ms: number): string {
+/** "45m", "1h", "36h", "3d" (en) / "45分钟", "3天" (zh). */
+export function formatDurationMs(ms: number, locale: Locale): string {
   const minutes = Math.round(ms / 60_000);
-  if (minutes < 60) return `${minutes}m`;
+  if (minutes < 60)
+    return translate(locale, "duration.minutes", { n: minutes });
   const hours = Math.round(minutes / 60);
-  if (hours < 48) return `${hours}h`;
-  return `${Math.round(hours / 24)}d`;
+  if (hours < 48) return translate(locale, "duration.hours", { n: hours });
+  return translate(locale, "duration.days", { n: Math.round(hours / 24) });
 }
 
 /** Live countdown: "4:05", "3:04:05", "2d 3:04:05". Rounds up to the second. */
-export function formatRemainingMs(ms: number): string {
+export function formatRemainingMs(ms: number, locale: Locale): string {
   const totalSeconds = Math.max(0, Math.ceil(ms / 1000));
   const days = Math.floor(totalSeconds / 86_400);
   const hours = Math.floor((totalSeconds % 86_400) / 3600);
@@ -102,7 +112,9 @@ export function formatRemainingMs(ms: number): string {
   const ss = seconds.toString().padStart(2, "0");
   if (days === 0 && hours === 0) return `${minutes}:${ss}`;
   const hms = `${hours}:${minutes.toString().padStart(2, "0")}:${ss}`;
-  return days === 0 ? hms : `${days}d ${hms}`;
+  return days === 0
+    ? hms
+    : translate(locale, "countdown.withDays", { days, time: hms });
 }
 
 /** Basis points → "5%", "12.5%". */

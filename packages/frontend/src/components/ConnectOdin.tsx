@@ -1,4 +1,6 @@
 import { useWallet, truncatePrincipal } from "../contexts/useWallet";
+import { useT } from "../i18n/useLocale";
+import { resolveText } from "../i18n/translate";
 import { Icon } from "./Icon";
 
 export function ConnectOdin() {
@@ -11,13 +13,14 @@ export function ConnectOdin() {
     connectWallet,
     disconnectWallet,
   } = useWallet();
+  const t = useT();
 
   if (isRestoring) {
     return (
       <div className="wallet-row">
         <div className="wallet-connect-row pixel-panel">
           <button className="pixel-btn wallet-connect-btn" disabled>
-            Loading...
+            {t("wallet.loading")}
           </button>
         </div>
       </div>
@@ -40,7 +43,7 @@ export function ConnectOdin() {
             onClick={disconnectWallet}
           >
             <Icon name="link-off" size={14} />
-            Disconnect
+            {t("wallet.disconnect")}
           </button>
         </div>
       ) : (
@@ -50,10 +53,12 @@ export function ConnectOdin() {
             onClick={connectWallet}
             disabled={isConnecting}
           >
-            {isConnecting ? "Connecting..." : "Connect Odin"}
+            {isConnecting ? t("wallet.connecting") : t("wallet.connect")}
           </button>
           {connectionError && (
-            <span className="wallet-error">{connectionError}</span>
+            <span className="wallet-error">
+              {resolveText(t, connectionError)}
+            </span>
           )}
         </div>
       )}

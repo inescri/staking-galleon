@@ -4,6 +4,8 @@ import { useWallet } from "../contexts/useWallet";
 import { BUY_BTC_AMOUNT, TOKEN_ID, TOKEN_URL } from "../canister/config";
 import { claimRequest } from "../odin/approvalFlow";
 import { COIN, formatUnits } from "../utils/rewards";
+import { useLocale, useT } from "../i18n/useLocale";
+import { resolveText, type UiText } from "../i18n/translate";
 import { FundTreasury } from "./FundTreasury";
 import { Icon } from "./Icon";
 
@@ -18,7 +20,9 @@ export function Treasury() {
     token,
   } = useWallet();
   const [refreshing, setRefreshing] = useState(false);
-  const [buyError, setBuyError] = useState<string | null>(null);
+  const [buyError, setBuyError] = useState<UiText | null>(null);
+  const { locale } = useLocale();
+  const t = useT();
 
   const isBuying = request?.action === "buy" && request.status === "pending";
   const isRefreshing = refreshing || isSettling;
@@ -41,13 +45,19 @@ export function Treasury() {
       if (claimRequest(id)) {
         refreshBalanceUntilChanged().catch((err: unknown) => {
           console.error("Failed to refresh balance after buy:", err);
-          setBuyError("Purchase succeeded; refresh to see your balance.");
+          setBuyError({ key: "treasury.buy.refreshHint" });
         });
       }
     } else if (status === "rejected") {
-      if (claimRequest(id)) setBuyError("Purchase was cancelled.");
+      if (claimRequest(id)) setBuyError({ key: "treasury.buy.cancelled" });
     } else if (status === "failed") {
-      if (claimRequest(id)) setBuyError(request.error ?? "Purchase failed.");
+      if (claimRequest(id)) {
+        setBuyError(
+          request.error
+            ? { raw: request.error }
+            : { key: "treasury.buy.failed" },
+        );
+      }
     }
   }, [request, refreshBalanceUntilChanged]);
 
@@ -65,16 +75,18 @@ export function Treasury() {
       <div className="balance-row">
         <span className="balance-label">
           <Icon name="wallet" size={18} />
-          Treasury
+          {t("treasury.title")}
         </span>
         <span className="balance-amount">
           <span className="coin-icon">{COIN}</span>
-          {formatUnits(balanceUnits, token)} tl
+          {t("treasury.balance", {
+            amount: formatUnits(balanceUnits, token, locale),
+          })}
           <button
             className="refresh-balance-btn"
             onClick={handleRefresh}
             disabled={isRefreshing}
-            aria-label="Refresh balance"
+            aria-label={t("treasury.refresh")}
           >
             <Icon
               name="refresh"
@@ -89,7 +101,7 @@ export function Treasury() {
             onClick={handleBuy}
             disabled={isBuying}
           >
-            {isBuying ? "Buying..." : "Buy"}
+            {isBuying ? t("treasury.buying") : t("treasury.buy")}
           </button>
         ) : (
           <a
@@ -98,11 +110,13 @@ export function Treasury() {
             rel="noopener noreferrer"
             className="buy-taels-link"
           >
-            Buy
+            {t("treasury.buy")}
           </a>
         )}
       </div>
-      {buyError && <span className="wallet-error">{buyError}</span>}
+      {buyError && (
+        <span className="wallet-error">{resolveText(t, buyError)}</span>
+      )}
 
       <FundTreasury />
     </div>

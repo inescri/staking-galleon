@@ -1,6 +1,7 @@
 import shipImage from "../assets/ships/ship.png";
 import { wearLevel } from "../utils/wear";
-import { TIER_CONFIGS, type Tier } from "../utils/rewards";
+import { useT } from "../i18n/useLocale";
+import type { Tier } from "../utils/rewards";
 
 interface ShipImageProps {
   /** How long the ship has been at sea. Drives the wear look. */
@@ -18,12 +19,18 @@ export function ShipImage({
   size = 32,
   className = "",
 }: ShipImageProps) {
+  const t = useT();
   const wear = wearLevel(elapsedMs);
+  const wearText = t(`wear.${wear}`);
   return (
     <img
       className={`ship-image ship-wear-${wear} ${className}`.trim()}
       src={shipImage}
-      alt={tier ? `${TIER_CONFIGS[tier].name} ${wear} ship` : `${wear} ship`}
+      alt={
+        tier
+          ? t("ship.altWithTier", { tier: t(`tier.${tier}`), wear: wearText })
+          : t("ship.alt", { wear: wearText })
+      }
       width={size}
       height={size}
       draggable={false}
