@@ -28,7 +28,7 @@ export function parseOdinEnv(raw: string | undefined): OdinEnv {
   );
 }
 
-const APP_NAME = import.meta.env.VITE_ODIN_APP_NAME ?? "Galleon Stakes";
+const APP_NAME = import.meta.env.VITE_ODIN_APP_NAME ?? "Red Sail Stakes";
 const APP_ENV = parseOdinEnv(import.meta.env.VITE_ODIN_ENV);
 
 /**

@@ -2,7 +2,7 @@
   "name": "staking-galleon",
   "version": "0.0.0",
   "private": true,
-  "description": "Galleon Stakes \u2014 pirate-themed voyage staking game on Odin Fun",
+  "description": "Red Sail Stakes \u2014 pirate-themed voyage staking game on Odin Fun",
   "packageManager": "pnpm@10.33.0",
   "engines": {
     "node": ">=22"

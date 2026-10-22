@@ -4,7 +4,7 @@ This file tells AI coding assistants (Claude Code and others) how to work in
 this repository. **Read it before editing.** Package-specific rules live in
 `packages/frontend/AI_INSTRUCTIONS.md` and `packages/canister/AI_INSTRUCTIONS.md`.
 
-Galleon Stakes is a pirate-themed voyage staking game on Odin Fun. Its layout
+Red Sail Stakes is a pirate-themed voyage staking game on Odin Fun. Its layout
 follows the `odin-app-template` reference: an Azle canister that owns the game
 rules and funds, and a Vite + React frontend that drives it through Odin
 Connect.

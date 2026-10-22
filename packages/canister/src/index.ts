@@ -114,7 +114,7 @@ function errorText(error: unknown): string {
 }
 
 /**
- * Galleon Stakes — voyage staking game canister.
+ * Red Sail Stakes — voyage staking game canister.
  *
  * A player launches a ship by staking a fixed amount for one of the
  * configured difficulties and durations. When the voyage ends the owner
