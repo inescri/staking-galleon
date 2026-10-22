@@ -31,7 +31,7 @@ vite.config.ts      # build config (outDir: dist → served by the asset caniste
 1. **Never trust the client for accounting.** The game canister is the
    source of truth for ships, outcomes and balances: `SYNC_SHIPS` replaces the
    fleet wholesale from `get_my_ships`; nothing game-related is persisted in
-   localStorage. The only localStorage key is `galleon.locale` (a UI
+   localStorage. The only localStorage key is `redsail.locale` (a UI
    preference). The UI displays and requests; it must not assume a call
    succeeded until the canister confirms.
 2. **On-chain amounts are `bigint`** and come from the canister (`get_config`

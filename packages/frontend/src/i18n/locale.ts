@@ -1,7 +1,7 @@
 import { LOCALES, type Locale } from "./translate";
 
 /** The only localStorage key the app writes: a UI preference, never game state. */
-export const LOCALE_STORAGE_KEY = "galleon.locale";
+export const LOCALE_STORAGE_KEY = "redsail.locale";
 
 type LocaleStorage = Pick<Storage, "getItem" | "setItem">;
 
