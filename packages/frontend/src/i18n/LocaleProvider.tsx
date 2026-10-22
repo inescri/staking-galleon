@@ -6,12 +6,12 @@ import {
   type ReactNode,
 } from "react";
 import { LocaleContext } from "./useLocale";
-import { browserStorage, loadInitialLocale, writeStoredLocale } from "./locale";
+import { browserStorage, writeStoredLocale } from "./locale";
 import { LOCALE_TAGS, translate, type Locale } from "./translate";
-import { ODIN_LANGS, odin } from "../odin/client";
+import { ODIN_LANGS, initialLocale, odin } from "../odin/client";
 
 export function LocaleProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState(loadInitialLocale);
+  const [locale, setLocaleState] = useState(initialLocale);
 
   // Only an explicit choice is stored; a detected browser language is not,
   // so detection keeps following the browser until the user picks one.

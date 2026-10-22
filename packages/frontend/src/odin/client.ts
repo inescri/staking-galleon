@@ -40,6 +40,12 @@ const APP_ENV = parseOdinEnv(import.meta.env.VITE_ODIN_ENV);
 export const ODIN_LANGS: Record<Locale, OdinLang> = { en: "en", zh: "zh" };
 
 /**
+ * Stored/detected locale for this page load, read once. Seeds both the Odin
+ * popup language below and `LocaleProvider`, so the two always agree.
+ */
+export const initialLocale: Locale = loadInitialLocale();
+
+/**
  * The one `OdinConnect` instance for this page load (odin-connect 2.x).
  *
  * Created at module level, not per render: the constructor immediately
@@ -58,5 +64,5 @@ export const ODIN_LANGS: Record<Locale, OdinLang> = { en: "en", zh: "zh" };
 export const odin = new OdinConnect({
   name: APP_NAME,
   env: APP_ENV,
-  lang: ODIN_LANGS[loadInitialLocale()],
+  lang: ODIN_LANGS[initialLocale],
 });
